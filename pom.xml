@@ -1,19 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <parent>
-        <groupId>jdc</groupId>
-        <artifactId>jdc-parent</artifactId>
-        <version>1.5.7</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dbtools</groupId>
     <artifactId>dbtools-android</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>DBTools Android</name>
+    <description>DBTools ORM for Android</description>
+    <url>https://github.com/jeffdcamp/dbtools-android</url>
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/jeffdcamp/dbtools-android</url>
+        <connection>scm:git:git://github.com/jeffdcamp/dbtools-android.git</connection>
+        <developerConnection>scm:git:git@github.com:jeffdcamp/dbtools-android.git</developerConnection>
+    </scm>
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/jeffdcamp/dbtools-android/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>jcampbell</id>
+            <name>Jeff Campbell</name>
+            <email>jeff@soupbowl.net</email>
+            <organization>Soupbowl Dev</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-7</timezone>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <target.jdk>1.6</target.jdk>
         <android.version>4.1.1.4</android.version> <!-- for use Maven dependency -->
         <android.sdk>17</android.sdk> <!-- for android-maven-plugin -->
@@ -23,18 +51,13 @@
         <maven>3.0.4</maven>
     </prerequisites>
 
-    <scm>
-        <connection>scm:git:file://${basedir}</connection>
-        <developerConnection>scm:git:file://${basedir}</developerConnection>
-    </scm>
-
     <dependencies>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>3.0</version>
-            <optional>true</optional>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.google.inject</groupId>-->
+            <!--<artifactId>guice</artifactId>-->
+            <!--<version>3.0</version>-->
+            <!--<optional>true</optional>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>net.sqlcipher</groupId>
             <artifactId>sqlcipher</artifactId>
@@ -83,19 +106,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>soupbowl.nexus</id>
-            <name>Soupbowl Nexus Mirror</name>
-            <url>http://www.soupbowl.net/nexus/content/groups/public</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>soupbowl.nexus</id>
-            <name>Soupbowl Nexus Mirror</name>
-            <url>http://www.soupbowl.net/nexus/content/groups/public</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>
