@@ -15,6 +15,7 @@ nb-configuration.xml
 *.ipr
 *.iml
 *.iws
+.idea/
 
 # Maven
 target/
