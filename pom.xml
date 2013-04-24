@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>jdc</groupId>
+        <artifactId>jdc-parent</artifactId>
+        <version>1.5.7</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.dbtools</groupId>
+    <artifactId>dbtools-android</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>DBTools Android</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <target.jdk>1.6</target.jdk>
+        <android.version>4.1.1.4</android.version> <!-- for use Maven dependency -->
+        <android.sdk>17</android.sdk> <!-- for android-maven-plugin -->
+    </properties>
+
+    <prerequisites>
+        <maven>3.0.4</maven>
+    </prerequisites>
+
+    <scm>
+        <connection>scm:git:file://${basedir}</connection>
+        <developerConnection>scm:git:file://${basedir}</developerConnection>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>3.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>net.sqlcipher</groupId>
+            <artifactId>sqlcipher</artifactId>
+            <version>2.1.1</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>${android.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xmlParserAPIs</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android-test</artifactId>
+            <version>${android.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>${target.jdk}</source>
+                    <target>${target.jdk}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>soupbowl.nexus</id>
+            <name>Soupbowl Nexus Mirror</name>
+            <url>http://www.soupbowl.net/nexus/content/groups/public</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>soupbowl.nexus</id>
+            <name>Soupbowl Nexus Mirror</name>
+            <url>http://www.soupbowl.net/nexus/content/groups/public</url>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
