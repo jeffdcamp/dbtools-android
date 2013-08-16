@@ -22,6 +22,7 @@ public class AndroidDatabase {
     public AndroidDatabase(String name, String password, String path, int version) {
         this.name = name;
         this.password = password;
+        this.encrypted = password != null;
         this.path = path;
         this.version = version;
     }
