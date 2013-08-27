@@ -18,6 +18,10 @@ public abstract class AndroidDatabaseBaseManager {
     private List<AndroidDatabase> databases = new ArrayList<AndroidDatabase>();
     private Map<String, AndroidDatabase> databaseMap = new HashMap<String, AndroidDatabase>(); // <Database name, Database Path>
 
+    /**
+     * Identify what databases will be used with this app.  This method should call addDatabase(...) for each database
+     */
+    public abstract void identifyDatabases();
     public abstract void onCreate(AndroidDatabase database);
     public abstract void onUpgrade(AndroidDatabase database, int oldVersion, int newVersion);
     public abstract void onCleanDatabase(AndroidDatabase database);
@@ -60,6 +64,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     private synchronized void initDatabases() {
         if (databaseMap == null || databaseMap.size() == 0) {
+            identifyDatabases();
             List<AndroidDatabase> databases = getDatabases();
             for (AndroidDatabase database : databases) {
                 databaseMap.put(database.getName(), database);
@@ -88,7 +93,7 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     /**
-     * Load the SQLCipher Libraries
+     * Helper method to load the SQLCipher Libraries
      * @param context Android Context
      */
     public void initSQLCipherLibs(Context context) {
@@ -96,7 +101,7 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     /**
-     * Load the SQLCipher Libraries
+     * Helper method to load the SQLCipher Libraries
      * @param context Android Context
      * @param workingDir Directory to extract SQLCipher files (such as an external storage space)
      */
@@ -124,6 +129,11 @@ public abstract class AndroidDatabaseBaseManager {
         initDatabases(); // (if needed)
 
         AndroidDatabase db = databaseMap.get(databaseName);
+
+        if (db == null) {
+            throw new IllegalArgumentException("Cannot connect to database (Cannot find database [" + databaseName + "] in databaseMap (databaseMap size: " + databaseMap.size() + ")).  Was this database added in the identifyDatabases() method?");
+        }
+
         boolean databaseAlreadyExists = new File(db.getPath()).exists();
         if (!databaseAlreadyExists || !isDatabaseAlreadyOpen(db)) {
             try {
