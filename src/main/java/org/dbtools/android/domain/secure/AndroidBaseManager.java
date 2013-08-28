@@ -523,6 +523,35 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return getAllItemsFromCursor(cursor);
     }
 
+    /**
+     * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     * @param rawQuery Custom query
+     * @return List of object T
+     */
+    public List<T> findAllByRawQuery(String rawQuery) {
+        return getAllItemsFromCursor(findCursorByRawQuery(getDatabaseName(), rawQuery, null));
+    }
+
+    /**
+     * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     * @param rawQuery Custom query
+     * @return List of object T
+     */
+    public List<T> findAllByRawQuery(String rawQuery, String[] selectionArgs) {
+        return getAllItemsFromCursor(findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs));
+    }
+
+    /**
+     * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     * @param databaseName Name of database
+     * @param rawQuery Custom query
+     * @param selectionArgs query arguments
+     * @return List of object T
+     */
+    public List<T> findAllByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+        return getAllItemsFromCursor(findCursorByRawQuery(databaseName, rawQuery, selectionArgs));
+    }
+
     public List<T> getAllItemsFromCursor(Cursor cursor) {
         List<T> foundItems = null;
         if (cursor != null) {
@@ -701,4 +730,77 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
         return value;
     }
+
+    /**
+     * Return a list of all of the first column values as a List<Long> for given rawQuery and selectionArgs.
+     * @param rawQuery Query contain first column which is a Long value
+     * @param selectionArgs Query parameters
+     * @return query results List or empty List returned
+     */
+    public List<Long> findAllLongByRawQuery(String rawQuery, String[] selectionArgs) {
+        return findAllLongByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return a list of all of the first column values as a List<Long> for given rawQuery and selectionArgs.
+     * @param databaseName Name of database to query
+     * @param rawQuery Query contain first column which is a Long value
+     * @param selectionArgs Query parameters
+     * @return query results List or empty List returned
+     */
+    public List<Long> findAllLongByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+        List<Long> foundItems;
+
+        Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+        if (cursor != null) {
+            foundItems = new ArrayList<Long>(cursor.getCount());
+            if (cursor.moveToFirst()) {
+                do {
+                    foundItems.add(cursor.getLong(0));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } else {
+            foundItems = new ArrayList<Long>();
+        }
+
+        return foundItems;
+    }
+
+    /**
+     * Return a list of all of the first column values as a List<String> for given rawQuery and selectionArgs.
+     * @param rawQuery Query contain first column which is a String value
+     * @param selectionArgs Query parameters
+     * @return query results List or empty List returned
+     */
+    public List<String> findAllStringByRawQuery(String rawQuery, String[] selectionArgs) {
+        return findAllStringByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return a list of all of the first column values as a List<String> for given rawQuery and selectionArgs.
+     * @param databaseName Name of database to query
+     * @param rawQuery Query contain first column which is a String value
+     * @param selectionArgs Query parameters
+     * @return query results List or empty List returned
+     */
+    public List<String> findAllStringByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+        List<String> foundItems;
+
+        Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+        if (cursor != null) {
+            foundItems = new ArrayList<String>(cursor.getCount());
+            if (cursor.moveToFirst()) {
+                do {
+                    foundItems.add(cursor.getString(0));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } else {
+            foundItems = new ArrayList<String>();
+        }
+
+        return foundItems;
+    }
+
 }
