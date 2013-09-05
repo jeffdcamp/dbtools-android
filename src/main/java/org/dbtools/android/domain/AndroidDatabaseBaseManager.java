@@ -7,15 +7,11 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class AndroidDatabaseBaseManager {
     public static final String TAG = "AndroidDBTools";
 
-    private List<AndroidDatabase> databases = new ArrayList<AndroidDatabase>();
     private Map<String, AndroidDatabase> databaseMap = new HashMap<String, AndroidDatabase>(); // <Database name, Database Path>
 
     /**
@@ -34,7 +30,7 @@ public abstract class AndroidDatabaseBaseManager {
      */
     public void addDatabase(Context context, String databaseName, int version) {
         String databasePath = getDatabaseFile(context, databaseName).getAbsolutePath();
-        databases.add(new AndroidDatabase(databaseName, databasePath, version));
+        databaseMap.put(databaseName, new AndroidDatabase(databaseName, databasePath, version));
     }
 
     /**
@@ -48,26 +44,32 @@ public abstract class AndroidDatabaseBaseManager {
         String databasePath = getDatabaseFile(context, databaseName).getAbsolutePath();
 
         if (password != null) {
-            databases.add(new AndroidDatabase(databaseName, password, databasePath, version));
+            databaseMap.put(databaseName, new AndroidDatabase(databaseName, password, databasePath, version));
         } else {
-            databases.add(new AndroidDatabase(databaseName, databasePath, version));
+            databaseMap.put(databaseName, new AndroidDatabase(databaseName, databasePath, version));
         }
     }
 
     public void addDatabase(AndroidDatabase database) {
-        databases.add(database);
+        databaseMap.put(database.getName(), database);
     }
 
-    public List<AndroidDatabase> getDatabases() {
-        return databases;
+    /**
+     * Reset/Removes any references to any database that was added
+     */
+    public void reset() {
+        databaseMap = new HashMap<String, AndroidDatabase>();
+    }
+
+    public Collection<AndroidDatabase> getDatabases() {
+        return databaseMap.values();
     }
 
     private synchronized void initDatabases() {
         if (databaseMap == null || databaseMap.size() == 0) {
             identifyDatabases();
-            List<AndroidDatabase> databases = getDatabases();
+            Collection<AndroidDatabase> databases = getDatabases();
             for (AndroidDatabase database : databases) {
-                databaseMap.put(database.getName(), database);
                 connectDatabase(database.getName());
             }
         }
@@ -109,7 +111,7 @@ public abstract class AndroidDatabaseBaseManager {
         net.sqlcipher.database.SQLiteDatabase.loadLibs(context, workingDir); // Initialize SQLCipher
     }
 
-    private void openDatabase(AndroidDatabase db) {
+    public void openDatabase(AndroidDatabase db) {
         if (db.isEncrypted()) {
             try {
                 db.setSecureSqLiteDatabase(net.sqlcipher.database.SQLiteDatabase.openOrCreateDatabase(db.getPath(), db.getPassword(), null));
@@ -136,46 +138,30 @@ public abstract class AndroidDatabaseBaseManager {
 
         boolean databaseAlreadyExists = new File(db.getPath()).exists();
         if (!databaseAlreadyExists || !isDatabaseAlreadyOpen(db)) {
-            try {
-                String databasePath = db.getPath();
-                File databaseFile = new File(databasePath);
-                boolean databaseExists = databaseFile.exists();
-                Log.i(TAG, "Connecting to database");
-                Log.i(TAG, "Database exists: " + databaseExists + "(path: " + databasePath + ")");
+            String databasePath = db.getPath();
+            File databaseFile = new File(databasePath);
+            boolean databaseExists = databaseFile.exists();
+            Log.i(TAG, "Connecting to database");
+            Log.i(TAG, "Database exists: " + databaseExists + "(path: " + databasePath + ")");
 
-                try {
-                    openDatabase(db);
-                } catch (Exception e1) {
-                    Log.e(TAG, "Failed to open database [" + databasePath + "] Reason: [" + e1.getMessage() + "]", e1);
-                    Log.i(TAG, "Deleting existing database and trying to re-open database");
-                    if (databaseExists) {
-                        String message = databaseFile.delete() ? "Existing database deleted" : "FAILED to delete existing database";
-                        Log.i(TAG, message);
-                    }
+            openDatabase(db);
 
-                    Log.i(TAG, "Connecting to database (attempt 2)");
-                    openDatabase(db);
-                }
-
-                // if the database did not already exist, just created it, otherwise perform upgrade path
-                if (!databaseAlreadyExists) {
-                    onCreate(db);
-                } else if (checkForUpgrade) {
-                    if (db.isEncrypted()) {
-                        onUpgrade(db, db.getSecureSqLiteDatabase().getVersion(), db.getVersion());
-                    } else {
-                        onUpgrade(db, db.getSqLiteDatabase().getVersion(), db.getVersion());
-                    }
-                }
-
-                // update database version
+            // if the database did not already exist, just created it, otherwise perform upgrade path
+            if (!databaseAlreadyExists) {
+                onCreate(db);
+            } else if (checkForUpgrade) {
                 if (db.isEncrypted()) {
-                    db.getSecureSqLiteDatabase().setVersion(db.getVersion());
+                    onUpgrade(db, db.getSecureSqLiteDatabase().getVersion(), db.getVersion());
                 } else {
-                    db.getSqLiteDatabase().setVersion(db.getVersion());
+                    onUpgrade(db, db.getSqLiteDatabase().getVersion(), db.getVersion());
                 }
-            } catch (Exception ex) {
-                Log.e(TAG, "error -- " + ex.getMessage(), ex);
+            }
+
+            // update database version
+            if (db.isEncrypted()) {
+                db.getSecureSqLiteDatabase().setVersion(db.getVersion());
+            } else {
+                db.getSqLiteDatabase().setVersion(db.getVersion());
             }
         }
     }

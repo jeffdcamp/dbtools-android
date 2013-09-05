@@ -3,12 +3,12 @@ package org.dbtools.android.domain;
 import android.database.sqlite.SQLiteDatabase;
 
 public class AndroidDatabase {
-    private boolean encrypted = false;
-    private String name;
-    private String path;
-    private int version;
+    private final boolean encrypted;
+    private final String name;
+    private final String path;
+    private final int version;
 
-    private String password;
+    private final String password;
 
     private SQLiteDatabase sqLiteDatabase;
     private net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase;
@@ -17,6 +17,8 @@ public class AndroidDatabase {
         this.name = name;
         this.path = path;
         this.version = version;
+        this.password = null;
+        this.encrypted = false;
     }
 
     public AndroidDatabase(String name, String password, String path, int version) {
@@ -29,10 +31,6 @@ public class AndroidDatabase {
 
     public boolean isEncrypted() {
         return encrypted;
-    }
-
-    public void setEncrypted(boolean encrypted) {
-        this.encrypted = encrypted;
     }
 
     public String getName() {
@@ -65,5 +63,20 @@ public class AndroidDatabase {
 
     public void setSecureSqLiteDatabase(net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase) {
         this.secureSqLiteDatabase = secureSqLiteDatabase;
+    }
+
+    public void close() {
+        if (encrypted) {
+            if (secureSqLiteDatabase != null) {
+                secureSqLiteDatabase.close();
+                secureSqLiteDatabase = null;
+            }
+        } else {
+            if (sqLiteDatabase != null) {
+                sqLiteDatabase.close();
+                sqLiteDatabase = null;
+
+            }
+        }
     }
 }

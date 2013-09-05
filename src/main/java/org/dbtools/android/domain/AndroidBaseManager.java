@@ -121,12 +121,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         getWritableDatabase(databaseName).beginTransaction();
     }
 
-    public void endTransaction() {
-        endTransaction(getDatabaseName());
+    public void endTransaction(boolean success) {
+        endTransaction(getDatabaseName(), success);
     }
 
-    public void endTransaction(String databaseName) {
-        getWritableDatabase(databaseName).setTransactionSuccessful();
+    public void endTransaction(String databaseName, boolean success) {
+        if (success) {
+            getWritableDatabase(databaseName).setTransactionSuccessful();
+        }
         getWritableDatabase(databaseName).endTransaction();
     }
 
