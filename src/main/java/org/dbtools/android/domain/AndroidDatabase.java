@@ -65,6 +65,20 @@ public class AndroidDatabase {
         this.secureSqLiteDatabase = secureSqLiteDatabase;
     }
 
+    public boolean inTransaction() {
+        if (encrypted) {
+            if (secureSqLiteDatabase != null) {
+                return secureSqLiteDatabase.inTransaction();
+            }
+        } else {
+            if (sqLiteDatabase != null) {
+                return sqLiteDatabase.inTransaction();
+            }
+        }
+
+        return false;
+    }
+
     public void close() {
         if (encrypted) {
             if (secureSqLiteDatabase != null) {

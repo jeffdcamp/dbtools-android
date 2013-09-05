@@ -20,7 +20,6 @@ public abstract class AndroidDatabaseBaseManager {
     public abstract void identifyDatabases();
     public abstract void onCreate(AndroidDatabase database);
     public abstract void onUpgrade(AndroidDatabase database, int oldVersion, int newVersion);
-    public abstract void onCleanDatabase(AndroidDatabase database);
 
     /**
      * Add a standard SQLite database
@@ -223,6 +222,47 @@ public abstract class AndroidDatabaseBaseManager {
         }
 
         return file;
+    }
+
+    /**
+     * Delete and then recreate the database
+     * @param androidDatabase database to clean
+     */
+    public void onCleanDatabase(AndroidDatabase androidDatabase) {
+        Log.i(TAG, "Cleaning Database");
+        deleteDatabase(androidDatabase);
+        connectDatabase(androidDatabase.getName(), false);  // do not update here, because it will cause a recursive call
+    }
+
+    /**
+     * Delete databases and reset references from AndroidDatabaseManager
+     */
+    public void wipeDatabases() {
+        Log.e(TAG, "Wiping databases");
+        for (AndroidDatabase database : getDatabases()) {
+            deleteDatabase(database);
+        }
+
+        // remove existing references
+        // this should be done after clearing the preferences (to be sure not to use the old password)
+        reset();
+        identifyDatabases();
+    }
+
+    public void deleteDatabase(AndroidDatabase androidDatabase) {
+        String databasePath = androidDatabase.getPath();
+
+        if (!androidDatabase.inTransaction()) {
+            androidDatabase.close(); // this will hang if there is an open transaction
+        }
+
+        Log.i(TAG, "Deleting database: [" + databasePath + "]");
+        File databaseFile = new File(databasePath);
+        if (databaseFile.exists() && !databaseFile.delete()) {
+            String errorMessage = "FAILED to delete database: [" + databasePath + "]";
+            Log.e(TAG, errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
     public boolean deleteDatabaseFiles(AndroidDatabase db) {
