@@ -259,7 +259,7 @@ public abstract class AndroidDatabaseBaseManager {
         } catch (Exception e) {
             // inTransaction can throw "IllegalStateException: attempt to re-open an already-closed object"
             // This should not keep LDS Tools from performing a SYNC
-            Log.w(TAG, "Failed to check if in inTransaction: Error: [" + e.getMessage() + "]");
+            Log.w(TAG, "deleteDatabase().inTransaction() Error: [" + e.getMessage() + "]");
         }
 
         Log.i(TAG, "Deleting database: [" + databasePath + "]");
