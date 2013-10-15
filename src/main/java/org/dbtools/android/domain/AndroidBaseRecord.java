@@ -2,6 +2,9 @@ package org.dbtools.android.domain;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -15,12 +18,17 @@ import java.util.Date;
  * @author jcampbell
  */
 public abstract class AndroidBaseRecord implements Serializable {
+
+    public static final String DB_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.sss";
+
     private static ThreadLocal<DateFormat> dateFormat = new ThreadLocal<DateFormat>() {
         @Override
         protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss"); // NOPMD This is the format for the database, not for user view
+            return new SimpleDateFormat(DB_DATE_FORMAT); // NOPMD This is the format for the database, not for user view
         }
     };
+
+    public static final DateTimeFormatter DB_DATE_FORMATTER = DateTimeFormat.forPattern(DB_DATE_FORMAT);
 
     public abstract void setID(long id);
     public abstract long getID();
@@ -61,4 +69,25 @@ public abstract class AndroidBaseRecord implements Serializable {
             return null;
         }
     }
+
+    public String dateTimeToDBString(DateTime d) {
+        if (d != null) {
+            return d.toString(DB_DATE_FORMAT);
+        } else {
+            return null;
+        }
+    }
+
+    public DateTime dbStringToDateTime(String text) {
+        if (text != null && text.length() > 0 && !text.equals("null")) {
+            try {
+                return DB_DATE_FORMATTER.parseDateTime(text);
+            } catch (Exception ex) {
+                throw new IllegalArgumentException("Cannot parse date text: " + text, ex);
+            }
+        } else {
+            return null;
+        }
+    }
+
 }
