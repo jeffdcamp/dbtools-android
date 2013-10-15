@@ -30,8 +30,8 @@ public abstract class AndroidBaseRecord implements Serializable {
 
     public static final DateTimeFormatter DB_DATE_FORMATTER = DateTimeFormat.forPattern(DB_DATE_FORMAT);
 
-    public abstract void setID(long id);
-    public abstract long getID();
+    public abstract void setPrimaryKeyID(long id);
+    public abstract long getPrimaryKeyID();
     public abstract String getRowIDKey();
     public abstract String getDatabaseName();
     public abstract String getTableName();

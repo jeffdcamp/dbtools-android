@@ -205,7 +205,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public static long insert(SQLiteDatabase db, AndroidBaseRecord e) {
         checkDB(db);
         long rowID = db.insert(e.getTableName(), null, e.getContentValues());
-        e.setID(rowID);
+        e.setPrimaryKeyID(rowID);
         return rowID;
     }
 
@@ -269,7 +269,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
 
         long rowID = statement.executeInsert();
-        e.setID(rowID);
+        e.setPrimaryKeyID(rowID);
         return rowID;
     }
 
@@ -283,7 +283,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static int update(SQLiteDatabase db, AndroidBaseRecord e) {
         checkDB(db);
-        long rowID = e.getID();
+        long rowID = e.getPrimaryKeyID();
         if (rowID <= 0) {
             throw new IllegalArgumentException("Invalid rowID [" + rowID + "] be sure to call create(...) before update(...)");
         }
@@ -327,7 +327,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static long delete(SQLiteDatabase db, AndroidBaseRecord e) {
         checkDB(db);
-        long rowID = e.getID();
+        long rowID = e.getPrimaryKeyID();
         if (rowID <= 0) {
             throw new IllegalArgumentException("Invalid rowID [" + rowID + "]");
         }

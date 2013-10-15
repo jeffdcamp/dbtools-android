@@ -93,4 +93,34 @@ public class AndroidDatabase {
             }
         }
     }
+
+    public void beginTransaction() {
+        if (encrypted) {
+            if (secureSqLiteDatabase != null) {
+                secureSqLiteDatabase.beginTransaction();
+            }
+        } else {
+            if (sqLiteDatabase != null) {
+                sqLiteDatabase.beginTransaction();
+            }
+        }
+    }
+
+    public void endTransaction(boolean success) {
+        if (encrypted) {
+            if (secureSqLiteDatabase != null) {
+                if (success) {
+                    secureSqLiteDatabase.setTransactionSuccessful();
+                }
+                secureSqLiteDatabase.endTransaction();
+            }
+        } else {
+            if (sqLiteDatabase != null) {
+                if (success) {
+                    sqLiteDatabase.setTransactionSuccessful();
+                }
+                sqLiteDatabase.endTransaction();
+            }
+        }
+    }
 }

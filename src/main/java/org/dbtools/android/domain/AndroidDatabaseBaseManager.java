@@ -336,4 +336,12 @@ public abstract class AndroidDatabaseBaseManager {
         }
         return renamed;
     }
+
+    public void beginTransaction(String databasename) {
+        getDatabase(databasename).beginTransaction();
+    }
+
+    public void endTransaction(String databasename, boolean success) {
+        getDatabase(databasename).endTransaction(success);
+    }
 }
