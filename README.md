@@ -4,7 +4,7 @@ DBTools for Android
 DBTools for Android is an Android ORM library that makes it easy to work with SQLite Databases.
 
 
-Usage
+Setup
 =====
 
 *For a working implementation of DBTools for Android see the Android-Template application (https://github.com/jeffdcamp/android-template)
@@ -217,6 +217,9 @@ Usage
 
                IndividualManager.java (extends IndividualBaseManager and is used for developer customizations (such as adding new findByXXX(...) methods) (NEVER overwritten by generator)
                IndividualBaseManager.java (contains boiler-plate code for doing CRUD operations) (this file is ALWAYS overwritten by generator)
+
+Usage
+=====
 
   At this point DBTools for Android is all setup and your Domain classes have been created.  The following are some use cases:
 
