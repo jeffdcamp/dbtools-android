@@ -158,7 +158,8 @@ Usage
             }
         }
 
-    7. Create BaseRecord.java and BaseManager.java files in the "baseOutputDir" (as specified in the build.gradle).  (These files should initially be generated in the future)
+
+  7. Create BaseRecord.java and BaseManager.java files in the "baseOutputDir" (as specified in the build.gradle).  (These files should initially be generated in the future)
 
         // BaseManager.java
         package org.company.project.domain;
@@ -203,11 +204,12 @@ Usage
         public abstract class BaseRecord extends AndroidBaseRecord {
         }
 
-    8. Use DBTools Generator to generate domain classes.  Execute gradle task:
+
+  8. Use DBTools Generator to generate domain classes.  Execute gradle task:
 
         ./gradlew dbtools
 
-    9. DBTools Generator will create the following files for each table
+  9. DBTools Generator will create the following files for each table
 
         individual/
                Individual.java (extends IndividualBaseRecord and is used for developer customizations) (NEVER overwritten by generator)
@@ -216,9 +218,9 @@ Usage
                IndividualManager.java (extends IndividualBaseManager and is used for developer customizations (such as adding new findByXXX(...) methods) (NEVER overwritten by generator)
                IndividualBaseManager.java (contains boiler-plate code for doing CRUD operations) (this file is ALWAYS overwritten by generator)
 
-    At this point DBTools for Android is all setup and your Domain classes have been created.  The following are some use cases:
+  At this point DBTools for Android is all setup and your Domain classes have been created.  The following are some use cases:
 
-    * Add data to the database
+  * Add data to the database
 
         @Inject
         IndividualManager individualManager;
@@ -232,20 +234,20 @@ Usage
 
         individualManager.save(individual);
 
-    * Update data to the database
+  * Update data to the database
 
         Individual individual = individualManager.findByRowID(1);
         individual.setPhone("801-555-0000");
         individualManager.save(individual);
 
-    * Delete data from the database
+  * Delete data from the database
 
         Individual individual = individualManager.findByRowID(1);
         individualManager.delete(individual);
 
-    DBTools Manager has a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
+  DBTools Manager has a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
 
-    * Get records
+  * Get records
 
         Individual individual = individualManager.findByRowID(1);
         Individual individual = individualManager.findBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find FIRST individual who has "555" in their phone number
@@ -254,12 +256,12 @@ Usage
         List<Individual> allOrderedIndividuals = individualManager.findAllOrderBy(Individual.C_NAME);
         List<Individual> specificIndividuals = individualManager.findAllBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find all those who have "555" in their phone number
 
-    * Using cursors
+  * Using cursors
 
         Cursor cursor = individualManager.findCursorBySelection(null, null, Individual.C_NAME); // find all, order by NAME column
         Cursor cursor = individualManager.findCursorBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find cursor of those who have "555" in their phone number
 
-    * Count number of items in the database
+  * Count number of items in the database
 
         int count = individualManager.findCount();
         int count = individualManager.findCountBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find count of those who have "555" in their phone number
