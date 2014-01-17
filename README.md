@@ -223,19 +223,52 @@ Usage
 
   At this point DBTools for Android is all setup and your Domain classes have been created.  The following are some use cases:
 
-  * Add data to the database
+  * Use manager classes to perform CRUD operations on tables (2 options: With injection or without injection)
 
+        // USING INJECTION (recommended) (when using injection frameworks such as Dagger, RoboGuice, etc)
         @Inject
-        IndividualManager individualManager;
+        IndividualManager individualManager;  // simply "Inject" your manager (it has access to the database directly)
 
-        ...
+        public void onSaveClicked() {
+            // save
+            individualManager.save(individual);
+        }
+
+        ... or ...
+
+        // NO INJECTION
+        public void onSaveClicked() {
+            // get your database (can be pulled from shared location)
+            DatabaseManager databaseManager = new DatabaseManager();
+            databaseManager.setContext(this);
+            SQLiteDatabase db = databaseManager.getWritableDatabase(DatabaseManager.MAIN_DATABASE_NAME);
+
+            // save
+            IndividualManager.save(db, individual); // static method call to manager
+        }
+
+  * Add data to the database
 
         // create a new domain object
         Individual individual = new Individual();
         individual.setName("Jeff Campbell");
         individual.setPhone("801-555-1234");
+        individual.setIndividualType(IndividualType.HEAD); // enum table example
 
         individualManager.save(individual);
+
+  * Transactions
+
+        individualManager.beginTransaction();  // managers share transactions (use any manager to begin/end a transaction)
+        boolean success = true;
+
+        individualManager.save(individual1);
+        individualManager.save(individual2);
+        individualManager.save(individual3);
+        individualManager.save(individual4);
+        individualManager.save(individual5);
+
+        individualManager.endTransaction(success); // if false, transaction is reverted
 
   * Update data to the database
 
