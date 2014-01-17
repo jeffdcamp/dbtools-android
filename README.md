@@ -16,7 +16,7 @@ Usage
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.6.+'
+                classpath 'com.android.tools.build:gradle:0.7.+'
                 classpath 'org.dbtools:dbtools-gen:1.+'
             }
         }
@@ -27,7 +27,7 @@ Usage
             mavenCentral()
         }
 
-  3. Add dbtools dependency to your "dependencies" section of the build.gradle file
+  3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version is found in Maven Central Repo)
 
         dependencies {
             compile 'org.dbtools:dbtools-android:<latest version>'
@@ -73,7 +73,7 @@ Usage
             </database>
         </dbSchema>
 
-  6. Create DatabaseManager.java.  This class manages all database connections, creates and updates databases (this version uses CDI injection for the context)
+  6. Create DatabaseManager.java.  This class manages all database connections, creates and updates databases (this version uses CDI injection for the context).  (This file should initially be generated in the future)
 
         package org.company.project.domain;
 
@@ -157,6 +157,113 @@ Usage
                 connectDatabase(androidDatabase.getName(), false);  // do not update here, because it will cause a recursive call
             }
         }
+
+    7. Create BaseRecord.java and BaseManager.java files in the "baseOutputDir" (as specified in the build.gradle).  (These files should initially be generated in the future)
+
+        // BaseManager.java
+        package org.company.project.domain;
+
+        //import net.sqlcipher.database.SQLiteDatabase;  // used for sqlcipher databases
+        //import org.dbtools.android.domain.secure.AndroidBaseManager; // used for sqlcipher databases
+
+        import android.database.sqlite.SQLiteDatabase;
+        import org.dbtools.android.domain.AndroidBaseManager;
+
+
+        import javax.inject.Inject;
+
+        public abstract class BaseManager<T extends BaseRecord> extends AndroidBaseManager<T> {
+
+            @Inject
+            public DatabaseManager databaseManager;
+
+            public SQLiteDatabase getReadableDatabase() {
+                return databaseManager.getReadableDatabase(getDatabaseName());
+            }
+
+            public SQLiteDatabase getReadableDatabase(String databaseName) {
+                return databaseManager.getReadableDatabase(databaseName);
+            }
+
+            public SQLiteDatabase getWritableDatabase() {
+                return databaseManager.getWritableDatabase(getDatabaseName());
+            }
+
+            public SQLiteDatabase getWritableDatabase(String databaseName) {
+                return databaseManager.getWritableDatabase(databaseName);
+            }
+        }
+
+
+        // BaseRecord.java
+        package org.company.project.domain;
+
+        import org.dbtools.android.domain.AndroidBaseRecord;
+
+        public abstract class BaseRecord extends AndroidBaseRecord {
+        }
+
+    8. Use DBTools Generator to generate domain classes.  Execute gradle task:
+
+        ./gradlew dbtools
+
+    9. DBTools Generator will create the following files for each table
+
+        individual/
+               Individual.java (extends IndividualBaseRecord and is used for developer customizations) (NEVER overwritten by generator)
+               IndividualBaseRecord.java (contains boiler-plate code for doing CRUD operations and contains CONST names of the table and all columns (used to help writing queries)) (this file is ALWAYS overwritten by generator)
+
+               IndividualManager.java (extends IndividualBaseManager and is used for developer customizations (such as adding new findByXXX(...) methods) (NEVER overwritten by generator)
+               IndividualBaseManager.java (contains boiler-plate code for doing CRUD operations) (this file is ALWAYS overwritten by generator)
+
+    At this point DBTools for Android is all setup and your Domain classes have been created.  The following are some use cases:
+
+    * Add data to the database
+
+        @Inject
+        IndividualManager individualManager;
+
+        ...
+
+        // create a new domain object
+        Individual individual = new Individual();
+        individual.setName("Jeff Campbell");
+        individual.setPhone("801-555-1234");
+
+        individualManager.save(individual);
+
+    * Update data to the database
+
+        Individual individual = individualManager.findByRowID(1);
+        individual.setPhone("801-555-0000");
+        individualManager.save(individual);
+
+    * Delete data from the database
+
+        Individual individual = individualManager.findByRowID(1);
+        individualManager.delete(individual);
+
+    DBTools Manager has a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
+
+    * Get records
+
+        Individual individual = individualManager.findByRowID(1);
+        Individual individual = individualManager.findBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find FIRST individual who has "555" in their phone number
+
+        List<Individual> allIndividuals = individualManager.findAll();
+        List<Individual> allOrderedIndividuals = individualManager.findAllOrderBy(Individual.C_NAME);
+        List<Individual> specificIndividuals = individualManager.findAllBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find all those who have "555" in their phone number
+
+    * Using cursors
+
+        Cursor cursor = individualManager.findCursorBySelection(null, null, Individual.C_NAME); // find all, order by NAME column
+        Cursor cursor = individualManager.findCursorBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find cursor of those who have "555" in their phone number
+
+    * Count number of items in the database
+
+        int count = individualManager.findCount();
+        int count = individualManager.findCountBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find count of those who have "555" in their phone number
+
 
 
 License
