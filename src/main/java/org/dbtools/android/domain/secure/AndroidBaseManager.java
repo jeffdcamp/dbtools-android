@@ -7,6 +7,7 @@ import android.provider.BaseColumns;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteStatement;
 import org.dbtools.android.domain.AndroidBaseRecord;
+import org.dbtools.android.domain.CustomQueryRecord;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -274,6 +275,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return rowID;
     }
 
+    public int update(ContentValues values, long rowID) {
+        return update(getTableName(), values, getPrimaryKey(), rowID);
+    }
+
+    public int update(ContentValues values, String where, String[] whereArgs) {
+        return update(getTableName(), values, where, whereArgs);
+    }
+
     public int update(T e) {
         return update(getDatabaseName(), e);
     }
@@ -316,6 +325,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public static int update(SQLiteDatabase db, String tableName, ContentValues contentValues, String where, String[] whereArgs) {
         checkDB(db);
         return db.update(tableName, contentValues, where, whereArgs);
+    }
+
+    public long delete(long rowID) {
+        return delete(getTableName(), getPrimaryKey(), rowID);
+    }
+
+    public long delete(String where, String[] whereArgs) {
+        return delete(getTableName(), where, whereArgs);
     }
 
     public long delete(T e) {
@@ -410,22 +427,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         if (db == null) {
             throw new IllegalArgumentException("db cannot be null");
         }
-    }
-
-    public int update(ContentValues values, long rowID) {
-        return update(getTableName(), values, getPrimaryKey(), rowID);
-    }
-
-    public int update(ContentValues values, String where, String[] whereArgs) {
-        return update(getTableName(), values, where, whereArgs);
-    }
-
-    public long delete(long rowID) {
-        return delete(getTableName(), getPrimaryKey(), rowID);
-    }
-
-    public long delete(String where, String[] whereArgs) {
-        return delete(getTableName(), where, whereArgs);
     }
 
     public Cursor findCursorByRawQuery(String rawQuery, String[] selectionArgs) {
@@ -805,4 +806,76 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return foundItems;
     }
 
+    /**
+     * Use a custom query to populate a custom class that extends CustomQueryRecord
+     * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of: Long, Double, String, byte[])
+     * @param rawQuery Query
+     * @param selectionArgs Query parameters
+     * @return List of CustomQueryRecord
+     */
+    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(String rawQuery, String[] selectionArgs, Class<T> type) {
+        return findAllCustomRecordByRawQuery(getDatabaseName(), rawQuery, selectionArgs, type);
+    }
+
+    /**
+     * Use a custom query to populate a custom class that extends CustomQueryRecord
+     * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of: Long, Double, String, byte[])
+     * @param databaseName Name of database to query
+     * @param rawQuery Query
+     * @param selectionArgs Query parameters
+     * @return List of CustomQueryRecord
+     */
+    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(String databaseName, String rawQuery, String[] selectionArgs, Class<T> type) {
+        List<T> foundItems;
+
+        Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+        if (cursor != null) {
+            foundItems = new ArrayList<T>(cursor.getCount());
+            if (cursor.moveToFirst()) {
+                do {
+                    T item;
+
+                    try {
+                        item = type.newInstance();
+                    } catch (InstantiationException e) {
+                        throw new IllegalStateException("Failed to create CustomQueryRecord", e);
+                    } catch (IllegalAccessException e) {
+                        throw new IllegalStateException("Failed to create CustomQueryRecord", e);
+                    }
+
+                    int cursorColCount = cursor.getColumnCount();
+                    Object[] rowData = new Object[cursorColCount];
+                    for (int col = 0; col < cursorColCount; col++) {
+                        switch (cursor.getType(col)) {
+                            case Cursor.FIELD_TYPE_INTEGER:
+                                rowData[col] = cursor.getLong(col);
+                                break;
+                            case Cursor.FIELD_TYPE_STRING:
+                                rowData[col] = cursor.getString(col);
+                                break;
+                            case Cursor.FIELD_TYPE_FLOAT:
+                                rowData[col] = cursor.getDouble(col);
+                                break;
+                            case Cursor.FIELD_TYPE_BLOB:
+                                rowData[col] = cursor.getBlob(col);
+                                break;
+                            case Cursor.FIELD_TYPE_NULL:
+                                rowData[col] = null;
+                                break;
+                            default:
+                                throw new IllegalStateException("Unknown Column Type [" + cursor.getType(col) + "]");
+                        }
+                    }
+
+                    item.setRowData(rowData);
+                    foundItems.add(item);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } else {
+            foundItems = new ArrayList<T>();
+        }
+
+        return foundItems;
+    }
 }

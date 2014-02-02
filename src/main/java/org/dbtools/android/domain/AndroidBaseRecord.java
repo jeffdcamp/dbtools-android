@@ -46,9 +46,23 @@ public abstract class AndroidBaseRecord implements Serializable {
     public abstract void setContent(Cursor cursor);
     public abstract boolean isNewRecord();
 
-    protected int booleanToInt(boolean b) {
+    public static int booleanToInt(boolean b) {
         return b ? 1 : 0;
     }
+
+    public static int booleanToLong(boolean b) {
+        return b ? 1 : 0;
+    }
+
+    public static boolean intToBoolean(int b) {
+        return b != 0;
+    }
+
+    public boolean longToBoolean(long b) {
+        return b != 0;
+    }
+
+    // Date - String
 
     public static String dateToDBString(Date d) {
         if (d != null) {
@@ -70,7 +84,9 @@ public abstract class AndroidBaseRecord implements Serializable {
         }
     }
 
-    public String dateTimeToDBString(DateTime d) {
+    // DateTime - String
+
+    public static String dateTimeToDBString(DateTime d) {
         if (d != null) {
             return d.toString(DB_DATE_FORMAT);
         } else {
@@ -78,7 +94,7 @@ public abstract class AndroidBaseRecord implements Serializable {
         }
     }
 
-    public DateTime dbStringToDateTime(String text) {
+    public static DateTime dbStringToDateTime(String text) {
         if (text != null && text.length() > 0 && !text.equals("null")) {
             try {
                 return DB_DATE_FORMATTER.parseDateTime(text);
@@ -90,4 +106,23 @@ public abstract class AndroidBaseRecord implements Serializable {
         }
     }
 
+    // DateTime - long
+
+    public static long dateTimeToLong(DateTime d) {
+        return d.getMillis();
+    }
+
+    public static DateTime longToDateTime(long l) {
+        return new org.joda.time.DateTime(l);
+    }
+
+    // Date - long
+
+    public static long dateToLong(Date d) {
+        return d.getTime();
+    }
+
+    public static Date longToDate(long l) {
+        return new Date(l);
+    }
 }
