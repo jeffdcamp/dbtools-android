@@ -20,10 +20,15 @@ public class TestCustomQueryRecord implements CustomQueryRecord {
                     name = (String) rowData[i];
                     break;
                 case 2:
-                    enable = (Integer) rowData[i] != 0;
+                    enable = (Boolean) rowData[i];
                 default:
                     throw new IllegalStateException("Unexpected column index [" + i + "]");
             }
         }
+    }
+
+    @Override
+    public Class[] getColumnTypes() {
+        return new Class[]{int.class, String.class, boolean.class};
     }
 }

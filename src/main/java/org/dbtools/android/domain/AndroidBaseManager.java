@@ -162,7 +162,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * Save Record.
      *
      * @param db database for the record to be saved to
-     * @param e Record to be saved
+     * @param e  Record to be saved
      * @return true if record was saved
      */
     public static boolean save(SQLiteDatabase db, AndroidBaseRecord e) {
@@ -199,7 +199,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * Insert record into database.
      *
      * @param db database for the record inserted into
-     * @param e record to be inserted
+     * @param e  record to be inserted
      * @return long value of new id
      */
     public static long insert(SQLiteDatabase db, AndroidBaseRecord e) {
@@ -526,6 +526,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     *
      * @param rawQuery Custom query
      * @return List of object T
      */
@@ -535,6 +536,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     *
      * @param rawQuery Custom query
      * @return List of object T
      */
@@ -544,8 +546,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
-     * @param databaseName Name of database
-     * @param rawQuery Custom query
+     *
+     * @param databaseName  Name of database
+     * @param rawQuery      Custom query
      * @param selectionArgs query arguments
      * @return List of object T
      */
@@ -631,6 +634,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Find count by raw query.  Raw query assumes first SELECT param is count(1).
+     *
      * @param rawQuery Query
      * @return total count
      */
@@ -640,6 +644,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Find count by raw query.  Raw query assumes first SELECT param is count(1).
+     *
      * @param rawQuery Query
      * @return total count
      */
@@ -649,7 +654,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Find count by raw query.  Raw query assumes first SELECT param is count(1).
-     * @param rawQuery Query
+     *
+     * @param rawQuery      Query
      * @param selectionArgs Selection args
      * @return total count
      */
@@ -672,7 +678,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return the first column and first row value as a Long for given rawQuery and selectionArgs.
-     * @param rawQuery Query contain first column which is a long value
+     *
+     * @param rawQuery      Query contain first column which is a long value
      * @param selectionArgs Query parameters
      * @return query results value or -1 if no data was returned
      */
@@ -682,8 +689,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return the first column and first row value as a Long for given rawQuery and selectionArgs.
-     * @param databaseName Name of database to query
-     * @param rawQuery Query contain first column which is a long value
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a long value
      * @param selectionArgs Query parameters
      * @return query results value or -1 if no data was returned
      */
@@ -703,7 +711,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return the first column and first row value as a String for given rawQuery and selectionArgs.
-     * @param rawQuery Query contain first column which is a String value
+     *
+     * @param rawQuery      Query contain first column which is a String value
      * @param selectionArgs Query parameters
      * @return query results value or null if no data was returned
      */
@@ -713,8 +722,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return the first column and first row value as a String for given rawQuery and selectionArgs.
-     * @param databaseName Name of database to query
-     * @param rawQuery Query contain first column which is a String value
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a String value
      * @param selectionArgs Query parameters
      * @return query results value or null if no data was returned
      */
@@ -734,7 +744,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return a list of all of the first column values as a List<Long> for given rawQuery and selectionArgs.
-     * @param rawQuery Query contain first column which is a Long value
+     *
+     * @param rawQuery      Query contain first column which is a Long value
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
@@ -744,8 +755,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return a list of all of the first column values as a List<Long> for given rawQuery and selectionArgs.
-     * @param databaseName Name of database to query
-     * @param rawQuery Query contain first column which is a Long value
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a Long value
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
@@ -770,7 +782,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return a list of all of the first column values as a List<String> for given rawQuery and selectionArgs.
-     * @param rawQuery Query contain first column which is a String value
+     *
+     * @param rawQuery      Query contain first column which is a String value
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
@@ -780,8 +793,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Return a list of all of the first column values as a List<String> for given rawQuery and selectionArgs.
-     * @param databaseName Name of database to query
-     * @param rawQuery Query contain first column which is a String value
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a String value
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
@@ -806,8 +820,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Use a custom query to populate a custom class that extends CustomQueryRecord
-     * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of: Long, Double, String, byte[])
-     * @param rawQuery Query
+     * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of objects based on CustomQueryRecord.getColumnTypes())
+     *
+     * @param rawQuery      Query
      * @param selectionArgs Query parameters
      * @return List of CustomQueryRecord
      */
@@ -817,14 +832,17 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     /**
      * Use a custom query to populate a custom class that extends CustomQueryRecord
-     * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of: Long, Double, String, byte[])
-     * @param databaseName Name of database to query
-     * @param rawQuery Query
+     * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of objects based on CustomQueryRecord.getColumnTypes())
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query
      * @param selectionArgs Query parameters
      * @return List of CustomQueryRecord
      */
     public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(String databaseName, String rawQuery, String[] selectionArgs, Class<T> type) {
         List<T> foundItems;
+
+        Class[] colTypes = null;
 
         Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
         if (cursor != null) {
@@ -841,27 +859,34 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
                         throw new IllegalStateException("Failed to create CustomQueryRecord", e);
                     }
 
+                    if (colTypes == null) {
+                        colTypes = item.getColumnTypes();
+                    }
+
                     int cursorColCount = cursor.getColumnCount();
+                    if (colTypes.length != cursorColCount) {
+                        throw new IllegalStateException("getColumnTypes().length != cursor.getColumnCount() for query [" + rawQuery + "]");
+                    }
+
                     Object[] rowData = new Object[cursorColCount];
                     for (int col = 0; col < cursorColCount; col++) {
-                        switch (cursor.getType(col)) {
-                            case Cursor.FIELD_TYPE_INTEGER:
-                                rowData[col] = cursor.getLong(col);
-                                break;
-                            case Cursor.FIELD_TYPE_STRING:
-                                rowData[col] = cursor.getString(col);
-                                break;
-                            case Cursor.FIELD_TYPE_FLOAT:
-                                rowData[col] = cursor.getDouble(col);
-                                break;
-                            case Cursor.FIELD_TYPE_BLOB:
-                                rowData[col] = cursor.getBlob(col);
-                                break;
-                            case Cursor.FIELD_TYPE_NULL:
-                                rowData[col] = null;
-                                break;
-                            default:
-                                throw new IllegalStateException("Unknown Column Type [" + cursor.getType(col) + "]");
+                        Class colType = colTypes[col];
+                        if (colType == Integer.class || colType == int.class) {
+                            rowData[col] = cursor.getInt(col);
+                        } else if (colType == Long.class || colType == long.class) {
+                            rowData[col] = cursor.getLong(col);
+                        } else if (colType == String.class) {
+                            rowData[col] = cursor.getString(col);
+                        } else if (colType == Boolean.class || colType == boolean.class) {
+                            rowData[col] = cursor.getInt(col) != 0;
+                        } else if (colType == Float.class || colType == float.class) {
+                            rowData[col] = cursor.getFloat(col);
+                        } else if (colType == Double.class || colType == double.class) {
+                            rowData[col] = cursor.getDouble(col);
+                        } else if (colType == byte[].class) {
+                            rowData[col] = cursor.getBlob(col);
+                        } else {
+                            throw new IllegalStateException("Unknown/Supported Column Type [" + colType + "]");
                         }
                     }
 
