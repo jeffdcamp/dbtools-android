@@ -64,13 +64,9 @@ public abstract class AndroidDatabaseBaseManager {
         return databaseMap.values();
     }
 
-    private synchronized void initDatabases() {
+    private void createDatabaseMap() {
         if (databaseMap == null || databaseMap.size() == 0) {
             identifyDatabases();
-            Collection<AndroidDatabase> databases = getDatabases();
-            for (AndroidDatabase database : databases) {
-                connectDatabase(database.getName());
-            }
         }
     }
 
@@ -122,12 +118,19 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
+    public void connectAllDatabases() {
+        Collection<AndroidDatabase> databases = getDatabases();
+        for (AndroidDatabase database : databases) {
+            connectDatabase(database.getName());
+        }
+    }
+
     public void connectDatabase(String databaseName) {
         connectDatabase(databaseName, true);
     }
 
-    public void connectDatabase(String databaseName, boolean checkForUpgrade) {
-        initDatabases(); // (if needed)
+    public synchronized void connectDatabase(String databaseName, boolean checkForUpgrade) {
+        createDatabaseMap();
 
         AndroidDatabase db = databaseMap.get(databaseName);
 
