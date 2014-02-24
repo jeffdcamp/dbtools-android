@@ -118,6 +118,28 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
+    public void closeDatabase(String databaseName) {
+        closeDatabase(getDatabase(databaseName));
+    }
+
+    public boolean closeDatabase(AndroidDatabase db) {
+        if (db.isEncrypted()) {
+            net.sqlcipher.database.SQLiteDatabase sqLiteDatabase = db.getSecureSqLiteDatabase();
+            if (sqLiteDatabase != null && sqLiteDatabase.isOpen() && !sqLiteDatabase.inTransaction()) {
+                sqLiteDatabase.close();
+                return true;
+            }
+        } else {
+            SQLiteDatabase sqLiteDatabase = db.getSqLiteDatabase();
+            if (sqLiteDatabase != null && sqLiteDatabase.isOpen() && !sqLiteDatabase.inTransaction()) {
+                sqLiteDatabase.close();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void connectAllDatabases() {
         Collection<AndroidDatabase> databases = getDatabases();
         for (AndroidDatabase database : databases) {
