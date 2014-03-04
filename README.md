@@ -16,7 +16,7 @@ Setup
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.7.+'
+                classpath 'com.android.tools.build:gradle:0.8.+'
                 classpath 'org.dbtools:dbtools-gen:1.+'
             }
         }
