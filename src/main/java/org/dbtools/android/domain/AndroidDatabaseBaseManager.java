@@ -33,6 +33,49 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     /**
+     * Add a standard SQLite database
+     * @param databaseName Name of the attached database
+     * @param primaryDatabaseName Primary Database name
+     * @param attachedDatabaseNames Database names to be attached to Primary Database
+     */
+    public void addAttachedDatabase(String databaseName, String primaryDatabaseName, String... attachedDatabaseNames) {
+        AndroidDatabase primaryDatabase = getDatabase(primaryDatabaseName);
+        if (primaryDatabase == null) {
+            throw new IllegalStateException("Database [" + primaryDatabaseName + "] does not exist");
+        }
+
+        List<AndroidDatabase> attachedDatabases = new ArrayList<AndroidDatabase>();
+        for (String databaseNameToAttach : attachedDatabaseNames) {
+            AndroidDatabase databaseToAttach = getDatabase(databaseNameToAttach);
+            if (databaseToAttach == null) {
+                throw new IllegalStateException("Database to attach [" + databaseNameToAttach + "] does not exist");
+            }
+
+            attachedDatabases.add(databaseToAttach);
+        }
+
+        databaseMap.put(databaseName, new AndroidDatabase(databaseName, primaryDatabase, attachedDatabases));
+    }
+
+    /**
+     * Add a standard SQLite database
+     * @param databaseName Name of the attached database
+     * @param primaryDatabase Primary Database
+     * @param attachedDatabases Databases to be attached to Primary Database
+     */
+    public void addAttachedDatabase(String databaseName, AndroidDatabase primaryDatabase, List<AndroidDatabase> attachedDatabases) {
+        databaseMap.put(databaseName, new AndroidDatabase(databaseName, primaryDatabase, attachedDatabases));
+    }
+
+    public void removeAttachedDatabase(String databaseName) {
+        AndroidDatabase database = databaseMap.get(databaseName);
+        if (database != null) {
+            closeDatabase(database);
+            databaseMap.remove(databaseName);
+        }
+    }
+
+    /**
      * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
      * @param context Android Context
      * @param databaseName Name of the database
@@ -170,23 +213,75 @@ public abstract class AndroidDatabaseBaseManager {
 
             openDatabase(db);
 
-            // if the database did not already exist, just created it, otherwise perform upgrade path
-            if (!databaseAlreadyExists) {
-                onCreate(db);
-            } else if (checkForUpgrade) {
-                if (db.isEncrypted()) {
-                    onUpgrade(db, db.getSecureSqLiteDatabase().getVersion(), db.getVersion());
-                } else {
-                    onUpgrade(db, db.getSqLiteDatabase().getVersion(), db.getVersion());
+            if (!db.isAttached()) {
+                // if the database did not already exist, just created it, otherwise perform upgrade path
+                if (!databaseAlreadyExists) {
+                    onCreate(db);
+                } else if (checkForUpgrade) {
+                    if (db.isEncrypted()) {
+                        onUpgrade(db, db.getSecureSqLiteDatabase().getVersion(), db.getVersion());
+                    } else {
+                        onUpgrade(db, db.getSqLiteDatabase().getVersion(), db.getVersion());
+                    }
                 }
-            }
 
-            // update database version
-            if (db.isEncrypted()) {
-                db.getSecureSqLiteDatabase().setVersion(db.getVersion());
+                // update database version
+                if (db.isEncrypted()) {
+                    db.getSecureSqLiteDatabase().setVersion(db.getVersion());
+                } else {
+                    db.getSqLiteDatabase().setVersion(db.getVersion());
+                }
             } else {
-                db.getSqLiteDatabase().setVersion(db.getVersion());
+                // attached database
+                attachDatabases(db);
             }
+        }
+    }
+
+    public void attachDatabases(AndroidDatabase db) {
+        if (!db.isEncrypted()) {
+            for (AndroidDatabase toDb : db.getAttachedDatabases()) {
+                String sql = "ATTACH DATABASE '" + toDb.getPath() + "' AS " + toDb.getName();
+                db.getSqLiteDatabase().execSQL(sql);
+            }
+        } else {
+            for (AndroidDatabase toDb : db.getAttachedDatabases()) {
+                String sql = "ATTACH DATABASE '" + toDb.getPath() + "' AS " + toDb.getName() + " KEY '" + toDb.getPassword() + "'";
+                db.getSqLiteDatabase().execSQL(sql);
+            }
+        }
+    }
+
+    public void detachDatabases(String databaseName) {
+        AndroidDatabase androidDatabase = databaseMap.get(databaseName);
+        if (androidDatabase == null) {
+            throw new IllegalArgumentException("Database [" + databaseName + "] does not exist");
+        }
+
+        detachDatabases(androidDatabase);
+    }
+
+    public void detachDatabases(AndroidDatabase db) {
+        for (AndroidDatabase toDb : db.getAttachedDatabases()) {
+            detachDatabase(db, toDb.getName());
+        }
+    }
+
+    public void detachDatabase(String databaseName, String databaseToDetach) {
+        AndroidDatabase androidDatabase = databaseMap.get(databaseName);
+        if (androidDatabase == null) {
+            throw new IllegalArgumentException("Database [" + databaseName + "] does not exist");
+        }
+
+        detachDatabase(androidDatabase, databaseToDetach);
+    }
+
+    public void detachDatabase(AndroidDatabase db, String databaseToDetach) {
+        String sql = "DETACH DATABASE '" + databaseToDetach + "'";
+        if (!db.isEncrypted()) {
+            db.getSqLiteDatabase().execSQL(sql);
+        } else {
+            db.getSecureSqLiteDatabase().execSQL(sql);
         }
     }
 

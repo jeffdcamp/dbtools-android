@@ -2,8 +2,11 @@ package org.dbtools.android.domain;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.List;
+
 public class AndroidDatabase {
     private final boolean encrypted;
+    private final boolean attached;
     private final String name;
     private final String path;
     private final int version;
@@ -12,6 +15,7 @@ public class AndroidDatabase {
 
     private SQLiteDatabase sqLiteDatabase;
     private net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase;
+    private List<AndroidDatabase> attachedDatabases;
 
     public AndroidDatabase(String name, String path, int version) {
         this.name = name;
@@ -19,6 +23,7 @@ public class AndroidDatabase {
         this.version = version;
         this.password = null;
         this.encrypted = false;
+        this.attached = false;
     }
 
     public AndroidDatabase(String name, String password, String path, int version) {
@@ -27,10 +32,25 @@ public class AndroidDatabase {
         this.encrypted = password != null;
         this.path = path;
         this.version = version;
+        this.attached = false;
+    }
+
+    public AndroidDatabase(String name, AndroidDatabase primaryDatabase, List<AndroidDatabase> attachedDatabases) {
+        this.name = name;
+        this.path = primaryDatabase.getPath();
+        this.version = primaryDatabase.getVersion();
+        this.password = null;
+        this.encrypted = false;
+        this.attached = true;
+        this.attachedDatabases = attachedDatabases;
     }
 
     public boolean isEncrypted() {
         return encrypted;
+    }
+
+    public boolean isAttached() {
+        return attached;
     }
 
     public String getName() {
@@ -63,6 +83,10 @@ public class AndroidDatabase {
 
     public void setSecureSqLiteDatabase(net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase) {
         this.secureSqLiteDatabase = secureSqLiteDatabase;
+    }
+
+    public List<AndroidDatabase> getAttachedDatabases() {
+        return attachedDatabases;
     }
 
     public boolean inTransaction() {

@@ -470,30 +470,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return findCursorBySelection(databaseName, getPrimaryKey() + "=" + rowID, null);
     }
 
-    public T findBySelection(String selection, String[] selectionArgs, String orderBy) {
-        Cursor cursor = findCursorBySelection(selection, selectionArgs, orderBy);
-        if (cursor != null) {
-            T record = newRecord();
-            record.setContent(cursor);
-            cursor.close();
-            return record;
-        } else {
-            return null;
-        }
-    }
-
-    public T findBySelection(String databaseName, String selection, String[] selectionArgs, String orderBy) {
-        Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
-        if (cursor != null) {
-            T record = newRecord();
-            record.setContent(cursor);
-            cursor.close();
-            return record;
-        } else {
-            return null;
-        }
-    }
-
     public List<T> findAll() {
         return findAllBySelection(null, null, null);
     }
@@ -557,7 +533,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public List<T> getAllItemsFromCursor(Cursor cursor) {
-        List<T> foundItems = null;
+        List<T> foundItems;
         if (cursor != null) {
             foundItems = new ArrayList<T>(cursor.getCount());
             if (cursor.moveToFirst()) {
@@ -581,6 +557,53 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public T findByRowID(String databaseName, long rowID) {
         return findBySelection(databaseName, getPrimaryKey() + "=" + rowID, null, null);
+    }
+
+    public T findBySelection(String selection, String[] selectionArgs, String orderBy) {
+        Cursor cursor = findCursorBySelection(selection, selectionArgs, orderBy);
+        if (cursor != null) {
+            T record = newRecord();
+            record.setContent(cursor);
+            cursor.close();
+            return record;
+        } else {
+            return null;
+        }
+    }
+
+    public T findBySelection(String databaseName, String selection, String[] selectionArgs, String orderBy) {
+        Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
+        return createRecordFromCursor(cursor);
+    }
+
+    public T findByRawQuery(String rawQuery, String[] selectionArgs) {
+        return findByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    public T findByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+        Cursor cursor = findCursorByRawQuery(databaseName, rawQuery, selectionArgs);
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                return createRecordFromCursor(cursor);
+            } else {
+                cursor.close();
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private T createRecordFromCursor(Cursor cursor) {
+        if (cursor != null) {
+            T record = newRecord();
+            record.setContent(cursor);
+            cursor.close();
+            return record;
+        } else {
+            return null;
+        }
     }
 
     public List<T> findAllByRowIDs(long[] rowIDs) {
