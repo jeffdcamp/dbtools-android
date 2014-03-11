@@ -16,7 +16,7 @@ Setup
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.8.+'
+                classpath 'com.android.tools.build:gradle:0.9.+'
                 classpath 'org.dbtools:dbtools-gen:1.+'
             }
         }
@@ -208,6 +208,10 @@ Setup
   8. Use DBTools Generator to generate domain classes.  Execute gradle task:
 
         ./gradlew dbtools
+
+        ... or ...
+
+        From Android Studio:  RIGHT-CLICK on the "task dbtools {", in the build.gradle file, and select "Run 'gradle:dbtools'"
 
   9. DBTools Generator will create the following files for each table
 
