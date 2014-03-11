@@ -15,7 +15,10 @@ public class AndroidDatabase {
 
     private SQLiteDatabase sqLiteDatabase;
     private net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase;
-    private List<AndroidDatabase> attachedDatabases;
+
+    // attached Database info
+    private final AndroidDatabase attachedMainDatabase;
+    private final List<AndroidDatabase> attachedDatabases;
 
     public AndroidDatabase(String name, String path, int version) {
         this.name = name;
@@ -24,6 +27,9 @@ public class AndroidDatabase {
         this.password = null;
         this.encrypted = false;
         this.attached = false;
+
+        this.attachedMainDatabase = null;
+        this.attachedDatabases = null;
     }
 
     public AndroidDatabase(String name, String password, String path, int version) {
@@ -33,15 +39,20 @@ public class AndroidDatabase {
         this.path = path;
         this.version = version;
         this.attached = false;
+
+        this.attachedMainDatabase = null;
+        this.attachedDatabases = null;
     }
 
-    public AndroidDatabase(String name, AndroidDatabase primaryDatabase, List<AndroidDatabase> attachedDatabases) {
+    public AndroidDatabase(String name, AndroidDatabase attachMainDatabase, List<AndroidDatabase> attachedDatabases) {
         this.name = name;
-        this.path = primaryDatabase.getPath();
-        this.version = primaryDatabase.getVersion();
+        this.path = attachMainDatabase.getPath();
+        this.version = attachMainDatabase.getVersion();
         this.password = null;
         this.encrypted = false;
         this.attached = true;
+
+        this.attachedMainDatabase = attachMainDatabase;
         this.attachedDatabases = attachedDatabases;
     }
 
@@ -83,6 +94,10 @@ public class AndroidDatabase {
 
     public void setSecureSqLiteDatabase(net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase) {
         this.secureSqLiteDatabase = secureSqLiteDatabase;
+    }
+
+    public AndroidDatabase getAttachMainDatabase() {
+        return attachedMainDatabase;
     }
 
     public List<AndroidDatabase> getAttachedDatabases() {

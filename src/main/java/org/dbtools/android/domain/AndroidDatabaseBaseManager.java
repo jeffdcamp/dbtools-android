@@ -38,7 +38,7 @@ public abstract class AndroidDatabaseBaseManager {
      * @param primaryDatabaseName Primary Database name
      * @param attachedDatabaseNames Database names to be attached to Primary Database
      */
-    public void addAttachedDatabase(String databaseName, String primaryDatabaseName, String... attachedDatabaseNames) {
+    public void addAttachedDatabase(String databaseName, String primaryDatabaseName, List<String> attachedDatabaseNames) {
         AndroidDatabase primaryDatabase = getDatabase(primaryDatabaseName);
         if (primaryDatabase == null) {
             throw new IllegalStateException("Database [" + primaryDatabaseName + "] does not exist");
@@ -211,6 +211,12 @@ public abstract class AndroidDatabaseBaseManager {
             Log.i(TAG, "Connecting to database");
             Log.i(TAG, "Database exists: " + databaseExists + "(path: " + databasePath + ")");
 
+            // if this is an attached database, make sure the main database is open first
+            AndroidDatabase attachMainDatabase = db.getAttachMainDatabase();
+            if (attachMainDatabase != null) {
+                connectDatabase(attachMainDatabase.getName());
+            }
+
             openDatabase(db);
 
             if (!db.isAttached()) {
@@ -232,6 +238,15 @@ public abstract class AndroidDatabaseBaseManager {
                     db.getSqLiteDatabase().setVersion(db.getVersion());
                 }
             } else {
+                // make sure database being attached are connected/opened
+                for (AndroidDatabase otherDb : db.getAttachedDatabases()) {
+                    if (otherDb.isAttached()) {
+                        throw new IllegalStateException("Attached databases cannot be attach type databases (for database [" + otherDb.getName() + "]");
+                    }
+
+                    connectDatabase(otherDb.getName());
+                }
+
                 // attached database
                 attachDatabases(db);
             }
