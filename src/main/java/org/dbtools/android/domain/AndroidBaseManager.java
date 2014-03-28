@@ -150,8 +150,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     public boolean save(String databaseName, T e) {
         if (e.isNewRecord()) {
-            long newID = insert(databaseName, e);
-            return newID != 0;
+            long newId = insert(databaseName, e);
+            return newId != 0;
         } else {
             int count = update(databaseName, e);
             return count != 0;
@@ -167,8 +167,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     public static boolean save(SQLiteDatabase db, AndroidBaseRecord e) {
         if (e.isNewRecord()) {
-            long newID = insert(db, e);
-            return newID != 0;
+            long newId = insert(db, e);
+            return newId != 0;
         } else {
             int count = update(db, e);
             return count != 0;
@@ -204,9 +204,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     public static long insert(SQLiteDatabase db, AndroidBaseRecord e) {
         checkDB(db);
-        long rowID = db.insert(e.getTableName(), null, e.getContentValues());
-        e.setPrimaryKeyID(rowID);
-        return rowID;
+        long rowId = db.insert(e.getTableName(), null, e.getContentValues());
+        e.setPrimaryKeyId(rowId);
+        return rowId;
     }
 
     public SQLiteStatement createCompiledInsert() {
@@ -268,13 +268,13 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
             bindItemCount++;
         }
 
-        long rowID = statement.executeInsert();
-        e.setPrimaryKeyID(rowID);
-        return rowID;
+        long rowId = statement.executeInsert();
+        e.setPrimaryKeyId(rowId);
+        return rowId;
     }
 
-    public int update(ContentValues values, long rowID) {
-        return update(getTableName(), values, getPrimaryKey(), rowID);
+    public int update(ContentValues values, long rowId) {
+        return update(getTableName(), values, getPrimaryKey(), rowId);
     }
 
     public int update(ContentValues values, String where, String[] whereArgs) {
@@ -291,25 +291,25 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static int update(SQLiteDatabase db, AndroidBaseRecord e) {
         checkDB(db);
-        long rowID = e.getPrimaryKeyID();
-        if (rowID <= 0) {
-            throw new IllegalArgumentException("Invalid rowID [" + rowID + "] be sure to call create(...) before update(...)");
+        long rowId = e.getPrimaryKeyId();
+        if (rowId <= 0) {
+            throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
-        return update(db, e.getTableName(), e.getContentValues(), e.getRowIDKey(), rowID);
+        return update(db, e.getTableName(), e.getContentValues(), e.getRowIdKey(), rowId);
     }
 
-    public int update(String tableName, ContentValues contentValues, String rowKey, long rowID) {
-        return update(getDatabaseName(), tableName, contentValues, rowKey, rowID);
+    public int update(String tableName, ContentValues contentValues, String rowKey, long rowId) {
+        return update(getDatabaseName(), tableName, contentValues, rowKey, rowId);
     }
 
-    public int update(String databaseName, String tableName, ContentValues contentValues, String rowKey, long rowID) {
-        return update(getWritableDatabase(databaseName), tableName, contentValues, rowKey, rowID);
+    public int update(String databaseName, String tableName, ContentValues contentValues, String rowKey, long rowId) {
+        return update(getWritableDatabase(databaseName), tableName, contentValues, rowKey, rowId);
     }
 
-    public static int update(SQLiteDatabase db, String tableName, ContentValues contentValues, String rowKey, long rowID) {
+    public static int update(SQLiteDatabase db, String tableName, ContentValues contentValues, String rowKey, long rowId) {
         checkDB(db);
-        return db.update(tableName, contentValues, rowKey + "=" + rowID, null);
+        return db.update(tableName, contentValues, rowKey + "=" + rowId, null);
     }
 
     public int update(String tableName, ContentValues contentValues, String where, String[] whereArgs) {
@@ -325,8 +325,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return db.update(tableName, contentValues, where, whereArgs);
     }
 
-    public long delete(long rowID) {
-        return delete(getTableName(), getPrimaryKey(), rowID);
+    public long delete(long rowId) {
+        return delete(getTableName(), getPrimaryKey(), rowId);
     }
 
     public long delete(String where, String[] whereArgs) {
@@ -343,25 +343,25 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static long delete(SQLiteDatabase db, AndroidBaseRecord e) {
         checkDB(db);
-        long rowID = e.getPrimaryKeyID();
-        if (rowID <= 0) {
-            throw new IllegalArgumentException("Invalid rowID [" + rowID + "]");
+        long rowId = e.getPrimaryKeyId();
+        if (rowId <= 0) {
+            throw new IllegalArgumentException("Invalid rowId [" + rowId + "]");
         }
 
-        return delete(db, e.getTableName(), e.getRowIDKey(), rowID);
+        return delete(db, e.getTableName(), e.getRowIdKey(), rowId);
     }
 
-    public long delete(String tableName, String rowKey, long rowID) {
-        return delete(getDatabaseName(), tableName, rowKey, rowID);
+    public long delete(String tableName, String rowKey, long rowId) {
+        return delete(getDatabaseName(), tableName, rowKey, rowId);
     }
 
-    public long delete(String databaseName, String tableName, String rowKey, long rowID) {
-        return delete(getWritableDatabase(databaseName), tableName, rowKey, rowID);
+    public long delete(String databaseName, String tableName, String rowKey, long rowId) {
+        return delete(getWritableDatabase(databaseName), tableName, rowKey, rowId);
     }
 
-    public static long delete(SQLiteDatabase db, String tableName, String rowKey, long rowID) {
+    public static long delete(SQLiteDatabase db, String tableName, String rowKey, long rowId) {
         checkDB(db);
-        return db.delete(tableName, rowKey + "=" + rowID, null);
+        return db.delete(tableName, rowKey + "=" + rowId, null);
     }
 
     public long delete(String tableName, String where, String[] whereArgs) {
@@ -401,10 +401,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public static String createSearchSuggestionColumnsSQL(String idColumn, String resultTextColumn) {
-        return createSearchSuggestionIDColumn(idColumn) + ", " + createSearchSuggestionResult1Column(resultTextColumn);
+        return createSearchSuggestionIdColumn(idColumn) + ", " + createSearchSuggestionResult1Column(resultTextColumn);
     }
 
-    public static String createSearchSuggestionIDColumn(String idColumn) {
+    public static String createSearchSuggestionIdColumn(String idColumn) {
         return idColumn + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID;
     }
 
@@ -462,12 +462,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
     }
 
-    public Cursor findCursorByRowID(long rowID) {
-        return findCursorBySelection(getPrimaryKey() + "=" + rowID, null);
+    public Cursor findCursorByRowId(long rowId) {
+        return findCursorBySelection(getPrimaryKey() + "=" + rowId, null);
     }
 
-    public Cursor findCursorByRowID(String databaseName, long rowID) {
-        return findCursorBySelection(databaseName, getPrimaryKey() + "=" + rowID, null);
+    public Cursor findCursorByRowId(String databaseName, long rowId) {
+        return findCursorBySelection(databaseName, getPrimaryKey() + "=" + rowId, null);
     }
 
     public List<T> findAll() {
@@ -551,12 +551,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return foundItems;
     }
 
-    public T findByRowID(long rowID) {
-        return findBySelection(getPrimaryKey() + "=" + rowID, null, null);
+    public T findByRowId(long rowId) {
+        return findBySelection(getPrimaryKey() + "=" + rowId, null, null);
     }
 
-    public T findByRowID(String databaseName, long rowID) {
-        return findBySelection(databaseName, getPrimaryKey() + "=" + rowID, null, null);
+    public T findByRowId(String databaseName, long rowId) {
+        return findBySelection(databaseName, getPrimaryKey() + "=" + rowId, null, null);
     }
 
     public T findBySelection(String selection, String[] selectionArgs, String orderBy) {
@@ -606,25 +606,25 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
     }
 
-    public List<T> findAllByRowIDs(long[] rowIDs) {
-        return findAllByRowIDs(rowIDs, null);
+    public List<T> findAllByRowIds(long[] rowIds) {
+        return findAllByRowIds(rowIds, null);
     }
 
-    public List<T> findAllByRowIDs(long[] rowIDs, String orderBy) {
-        return findAllByRowIDs(getDatabaseName(), rowIDs, orderBy);
+    public List<T> findAllByRowIds(long[] rowIds, String orderBy) {
+        return findAllByRowIds(getDatabaseName(), rowIds, orderBy);
     }
 
-    public List<T> findAllByRowIDs(String databaseName, long[] rowIDs, String orderBy) {
-        if (rowIDs.length == 0) {
+    public List<T> findAllByRowIds(String databaseName, long[] rowIds, String orderBy) {
+        if (rowIds.length == 0) {
             return new ArrayList<T>();
         }
 
         StringBuilder sb = new StringBuilder();
-        for (long rowID : rowIDs) {
+        for (long rowId : rowIds) {
             if (sb.length() > 0) {
                 sb.append(" OR ");
             }
-            sb.append(getPrimaryKey()).append(" = ").append(rowID);
+            sb.append(getPrimaryKey()).append(" = ").append(rowId);
         }
 
         return findAllBySelection(databaseName, sb.toString(), null, orderBy);
