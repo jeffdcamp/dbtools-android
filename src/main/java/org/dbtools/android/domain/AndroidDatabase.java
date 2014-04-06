@@ -10,6 +10,7 @@ public class AndroidDatabase {
     private final String name;
     private final String path;
     private final int version;
+    private final int viewsVersion;
 
     private final String password;
 
@@ -20,10 +21,11 @@ public class AndroidDatabase {
     private final AndroidDatabase attachedMainDatabase;
     private final List<AndroidDatabase> attachedDatabases;
 
-    public AndroidDatabase(String name, String path, int version) {
+    public AndroidDatabase(String name, String path, int version, int viewsVersion) {
         this.name = name;
         this.path = path;
         this.version = version;
+        this.viewsVersion = viewsVersion;
         this.password = null;
         this.encrypted = false;
         this.attached = false;
@@ -32,12 +34,13 @@ public class AndroidDatabase {
         this.attachedDatabases = null;
     }
 
-    public AndroidDatabase(String name, String password, String path, int version) {
+    public AndroidDatabase(String name, String password, String path, int version, int viewsVersion) {
         this.name = name;
         this.password = password;
         this.encrypted = password != null;
         this.path = path;
         this.version = version;
+        this.viewsVersion = viewsVersion;
         this.attached = false;
 
         this.attachedMainDatabase = null;
@@ -48,6 +51,7 @@ public class AndroidDatabase {
         this.name = name;
         this.path = attachMainDatabase.getPath();
         this.version = attachMainDatabase.getVersion();
+        this.viewsVersion = attachMainDatabase.getViewsVersion();
         this.password = null;
         this.encrypted = false;
         this.attached = true;
@@ -74,6 +78,10 @@ public class AndroidDatabase {
 
     public int getVersion() {
         return version;
+    }
+
+    public int getViewsVersion() {
+        return viewsVersion;
     }
 
     public String getPassword() {

@@ -32,7 +32,7 @@ public abstract class AndroidBaseRecord implements Serializable {
 
     public abstract void setPrimaryKeyId(long id);
     public abstract long getPrimaryKeyId();
-    public abstract String getRowIdKey();
+    public abstract String getIdColumnName();
     public abstract String getDatabaseName();
     public abstract String getTableName();
 

@@ -7,6 +7,7 @@ import android.provider.BaseColumns;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteStatement;
 import org.dbtools.android.domain.AndroidBaseRecord;
+import org.dbtools.android.domain.AndroidDatabase;
 import org.dbtools.android.domain.CustomQueryRecord;
 
 import java.util.ArrayList;
@@ -31,43 +32,70 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public abstract String[] getAllKeys();
 
-    public abstract String getDropTableSQL();
+    public abstract String getDropSql();
 
-    public abstract String getCreateTableSQL();
+    public abstract String getCreateSql();
 
     public abstract T newRecord();
 
+    public static SQLiteDatabase getDatabase(AndroidDatabase androidDatabase) {
+        return androidDatabase.getSecureSqLiteDatabase();
+    }
+
+    public static void openDatabase(AndroidDatabase androidDatabase) {
+        try {
+            androidDatabase.setSecureSqLiteDatabase(SQLiteDatabase.openOrCreateDatabase(androidDatabase.getPath(), androidDatabase.getPassword(), null));
+        } catch (UnsatisfiedLinkError e) {
+            throw new IllegalStateException("Could not find native libs (be sure to call initSQLCipherLibs(...))", e);
+        }
+    }
+
+    public static boolean closeDatabase(AndroidDatabase androidDatabase) {
+        SQLiteDatabase sqLiteDatabase = getDatabase(androidDatabase);
+        if (sqLiteDatabase != null && sqLiteDatabase.isOpen() && !sqLiteDatabase.inTransaction()) {
+            sqLiteDatabase.close();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isDatabaseAlreadyOpen(AndroidDatabase androidDatabase) {
+        SQLiteDatabase database = getDatabase(androidDatabase);
+        return database != null && database.isOpen();
+    }
+
     public void createTable() {
-        executeSQL(getDatabaseName(), getCreateTableSQL());
+        executeSql(getDatabaseName(), getCreateSql());
     }
 
     public void createTable(String databaseName) {
-        executeSQL(getWritableDatabase(databaseName), getCreateTableSQL());
+        executeSql(getWritableDatabase(databaseName), getCreateSql());
     }
 
     public void createTable(SQLiteDatabase db) {
-        executeSQL(db, getCreateTableSQL());
+        executeSql(db, getCreateSql());
     }
 
     public static void createTable(SQLiteDatabase db, String sql) {
-        executeSQL(db, sql);
+        executeSql(db, sql);
     }
 
     public void dropTable() {
-        executeSQL(getDatabaseName(), getCreateTableSQL());
+        executeSql(getDatabaseName(), getCreateSql());
     }
 
     public void dropTable(String databaseName) {
-        executeSQL(getWritableDatabase(databaseName), getCreateTableSQL());
+        executeSql(getWritableDatabase(databaseName), getCreateSql());
     }
 
     public void dropTable(SQLiteDatabase db) {
-        executeSQL(db, getCreateTableSQL());
+        executeSql(db, getCreateSql());
     }
 
     // for use with enum records
     public static void dropTable(SQLiteDatabase db, String sql) {
-        executeSQL(db, sql);
+        executeSql(db, sql);
     }
 
     public void cleanTable() {
@@ -75,36 +103,40 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public void cleanTable(String databaseName) {
-        cleanTable(getWritableDatabase(databaseName), getDropTableSQL(), getCreateTableSQL());
+        cleanTable(getWritableDatabase(databaseName), getDropSql(), getCreateSql());
     }
 
     public void cleanTable(SQLiteDatabase db) {
-        cleanTable(db, getDropTableSQL(), getCreateTableSQL());
+        cleanTable(db, getDropSql(), getCreateSql());
     }
 
-    public void cleanTable(String dropSQL, String createSQL) {
-        cleanTable(getDatabaseName(), dropSQL, createSQL);
+    public void cleanTable(String dropSql, String createSql) {
+        cleanTable(getDatabaseName(), dropSql, createSql);
     }
 
-    public void cleanTable(String databaseName, String dropSQL, String createSQL) {
-        cleanTable(getWritableDatabase(databaseName), dropSQL, createSQL);
+    public void cleanTable(String databaseName, String dropSql, String createSql) {
+        cleanTable(getWritableDatabase(databaseName), dropSql, createSql);
     }
 
-    public static void cleanTable(SQLiteDatabase db, String dropSQL, String createSQL) {
+    public static void cleanTable(SQLiteDatabase db, String dropSql, String createSql) {
         checkDB(db);
-        executeSQL(db, dropSQL);
-        executeSQL(db, createSQL);
+        executeSql(db, dropSql);
+        executeSql(db, createSql);
     }
 
-    public void executeSQL(String sql) {
-        executeSQL(getDatabaseName(), sql);
+    public void executeSql(String sql) {
+        executeSql(getDatabaseName(), sql);
     }
 
-    public void executeSQL(String databaseName, String sql) {
-        executeSQL(getWritableDatabase(databaseName), sql);
+    public void executeSql(String databaseName, String sql) {
+        executeSql(getWritableDatabase(databaseName), sql);
     }
 
-    public static void executeSQL(SQLiteDatabase db, String sql) {
+    public static void executeSql(AndroidDatabase androidDatabase, String sql) {
+        executeSql(getDatabase(androidDatabase), sql);
+    }
+
+    public static void executeSql(SQLiteDatabase db, String sql) {
         checkDB(db);
         String[] sqlStatements = sql.split(";");
 
@@ -298,7 +330,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
-        return update(db, e.getTableName(), e.getContentValues(), e.getRowIdKey(), rowId);
+        return update(db, e.getTableName(), e.getContentValues(), e.getIdColumnName(), rowId);
     }
 
     public int update(String tableName, ContentValues contentValues, String rowKey, long rowId) {
@@ -350,7 +382,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "]");
         }
 
-        return delete(db, e.getTableName(), e.getRowIdKey(), rowId);
+        return delete(db, e.getTableName(), e.getIdColumnName(), rowId);
     }
 
     public long delete(String tableName, String rowKey, long rowId) {
@@ -721,9 +753,13 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @return query results value or -1 if no data was returned
      */
     public long findLongByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+        return findLongByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
+    }
+
+    public static long findLongByRawQuery(SQLiteDatabase database, String rawQuery, String[] selectionArgs) {
         long value = -1;
 
-        Cursor c = getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+        Cursor c = database.rawQuery(rawQuery, selectionArgs);
         if (c != null) {
             if (c.moveToFirst()) {
                 value = c.getLong(0);
@@ -925,5 +961,32 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
 
         return foundItems;
+    }
+
+    private static final String TABLE_EXISTS = "SELECT COUNT(1) FROM sqlite_master WHERE type = 'table' AND name = ?";
+
+    public boolean tableExists(String tableName) {
+        return tableExists(getDatabaseName(), tableName);
+    }
+
+    public boolean tableExists(String databaseName, String tableName) {
+        return tableExists(getReadableDatabase(databaseName), tableName);
+    }
+
+    public static boolean tableExists(AndroidDatabase androidDatabase, String tableName) {
+        return tableExists(getDatabase(androidDatabase), tableName);
+    }
+
+    public static boolean tableExists(SQLiteDatabase db, String tableName) {
+        if (tableName == null || db == null || !db.isOpen()) {
+            return false;
+        }
+        Cursor cursor = db.rawQuery(TABLE_EXISTS, new String[]{tableName});
+        if (!cursor.moveToFirst()) {
+            return false;
+        }
+        int count = cursor.getInt(0);
+        cursor.close();
+        return count > 0;
     }
 }
