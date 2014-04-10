@@ -3,7 +3,6 @@ DBTools for Android
 
 DBTools for Android is an Android ORM library that makes it easy to work with SQLite Databases.
 
-Instructions for [migration from 1.x to 2.x] [1]
 
 Setup
 =====
@@ -18,7 +17,7 @@ Setup
             }
             dependencies {
                 classpath 'com.android.tools.build:gradle:0.9.+'
-                classpath 'org.dbtools:dbtools-gen:<latest version>' // (2.+)
+                classpath 'org.dbtools:dbtools-gen:1.+'
             }
         }
 
@@ -31,7 +30,7 @@ Setup
   3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version is found in Maven Central Repo)
 
         dependencies {
-            compile 'org.dbtools:dbtools-android:<latest version>' // (2.+)
+            compile 'org.dbtools:dbtools-android:<latest version>'
         }
 
   4. Add dbtools "task" to your build.gradle file.  Be sure to modify the variables/properties in this task (especially "baseOutputDir" and "basePackageName")
@@ -44,16 +43,14 @@ Setup
                 // properties
                 String schemaFilename = "src/main/database/schema.xml";
                 boolean injectionSupport = true; // support for CDI
-                boolean dateTimeSupport = true; // support for Joda DateTime (must include Joda Time into your project)
-                boolean encryptionSupport = true; // SqlCipher support (must include Sqlcipher into your project)
-
+                boolean dateTimeSupport = true; // support for jsr DateTime (Joda Time)
                 String baseOutputDir = "src/main/java/org/company/project/domain";
                 String basePackageName = "org.company.project.domain";
-                org.dbtools.gen.android.AndroidObjectsBuilder.buildAll(schemaFilename, baseOutputDir, basePackageName, injectionSupport, dateTimeSupport, encryptionSupport);
+                org.dbtools.gen.android.AndroidDBObjectBuilder.buildAll(schemaFilename, baseOutputDir, basePackageName, injectionSupport, dateTimeSupport);
             }
         }
 
-  5. Add schema.xml file (after executing the "dbtools" task (from above) an XSD definition file will be created (this may help writing the XML file in some IDE's)), to the /src/main/database directory.  This file contains a list of all of the databases and tables in each database.  The following is a sample of this file:
+  5. Add schema.xml file (and optionally the XSD definition file (this may help writing the XML file in some IDE's)), to the /src/main/database directory.  This file contains a list of all of the databases and tables in each database.  The following is a sample of this file:
 
         <?xml version="1.0" encoding="UTF-8" ?>
         <dbSchema xmlns='https://github.com/jeffdcamp/dbtools-gen'
@@ -76,7 +73,139 @@ Setup
             </database>
         </dbSchema>
 
-  6. Use DBTools Generator to generate DatabaseManager and all domain classes.  Execute gradle task:
+  6. Create DatabaseManager.java.  This class manages all database connections, creates and updates databases (this version uses CDI injection for the context).  (This file should initially be generated in the future)
+
+        package org.company.project.domain;
+
+        import android.content.Context;
+        import android.database.sqlite.SQLiteDatabase;
+        import android.util.Log;
+        import org.company.project.ForApplication;
+        import org.company.project.MyApplication;
+        import org.company.project.domain.individual.Individual;
+        import org.company.project.domain.individualtype.IndividualType;
+        import org.dbtools.android.domain.AndroidDatabase;
+        import org.dbtools.android.domain.AndroidDatabaseManager;
+        import java.io.File;
+        import javax.inject.Inject;
+        import javax.inject.Singleton;
+
+        /**
+         * This class helps open, create, and upgrade the database file.
+         */
+        @Singleton
+        public class DatabaseManager extends AndroidDatabaseManager {
+            private static final String TAG = MyApplication.createTag(DatabaseManager.class);
+
+            public static final int DATABASE_VERSION = 1;
+            public static final String MAIN_DATABASE_NAME = "main"; // !!!! WARNING be SURE this matches the value in the schema.xml !!!!
+
+            @ForApplication
+            @Inject
+            public Context context;
+
+
+            @Override
+            public void identifyDatabases() {
+                addDatabase(context, DatabaseManager.MAIN_DATABASE_NAME, DatabaseManager.DATABASE_VERSION);
+            }
+
+            @Override
+            public void onCreate(AndroidDatabase androidDatabase) {
+                Log.i(TAG, "Creating database: " + androidDatabase.getName());
+                SQLiteDatabase database = androidDatabase.getSqLiteDatabase();
+
+                // use any record manager to begin/end transaction
+                database.beginTransaction();
+
+                // Enum Tables
+                BaseManager.createTable(database, IndividualType.CREATE_TABLE);
+
+                // Regular Tables
+                BaseManager.createTable(database, Individual.CREATE_TABLE);
+
+                // end transaction
+                database.setTransactionSuccessful();
+                database.endTransaction();
+            }
+
+            @Override
+            public void onUpgrade(AndroidDatabase androidDatabase, int oldVersion, int newVersion) {
+                Log.i(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion);
+
+                // Wipe database version if it is different.
+                if (oldVersion != DATABASE_VERSION) {
+                    onCleanDatabase(androidDatabase);
+                }
+            }
+
+            @Override
+            public void onCleanDatabase(AndroidDatabase androidDatabase) {
+                Log.i(TAG, "Cleaning Database");
+                SQLiteDatabase database = androidDatabase.getSqLiteDatabase();
+                String databasePath = androidDatabase.getPath();
+                database.close();
+
+                Log.i(TAG, "Deleting database: [" + databasePath + "]");
+                File databaseFile = new File(databasePath);
+                if (databaseFile.exists() && !databaseFile.delete()) {
+                    String errorMessage = "FAILED to delete database: [" + databasePath + "]";
+                    Log.e(TAG, errorMessage);
+                    throw new IllegalStateException(errorMessage);
+                }
+
+                connectDatabase(androidDatabase.getName(), false);  // do not update here, because it will cause a recursive call
+            }
+        }
+
+
+  7. Create BaseRecord.java and BaseManager.java files in the "baseOutputDir" (as specified in the build.gradle).  (These files should initially be generated in the future)
+
+        // BaseManager.java
+        package org.company.project.domain;
+
+        //import net.sqlcipher.database.SQLiteDatabase;  // used for sqlcipher databases
+        //import org.dbtools.android.domain.secure.AndroidBaseManager; // used for sqlcipher databases
+
+        import android.database.sqlite.SQLiteDatabase;
+        import org.dbtools.android.domain.AndroidBaseManager;
+
+
+        import javax.inject.Inject;
+
+        public abstract class BaseManager<T extends BaseRecord> extends AndroidBaseManager<T> {
+
+            @Inject
+            public DatabaseManager databaseManager;
+
+            public SQLiteDatabase getReadableDatabase() {
+                return databaseManager.getReadableDatabase(getDatabaseName());
+            }
+
+            public SQLiteDatabase getReadableDatabase(String databaseName) {
+                return databaseManager.getReadableDatabase(databaseName);
+            }
+
+            public SQLiteDatabase getWritableDatabase() {
+                return databaseManager.getWritableDatabase(getDatabaseName());
+            }
+
+            public SQLiteDatabase getWritableDatabase(String databaseName) {
+                return databaseManager.getWritableDatabase(databaseName);
+            }
+        }
+
+
+        // BaseRecord.java
+        package org.company.project.domain;
+
+        import org.dbtools.android.domain.AndroidBaseRecord;
+
+        public abstract class BaseRecord extends AndroidBaseRecord {
+        }
+
+
+  8. Use DBTools Generator to generate domain classes.  Execute gradle task:
 
         ./gradlew dbtools
 
@@ -84,12 +213,7 @@ Setup
 
         From Android Studio:  RIGHT-CLICK on the "task dbtools {", in the build.gradle file, and select "Run 'gradle:dbtools'"
 
-  DBTools Generator will create the following files to manage all database connections and create/update database tables:
-
-       DatabaseManager.java (extends DatabaseBaseManager and is used for developer customizations.  Contains CONST names and versions of the databases and versions) (NEVER overwritten by generator)
-       DatabaseBaseManager.java (contains boiler-plate code creating all tables and views for all databases defined in the schema.xml) (this file is ALWAYS overwritten by generator)
-
-  DBTools Generator will create the following files for each table (example for the Individual table):
+  9. DBTools Generator will create the following files for each table
 
         individual/
                Individual.java (extends IndividualBaseRecord and is used for developer customizations) (NEVER overwritten by generator)
@@ -152,20 +276,20 @@ Usage
 
   * Update data to the database
 
-        Individual individual = individualManager.findByRowId(1);
+        Individual individual = individualManager.findByRowID(1);
         individual.setPhone("801-555-0000");
         individualManager.save(individual);
 
   * Delete data from the database
 
-        Individual individual = individualManager.findByRowId(1);
+        Individual individual = individualManager.findByRowID(1);
         individualManager.delete(individual);
 
   DBTools Manager has a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
 
   * Get records
 
-        Individual individual = individualManager.findByRowId(1);
+        Individual individual = individualManager.findByRowID(1);
         Individual individual = individualManager.findBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find FIRST individual who has "555" in their phone number
 
         List<Individual> allIndividuals = individualManager.findAll();
@@ -187,7 +311,7 @@ Usage
 License
 =======
 
-    Copyright 2014 Jeff Campbell
+    Copyright 2013 Jeff Campbell
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -200,5 +324,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-[migration]: https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md
