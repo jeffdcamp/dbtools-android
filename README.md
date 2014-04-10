@@ -3,7 +3,7 @@ DBTools for Android
 
 DBTools for Android is an Android ORM library that makes it easy to work with SQLite Databases.
 
-Instructions for [migration from 1.x to 2.x] [1]
+Instructions for migration from 1.x to 2.x (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md)
 
 Setup
 =====
