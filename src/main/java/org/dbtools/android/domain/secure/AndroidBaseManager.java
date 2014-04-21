@@ -343,7 +343,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static int update(SQLiteDatabase db, String tableName, ContentValues contentValues, String rowKey, long rowId) {
         checkDB(db);
-        return db.update(tableName, contentValues, rowKey + "=" + rowId, null);
+        return db.update(tableName, contentValues, rowKey + "=?", new String[]{String.valueOf(rowId)});
     }
 
     public int update(String tableName, ContentValues contentValues, String where, String[] whereArgs) {
@@ -395,7 +395,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static long delete(SQLiteDatabase db, String tableName, String rowKey, long rowId) {
         checkDB(db);
-        return db.delete(tableName, rowKey + "=" + rowId, null);
+        return db.delete(tableName, rowKey + "=?" + rowId, new String[]{String.valueOf(rowId)});
     }
 
     public long delete(String tableName, String where, String[] whereArgs) {
@@ -497,11 +497,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public Cursor findCursorByRowId(long rowId) {
-        return findCursorBySelection(getPrimaryKey() + "=" + rowId, null);
+        return findCursorBySelection(getPrimaryKey() + "=?", new String[]{String.valueOf(rowId)}, null);
     }
 
     public Cursor findCursorByRowId(String databaseName, long rowId) {
-        return findCursorBySelection(databaseName, getPrimaryKey() + "=" + rowId, null);
+        return findCursorBySelection(databaseName, getPrimaryKey() + "=?", new String[]{String.valueOf(rowId)}, null);
     }
 
     public List<T> findAll() {
@@ -586,11 +586,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public T findByRowId(long rowId) {
-        return findBySelection(getPrimaryKey() + "=" + rowId, null, null);
+        return findBySelection(getPrimaryKey() + "=?", new String[]{String.valueOf(rowId)}, null);
     }
 
     public T findByRowId(String databaseName, long rowId) {
-        return findBySelection(databaseName, getPrimaryKey() + "=" + rowId, null, null);
+        return findBySelection(databaseName, getPrimaryKey() + "=?", new String[]{String.valueOf(rowId)}, null);
     }
 
     public T findBySelection(String selection, String[] selectionArgs, String orderBy) {
