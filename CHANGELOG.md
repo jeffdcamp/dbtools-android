@@ -5,6 +5,8 @@ Version 2.1.0 *(2014-05-15)*
 ----------------------------
 
  * NEW JSR 305 support (@Nullable / @Nonnull)
+ * GENERATOR: Fixed issues with databases that have a '.' in the name
+ * GENERATOR: Changed getColumnIndex(...) to getColumnIndexOrThrow(...) for better error messages
  
  Version 2.0.0 *(2014-04)*
 ----------------------------
