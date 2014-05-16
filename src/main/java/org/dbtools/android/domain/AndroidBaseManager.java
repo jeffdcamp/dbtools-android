@@ -3,10 +3,12 @@ package org.dbtools.android.domain;
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.provider.BaseColumns;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.provider.BaseColumns;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,15 +37,16 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public abstract T newRecord();
 
-    public static SQLiteDatabase getDatabase(AndroidDatabase androidDatabase) {
+    @Nullable
+    public static SQLiteDatabase getDatabase(@Nonnull AndroidDatabase androidDatabase) {
         return androidDatabase.getSqLiteDatabase();
     }
 
-    public static void openDatabase(AndroidDatabase androidDatabase) {
+    public static void openDatabase(@Nonnull AndroidDatabase androidDatabase) {
         androidDatabase.setSqLiteDatabase(SQLiteDatabase.openOrCreateDatabase(androidDatabase.getPath(), null));
     }
 
-    public static boolean closeDatabase(AndroidDatabase androidDatabase) {
+    public static boolean closeDatabase(@Nonnull AndroidDatabase androidDatabase) {
         SQLiteDatabase sqLiteDatabase = getDatabase(androidDatabase);
         if (sqLiteDatabase != null && sqLiteDatabase.isOpen() && !sqLiteDatabase.inTransaction()) {
             sqLiteDatabase.close();
@@ -53,7 +56,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return false;
     }
 
-    public static boolean isDatabaseAlreadyOpen(AndroidDatabase androidDatabase) {
+    public static boolean isDatabaseAlreadyOpen(@Nonnull AndroidDatabase androidDatabase) {
         SQLiteDatabase database = getDatabase(androidDatabase);
         return database != null && database.isOpen();
     }
@@ -62,15 +65,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(getDatabaseName(), getCreateSql());
     }
 
-    public void createTable(String databaseName) {
+    public void createTable(@Nonnull String databaseName) {
         executeSql(getWritableDatabase(databaseName), getCreateSql());
     }
 
-    public void createTable(SQLiteDatabase db) {
+    public void createTable(@Nonnull SQLiteDatabase db) {
         executeSql(db, getCreateSql());
     }
 
-    public static void createTable(SQLiteDatabase db, String sql) {
+    public static void createTable(@Nonnull SQLiteDatabase db, String sql) {
         executeSql(db, sql);
     }
 
@@ -78,16 +81,16 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(getDatabaseName(), getCreateSql());
     }
 
-    public void dropTable(String databaseName) {
+    public void dropTable(@Nonnull String databaseName) {
         executeSql(getWritableDatabase(databaseName), getCreateSql());
     }
 
-    public void dropTable(SQLiteDatabase db) {
+    public void dropTable(@Nonnull SQLiteDatabase db) {
         executeSql(db, getCreateSql());
     }
 
     // for use with enum records
-    public static void dropTable(SQLiteDatabase db, String sql) {
+    public static void dropTable(@Nonnull SQLiteDatabase db, @Nonnull String sql) {
         executeSql(db, sql);
     }
 
@@ -95,42 +98,47 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         cleanTable(getDatabaseName());
     }
 
-    public void cleanTable(String databaseName) {
+    public void cleanTable(@Nonnull String databaseName) {
         cleanTable(getWritableDatabase(databaseName), getDropSql(), getCreateSql());
     }
 
-    public void cleanTable(SQLiteDatabase db) {
+    public void cleanTable(@Nonnull SQLiteDatabase db) {
         cleanTable(db, getDropSql(), getCreateSql());
     }
 
-    public void cleanTable(String dropSql, String createSql) {
+    public void cleanTable(@Nonnull String dropSql, @Nonnull String createSql) {
         cleanTable(getDatabaseName(), dropSql, createSql);
     }
 
-    public void cleanTable(String databaseName, String dropSql, String createSql) {
+    public void cleanTable(@Nonnull String databaseName, @Nonnull String dropSql, @Nonnull String createSql) {
         cleanTable(getWritableDatabase(databaseName), dropSql, createSql);
     }
 
-    public static void cleanTable(SQLiteDatabase db, String dropSql, String createSql) {
+    public static void cleanTable(@Nonnull SQLiteDatabase db, @Nonnull String dropSql, @Nonnull String createSql) {
         checkDB(db);
         executeSql(db, dropSql);
         executeSql(db, createSql);
     }
 
-    public void executeSql(String sql) {
+    public void executeSql(@Nonnull String sql) {
         executeSql(getDatabaseName(), sql);
     }
 
-    public void executeSql(String databaseName, String sql) {
+    public void executeSql(@Nonnull String databaseName, @Nonnull String sql) {
         executeSql(getWritableDatabase(databaseName), sql);
     }
 
-    public static void executeSql(AndroidDatabase androidDatabase, String sql) {
+    public static void executeSql(@Nonnull AndroidDatabase androidDatabase, @Nonnull String sql) {
         executeSql(getDatabase(androidDatabase), sql);
     }
 
-    public static void executeSql(SQLiteDatabase db, String sql) {
+    public static void executeSql(@Nullable SQLiteDatabase db, @Nonnull String sql) {
         checkDB(db);
+
+        if (db == null) {
+            return;
+        }
+
         String[] sqlStatements = sql.split(";");
 
         for (String sqlStatement : sqlStatements) {
@@ -144,7 +152,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         beginTransaction(getDatabaseName());
     }
 
-    public void beginTransaction(String databaseName) {
+    public void beginTransaction(@Nonnull String databaseName) {
         getWritableDatabase(databaseName).beginTransaction();
     }
 
@@ -152,7 +160,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         endTransaction(getDatabaseName(), success);
     }
 
-    public void endTransaction(String databaseName, boolean success) {
+    public void endTransaction(@Nonnull String databaseName, boolean success) {
         if (success) {
             getWritableDatabase(databaseName).setTransactionSuccessful();
         }
@@ -165,7 +173,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e Record to be saved
      * @return true if record was saved
      */
-    public boolean save(T e) {
+    public boolean save(@Nonnull T e) {
         return save(getDatabaseName(), e);
     }
 
@@ -175,7 +183,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e Record to be saved
      * @return true if record was saved
      */
-    public boolean save(String databaseName, T e) {
+    public boolean save(@Nonnull String databaseName, @Nonnull T e) {
         if (e.isNewRecord()) {
             long newId = insert(databaseName, e);
             return newId != 0;
@@ -192,7 +200,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e  Record to be saved
      * @return true if record was saved
      */
-    public static boolean save(SQLiteDatabase db, AndroidBaseRecord e) {
+    public static boolean save(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
         if (e.isNewRecord()) {
             long newId = insert(db, e);
             return newId != 0;
@@ -208,7 +216,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e record to be inserted
      * @return long value of new id
      */
-    public long insert(T e) {
+    public long insert(@Nonnull T e) {
         return insert(getDatabaseName(), e);
     }
 
@@ -218,7 +226,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e record to be inserted
      * @return long value of new id
      */
-    public long insert(String databaseName, T e) {
+    public long insert(@Nonnull String databaseName, @Nonnull T e) {
         return insert(getWritableDatabase(databaseName), e);
     }
 
@@ -229,22 +237,25 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e  record to be inserted
      * @return long value of new id
      */
-    public static long insert(SQLiteDatabase db, AndroidBaseRecord e) {
+    public static long insert(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
         checkDB(db);
         long rowId = db.insert(e.getTableName(), null, e.getContentValues());
         e.setPrimaryKeyId(rowId);
         return rowId;
     }
 
+    @Nonnull
     public SQLiteStatement createCompiledInsert() {
         return createCompiledInsert(getDatabaseName());
     }
 
-    public SQLiteStatement createCompiledInsert(String databaseName) {
+    @Nonnull
+    public SQLiteStatement createCompiledInsert(@Nonnull String databaseName) {
         return createCompiledInsert(getWritableDatabase(databaseName));
     }
 
-    public SQLiteStatement createCompiledInsert(SQLiteDatabase db) {
+    @Nonnull
+    public SQLiteStatement createCompiledInsert(@Nonnull SQLiteDatabase db) {
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO " + getTableName() + " (");
 
@@ -271,7 +282,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return db.compileStatement(sql.toString());
     }
 
-    public long insert(SQLiteStatement statement, AndroidBaseRecord e) {
+    public long insert(@Nonnull SQLiteStatement statement, @Nonnull AndroidBaseRecord e) {
         ContentValues contentValues = e.getContentValues();
         int bindItemCount = 1;
         for (String key : e.getAllKeys()) {
@@ -300,23 +311,23 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return rowId;
     }
 
-    public int update(ContentValues values, long rowId) {
+    public int update(@Nonnull ContentValues values, long rowId) {
         return update(getTableName(), values, getPrimaryKey(), rowId);
     }
 
-    public int update(ContentValues values, String where, String[] whereArgs) {
+    public int update(@Nonnull ContentValues values, @Nonnull String where, String[] whereArgs) {
         return update(getTableName(), values, where, whereArgs);
     }
 
-    public int update(T e) {
+    public int update(@Nonnull T e) {
         return update(getDatabaseName(), e);
     }
 
-    public int update(String databaseName, T e) {
+    public int update(@Nonnull String databaseName, @Nonnull T e) {
         return update(getWritableDatabase(databaseName), e);
     }
 
-    public static int update(SQLiteDatabase db, AndroidBaseRecord e) {
+    public static int update(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
         checkDB(db);
         long rowId = e.getPrimaryKeyId();
         if (rowId <= 0) {
@@ -326,28 +337,28 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return update(db, e.getTableName(), e.getContentValues(), e.getIdColumnName(), rowId);
     }
 
-    public int update(String tableName, ContentValues contentValues, String rowKey, long rowId) {
+    public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
         return update(getDatabaseName(), tableName, contentValues, rowKey, rowId);
     }
 
-    public int update(String databaseName, String tableName, ContentValues contentValues, String rowKey, long rowId) {
+    public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
         return update(getWritableDatabase(databaseName), tableName, contentValues, rowKey, rowId);
     }
 
-    public static int update(SQLiteDatabase db, String tableName, ContentValues contentValues, String rowKey, long rowId) {
+    public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
         checkDB(db);
         return db.update(tableName, contentValues, rowKey + "=" + rowId, null);
     }
 
-    public int update(String tableName, ContentValues contentValues, String where, String[] whereArgs) {
+    public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String where, @Nonnull String[] whereArgs) {
         return update(getDatabaseName(), tableName, contentValues, where, whereArgs);
     }
 
-    public int update(String databaseName, String tableName, ContentValues contentValues, String where, String[] whereArgs) {
+    public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String where, @Nonnull String[] whereArgs) {
         return update(getWritableDatabase(databaseName), tableName, contentValues, where, whereArgs);
     }
 
-    public static int update(SQLiteDatabase db, String tableName, ContentValues contentValues, String where, String[] whereArgs) {
+    public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String where, @Nullable String[] whereArgs) {
         checkDB(db);
         return db.update(tableName, contentValues, where, whereArgs);
     }
@@ -356,19 +367,19 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return delete(getTableName(), getPrimaryKey(), rowId);
     }
 
-    public long delete(String where, String[] whereArgs) {
+    public long delete(@Nonnull String where, @Nullable String[] whereArgs) {
         return delete(getTableName(), where, whereArgs);
     }
 
-    public long delete(T e) {
+    public long delete(@Nonnull T e) {
         return delete(getDatabaseName(), e);
     }
 
-    public long delete(String databaseName, T e) {
+    public long delete(@Nonnull String databaseName, @Nonnull T e) {
         return delete(getWritableDatabase(databaseName), e);
     }
 
-    public static long delete(SQLiteDatabase db, AndroidBaseRecord e) {
+    public static long delete(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
         checkDB(db);
         long rowId = e.getPrimaryKeyId();
         if (rowId <= 0) {
@@ -378,28 +389,28 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return delete(db, e.getTableName(), e.getIdColumnName(), rowId);
     }
 
-    public long delete(String tableName, String rowKey, long rowId) {
+    public long delete(@Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         return delete(getDatabaseName(), tableName, rowKey, rowId);
     }
 
-    public long delete(String databaseName, String tableName, String rowKey, long rowId) {
+    public long delete(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         return delete(getWritableDatabase(databaseName), tableName, rowKey, rowId);
     }
 
-    public static long delete(SQLiteDatabase db, String tableName, String rowKey, long rowId) {
+    public static long delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         checkDB(db);
         return db.delete(tableName, rowKey + "=" + rowId, null);
     }
 
-    public long delete(String tableName, String where, String[] whereArgs) {
+    public long delete(@Nonnull String tableName, @Nonnull String where, @Nullable String[] whereArgs) {
         return delete(getDatabaseName(), tableName, where, whereArgs);
     }
 
-    public long delete(String databaseName, String tableName, String where, String[] whereArgs) {
+    public long delete(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull String where, @Nullable String[] whereArgs) {
         return delete(getWritableDatabase(databaseName), tableName, where, whereArgs);
     }
 
-    public static long delete(SQLiteDatabase db, String tableName, String where, String[] whereArgs) {
+    public static long delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
         checkDB(db);
         return db.delete(tableName, where, whereArgs);
     }
@@ -408,38 +419,43 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return deleteAll(getDatabaseName());
     }
 
-    public long deleteAll(String databaseName) {
+    public long deleteAll(@Nonnull String databaseName) {
         return delete(getWritableDatabase(databaseName), getTableName(), null, null);
     }
 
-    public long deleteAll(String databaseName, String tableName) {
+    public long deleteAll(@Nonnull String databaseName, @Nonnull String tableName) {
         return delete(getWritableDatabase(databaseName), tableName, null, null);
     }
 
-    public static long deleteAll(SQLiteDatabase db, String tableName) {
+    public static long deleteAll(@Nonnull SQLiteDatabase db, @Nonnull String tableName) {
         return delete(db, tableName, null, null);
     }
 
     private static final String DEFAULT_SEARCH_SUG_INTENT = BaseColumns._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID;
 
-    public static String[] addSearchSuggestionIntentCol(String[] currentCols, String resultColName) {
+    @Nonnull
+    public static String[] addSearchSuggestionIntentCol(@Nonnull String[] currentCols, @Nonnull String resultColName) {
         String sugCol1 = resultColName + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1;
         return addToArray(currentCols, new String[]{DEFAULT_SEARCH_SUG_INTENT, sugCol1});
     }
 
-    public static String createSearchSuggestionColumnsSQL(String idColumn, String resultTextColumn) {
+    @Nonnull
+    public static String createSearchSuggestionColumnsSQL(@Nonnull String idColumn, @Nonnull String resultTextColumn) {
         return createSearchSuggestionIdColumn(idColumn) + ", " + createSearchSuggestionResult1Column(resultTextColumn);
     }
 
-    public static String createSearchSuggestionIdColumn(String idColumn) {
+    @Nonnull
+    public static String createSearchSuggestionIdColumn(@Nonnull String idColumn) {
         return idColumn + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID;
     }
 
-    public static String createSearchSuggestionResult1Column(String resultTextColumn) {
+    @Nonnull
+    public static String createSearchSuggestionResult1Column(@Nonnull String resultTextColumn) {
         return resultTextColumn + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1;
     }
 
-    public static String[] addToArray(String[] array, String[] strings) {
+    @Nonnull
+    public static String[] addToArray(@Nonnull String[] array, @Nonnull String[] strings) {
         String[] newArray = new String[array.length + strings.length];
         System.arraycopy(array, 0, newArray, 0, array.length);
         for (int i = array.length, j = 0; j < strings.length; i++, j++) { // NOPMD
@@ -448,33 +464,39 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return newArray;
     }
 
-    private static void checkDB(SQLiteDatabase db) {
+    private static void checkDB(@Nullable SQLiteDatabase db) {
         if (db == null) {
             throw new IllegalArgumentException("db cannot be null");
         }
     }
 
-    public Cursor findCursorByRawQuery(String rawQuery, String[] selectionArgs) {
+    @Nullable
+    public Cursor findCursorByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
-    public Cursor findCursorByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    @Nullable
+    public Cursor findCursorByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
     }
 
-    public Cursor findCursorBySelection(String selection, String orderBy) {
+    @Nullable
+    public Cursor findCursorBySelection(@Nullable String selection, @Nullable String orderBy) {
         return findCursorBySelection(selection, new String[]{}, orderBy);
     }
 
-    public Cursor findCursorBySelection(String databaseName, String selection, String orderBy) {
+    @Nullable
+    public Cursor findCursorBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String orderBy) {
         return findCursorBySelection(databaseName, selection, null, orderBy);
     }
 
-    public Cursor findCursorBySelection(String selection, String[] selectionArgs, String orderBy) {
+    @Nullable
+    public Cursor findCursorBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findCursorBySelection(getDatabaseName(), selection, selectionArgs, orderBy);
     }
 
-    public Cursor findCursorBySelection(String databaseName, String selection, String[] selectionArgs, String orderBy) {
+    @Nullable
+    public Cursor findCursorBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         Cursor cursor = getReadableDatabase(databaseName).query(true, getTableName(), getAllKeys(), selection, selectionArgs, null, null, orderBy, null);
 
         if (cursor != null) {
@@ -489,40 +511,49 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
     }
 
+    @Nullable
     public Cursor findCursorByRowId(long rowId) {
         return findCursorBySelection(getPrimaryKey() + "=" + rowId, null);
     }
 
-    public Cursor findCursorByRowId(String databaseName, long rowId) {
+    @Nullable
+    public Cursor findCursorByRowId(@Nonnull String databaseName, long rowId) {
         return findCursorBySelection(databaseName, getPrimaryKey() + "=" + rowId, null);
     }
 
+    @Nonnull
     public List<T> findAll() {
         return findAllBySelection(null, null, null);
     }
 
-    public List<T> findAll(String databaseName) {
+    @Nonnull
+    public List<T> findAll(@Nonnull String databaseName) {
         return findAllBySelection(databaseName, null, null, null);
     }
 
-    public List<T> findAllOrderBy(String orderBy) {
+    @Nonnull
+    public List<T> findAllOrderBy(@Nullable String orderBy) {
         return findAllBySelection(null, null, orderBy);
     }
 
-    public List<T> findAllOrderBy(String databaseName, String orderBy) {
+    @Nonnull
+    public List<T> findAllOrderBy(@Nonnull String databaseName, @Nullable String orderBy) {
         return findAllBySelection(databaseName, null, null, orderBy);
     }
 
-    public List<T> findAllBySelection(String selection, String[] selectionArgs) {
+    @Nonnull
+    public List<T> findAllBySelection(@Nullable String selection, @Nonnull String[] selectionArgs) {
         return findAllBySelection(selection, selectionArgs, null);
     }
 
-    public List<T> findAllBySelection(String selection, String[] selectionArgs, String orderBy) {
+    @Nonnull
+    public List<T> findAllBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         Cursor cursor = findCursorBySelection(selection, selectionArgs, orderBy);
         return getAllItemsFromCursor(cursor);
     }
 
-    public List<T> findAllBySelection(String databaseName, String selection, String[] selectionArgs, String orderBy) {
+    @Nonnull
+    public List<T> findAllBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
         return getAllItemsFromCursor(cursor);
     }
@@ -533,7 +564,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery Custom query
      * @return List of object T
      */
-    public List<T> findAllByRawQuery(String rawQuery) {
+    @Nonnull
+    public List<T> findAllByRawQuery(@Nonnull String rawQuery) {
         return getAllItemsFromCursor(findCursorByRawQuery(getDatabaseName(), rawQuery, null));
     }
 
@@ -543,7 +575,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery Custom query
      * @return List of object T
      */
-    public List<T> findAllByRawQuery(String rawQuery, String[] selectionArgs) {
+    @Nonnull
+    public List<T> findAllByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return getAllItemsFromCursor(findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs));
     }
 
@@ -555,11 +588,13 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs query arguments
      * @return List of object T
      */
-    public List<T> findAllByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    @Nonnull
+    public List<T> findAllByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return getAllItemsFromCursor(findCursorByRawQuery(databaseName, rawQuery, selectionArgs));
     }
 
-    public List<T> getAllItemsFromCursor(Cursor cursor) {
+    @Nonnull
+    public List<T> getAllItemsFromCursor(@Nullable Cursor cursor) {
         List<T> foundItems;
         if (cursor != null) {
             foundItems = new ArrayList<T>(cursor.getCount());
@@ -578,15 +613,18 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return foundItems;
     }
 
+    @Nullable
     public T findByRowId(long rowId) {
         return findBySelection(getPrimaryKey() + "=" + rowId, null, null);
     }
 
-    public T findByRowId(String databaseName, long rowId) {
+    @Nullable
+    public T findByRowId(@Nonnull String databaseName, long rowId) {
         return findBySelection(databaseName, getPrimaryKey() + "=" + rowId, null, null);
     }
 
-    public T findBySelection(String selection, String[] selectionArgs, String orderBy) {
+    @Nullable
+    public T findBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         Cursor cursor = findCursorBySelection(selection, selectionArgs, orderBy);
         if (cursor != null) {
             T record = newRecord();
@@ -598,16 +636,19 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
     }
 
-    public T findBySelection(String databaseName, String selection, String[] selectionArgs, String orderBy) {
+    @Nullable
+    public T findBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
         return createRecordFromCursor(cursor);
     }
 
-    public T findByRawQuery(String rawQuery, String[] selectionArgs) {
+    @Nullable
+    public T findByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
-    public T findByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    @Nullable
+    public T findByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         Cursor cursor = findCursorByRawQuery(databaseName, rawQuery, selectionArgs);
 
         if (cursor != null) {
@@ -622,7 +663,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
     }
 
-    private T createRecordFromCursor(Cursor cursor) {
+    @Nullable
+    private T createRecordFromCursor(@Nullable Cursor cursor) {
         if (cursor != null) {
             T record = newRecord();
             record.setContent(cursor);
@@ -633,15 +675,18 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
     }
 
+    @Nonnull
     public List<T> findAllByRowIds(long[] rowIds) {
         return findAllByRowIds(rowIds, null);
     }
 
-    public List<T> findAllByRowIds(long[] rowIds, String orderBy) {
+    @Nonnull
+    public List<T> findAllByRowIds(long[] rowIds, @Nullable String orderBy) {
         return findAllByRowIds(getDatabaseName(), rowIds, orderBy);
     }
 
-    public List<T> findAllByRowIds(String databaseName, long[] rowIds, String orderBy) {
+    @Nonnull
+    public List<T> findAllByRowIds(@Nonnull String databaseName, long[] rowIds, @Nullable String orderBy) {
         if (rowIds.length == 0) {
             return new ArrayList<T>();
         }
@@ -661,15 +706,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return findCountBySelection(null, null);
     }
 
-    public long findCount(String databaseName) {
+    public long findCount(@Nonnull String databaseName) {
         return findCountBySelection(databaseName, null, null);
     }
 
-    public long findCountBySelection(String selection, String[] selectionArgs) {
+    public long findCountBySelection(@Nullable String selection, @Nullable String[] selectionArgs) {
         return findCountBySelection(getDatabaseName(), selection, selectionArgs);
     }
 
-    public long findCountBySelection(String databaseName, String selection, String[] selectionArgs) {
+    public long findCountBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs) {
         long count = -1;
 
         Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{"count(1)"}, selection, selectionArgs, null, null, null);
@@ -688,7 +733,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery Query
      * @return total count
      */
-    public long findCountByRawQuery(String rawQuery) {
+    public long findCountByRawQuery(@Nonnull String rawQuery) {
         return findCountByRawQuery(getDatabaseName(), rawQuery, null);
     }
 
@@ -698,7 +743,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery Query
      * @return total count
      */
-    public long findCountByRawQuery(String databaseName, String rawQuery) {
+    public long findCountByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery) {
         return findCountByRawQuery(databaseName, rawQuery, null);
     }
 
@@ -709,11 +754,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Selection args
      * @return total count
      */
-    public long findCountByRawQuery(String rawQuery, String[] selectionArgs) {
+    public long findCountByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findCountByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
-    public long findCountByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    public long findCountByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         long count = 0;
         Cursor c = getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
         if (c != null) {
@@ -733,7 +778,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results value or -1 if no data was returned
      */
-    public long findLongByRawQuery(String rawQuery, String[] selectionArgs) {
+    public long findLongByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findLongByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
@@ -745,11 +790,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results value or -1 if no data was returned
      */
-    public long findLongByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    public long findLongByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findLongByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
     }
 
-    public static long findLongByRawQuery(SQLiteDatabase database, String rawQuery, String[] selectionArgs) {
+    public static long findLongByRawQuery(@Nonnull SQLiteDatabase database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         long value = -1;
 
         Cursor c = database.rawQuery(rawQuery, selectionArgs);
@@ -770,7 +815,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results value or null if no data was returned
      */
-    public String findStringByRawQuery(String rawQuery, String[] selectionArgs) {
+    @Nullable
+    public String findStringByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findStringByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
@@ -782,7 +828,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results value or null if no data was returned
      */
-    public String findStringByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    @Nullable
+    public String findStringByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         String value = null;
 
         Cursor c = getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
@@ -803,7 +850,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
-    public List<Long> findAllLongByRawQuery(String rawQuery, String[] selectionArgs) {
+    @Nonnull
+    public List<Long> findAllLongByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findAllLongByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
@@ -815,7 +863,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
-    public List<Long> findAllLongByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    @Nonnull
+    public List<Long> findAllLongByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         List<Long> foundItems;
 
         Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
@@ -841,7 +890,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
-    public List<String> findAllStringByRawQuery(String rawQuery, String[] selectionArgs) {
+    @Nonnull
+    public List<String> findAllStringByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         return findAllStringByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
@@ -853,7 +903,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
-    public List<String> findAllStringByRawQuery(String databaseName, String rawQuery, String[] selectionArgs) {
+    @Nonnull
+    public List<String> findAllStringByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         List<String> foundItems;
 
         Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
@@ -880,7 +931,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return List of CustomQueryRecord
      */
-    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(String rawQuery, String[] selectionArgs, Class<T> type) {
+    @Nonnull
+    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<T> type) {
         return findAllCustomRecordByRawQuery(getDatabaseName(), rawQuery, selectionArgs, type);
     }
 
@@ -893,7 +945,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @return List of CustomQueryRecord
      */
-    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(String databaseName, String rawQuery, String[] selectionArgs, Class<T> type) {
+    @Nonnull
+    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<T> type) {
         List<T> foundItems;
 
         Class[] colTypes = null;
@@ -958,19 +1011,19 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     private static final String TABLE_EXISTS = "SELECT COUNT(1) FROM sqlite_master WHERE type = 'table' AND name = ?";
 
-    public boolean tableExists(String tableName) {
+    public boolean tableExists(@Nonnull String tableName) {
         return tableExists(getDatabaseName(), tableName);
     }
 
-    public boolean tableExists(String databaseName, String tableName) {
+    public boolean tableExists(@Nonnull String databaseName, @Nonnull String tableName) {
         return tableExists(getReadableDatabase(databaseName), tableName);
     }
 
-    public static boolean tableExists(AndroidDatabase androidDatabase, String tableName) {
+    public static boolean tableExists(@Nonnull AndroidDatabase androidDatabase, @Nonnull String tableName) {
         return tableExists(getDatabase(androidDatabase), tableName);
     }
 
-    public static boolean tableExists(SQLiteDatabase db, String tableName) {
+    public static boolean tableExists(@Nullable SQLiteDatabase db, @Nullable String tableName) {
         if (tableName == null || db == null || !db.isOpen()) {
             return false;
         }

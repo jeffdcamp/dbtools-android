@@ -5,6 +5,8 @@ import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.*;
@@ -29,7 +31,7 @@ public abstract class AndroidDatabaseBaseManager {
      * @param databaseName Name of the database
      * @param version Version of the database
      */
-    public void addDatabase(Context context, String databaseName, int version, int viewsVersion) {
+    public void addDatabase(@Nonnull Context context, @Nonnull String databaseName, int version, int viewsVersion) {
         String databasePath = getDatabaseFile(context, databaseName).getAbsolutePath();
         databaseMap.put(databaseName, new AndroidDatabase(databaseName, databasePath, version, viewsVersion));
     }
@@ -40,7 +42,7 @@ public abstract class AndroidDatabaseBaseManager {
      * @param primaryDatabaseName Primary Database name
      * @param attachedDatabaseNames Database names to be attached to Primary Database
      */
-    public void addAttachedDatabase(String databaseName, String primaryDatabaseName, List<String> attachedDatabaseNames) {
+    public void addAttachedDatabase(@Nonnull String databaseName, @Nonnull String primaryDatabaseName, @Nonnull List<String> attachedDatabaseNames) {
         AndroidDatabase primaryDatabase = getDatabase(primaryDatabaseName);
         if (primaryDatabase == null) {
             throw new IllegalStateException("Database [" + primaryDatabaseName + "] does not exist");
@@ -65,11 +67,11 @@ public abstract class AndroidDatabaseBaseManager {
      * @param primaryDatabase Primary Database
      * @param attachedDatabases Databases to be attached to Primary Database
      */
-    public void addAttachedDatabase(String databaseName, AndroidDatabase primaryDatabase, List<AndroidDatabase> attachedDatabases) {
+    public void addAttachedDatabase(@Nonnull String databaseName, @Nonnull AndroidDatabase primaryDatabase, @Nonnull List<AndroidDatabase> attachedDatabases) {
         databaseMap.put(databaseName, new AndroidDatabase(databaseName, primaryDatabase, attachedDatabases));
     }
 
-    public void removeAttachedDatabase(String databaseName) {
+    public void removeAttachedDatabase(@Nonnull String databaseName) {
         AndroidDatabase database = databaseMap.get(databaseName);
         if (database != null) {
             closeDatabase(database);
@@ -84,7 +86,7 @@ public abstract class AndroidDatabaseBaseManager {
      * @param password Database password
      * @param version Version of the database
      */
-    public void addDatabase(Context context, String databaseName, String password, int version, int viewsVersion) {
+    public void addDatabase(@Nonnull Context context, @Nonnull String databaseName, @Nullable String password, int version, int viewsVersion) {
         String databasePath = getDatabaseFile(context, databaseName).getAbsolutePath();
 
         if (password != null) {
@@ -94,7 +96,7 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public void addDatabase(AndroidDatabase database) {
+    public void addDatabase(@Nonnull AndroidDatabase database) {
         databaseMap.put(database.getName(), database);
     }
 
@@ -105,6 +107,7 @@ public abstract class AndroidDatabaseBaseManager {
         databaseMap = new HashMap<String, AndroidDatabase>();
     }
 
+    @Nonnull
     public Collection<AndroidDatabase> getDatabases() {
         return databaseMap.values();
     }
@@ -115,15 +118,17 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public String getDatabasePath(String databaseName) {
+    @Nonnull
+    public String getDatabasePath(@Nonnull String databaseName) {
         return databaseMap.get(databaseName).getPath();
     }
 
-    public AndroidDatabase getDatabase(String databaseName) {
+    @Nullable
+    public AndroidDatabase getDatabase(@Nonnull String databaseName) {
         return databaseMap.get(databaseName);
     }
 
-    private boolean isDatabaseAlreadyOpen(AndroidDatabase db) {
+    private boolean isDatabaseAlreadyOpen(@Nonnull AndroidDatabase db) {
         if (!db.isEncrypted()) {
             return AndroidBaseManager.isDatabaseAlreadyOpen(db);
         } else {
@@ -135,7 +140,7 @@ public abstract class AndroidDatabaseBaseManager {
      * Helper method to load the SQLCipher Libraries
      * @param context Android Context
      */
-    public void initSQLCipherLibs(Context context) {
+    public void initSQLCipherLibs(@Nonnull Context context) {
         net.sqlcipher.database.SQLiteDatabase.loadLibs(context); // Initialize SQLCipher
     }
 
@@ -144,11 +149,11 @@ public abstract class AndroidDatabaseBaseManager {
      * @param context Android Context
      * @param workingDir Directory to extract SQLCipher files (such as an external storage space)
      */
-    public void initSQLCipherLibs(Context context, File workingDir) {
+    public void initSQLCipherLibs(@Nonnull Context context, @Nonnull File workingDir) {
         net.sqlcipher.database.SQLiteDatabase.loadLibs(context, workingDir); // Initialize SQLCipher
     }
 
-    public void openDatabase(AndroidDatabase androidDatabase) {
+    public void openDatabase(@Nonnull AndroidDatabase androidDatabase) {
         if (!androidDatabase.isEncrypted()) {
             AndroidBaseManager.openDatabase(androidDatabase);
         } else {
@@ -156,11 +161,14 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public void closeDatabase(String databaseName) {
-        closeDatabase(getDatabase(databaseName));
+    public void closeDatabase(@Nonnull String databaseName) {
+        AndroidDatabase database = getDatabase(databaseName);
+        if (database != null) {
+            closeDatabase(database);
+        }
     }
 
-    public boolean closeDatabase(AndroidDatabase androidDatabase) {
+    public boolean closeDatabase(@Nonnull AndroidDatabase androidDatabase) {
         if (!androidDatabase.isEncrypted()) {
             return AndroidBaseManager.closeDatabase(androidDatabase);
         } else {
@@ -175,11 +183,11 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public void connectDatabase(String databaseName) {
+    public void connectDatabase(@Nonnull String databaseName) {
         connectDatabase(databaseName, true);
     }
 
-    public synchronized void connectDatabase(String databaseName, boolean checkForUpgrade) {
+    public synchronized void connectDatabase(@Nonnull String databaseName, boolean checkForUpgrade) {
         createDatabaseMap();
 
         AndroidDatabase androidDatabase = databaseMap.get(databaseName);
@@ -244,7 +252,7 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public void attachDatabases(AndroidDatabase db) {
+    public void attachDatabases(@Nonnull AndroidDatabase db) {
         if (!db.isEncrypted()) {
             for (AndroidDatabase toDb : db.getAttachedDatabases()) {
                 String sql = "ATTACH DATABASE '" + toDb.getPath() + "' AS " + toDb.getName();
@@ -258,7 +266,7 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public void detachDatabases(String databaseName) {
+    public void detachDatabases(@Nonnull String databaseName) {
         AndroidDatabase androidDatabase = databaseMap.get(databaseName);
         if (androidDatabase == null) {
             throw new IllegalArgumentException("Database [" + databaseName + "] does not exist");
@@ -267,13 +275,13 @@ public abstract class AndroidDatabaseBaseManager {
         detachDatabases(androidDatabase);
     }
 
-    public void detachDatabases(AndroidDatabase db) {
+    public void detachDatabases(@Nonnull AndroidDatabase db) {
         for (AndroidDatabase toDb : db.getAttachedDatabases()) {
             detachDatabase(db, toDb.getName());
         }
     }
 
-    public void detachDatabase(String databaseName, String databaseToDetach) {
+    public void detachDatabase(@Nonnull String databaseName, @Nonnull String databaseToDetach) {
         AndroidDatabase androidDatabase = databaseMap.get(databaseName);
         if (androidDatabase == null) {
             throw new IllegalArgumentException("Database [" + databaseName + "] does not exist");
@@ -282,7 +290,7 @@ public abstract class AndroidDatabaseBaseManager {
         detachDatabase(androidDatabase, databaseToDetach);
     }
 
-    public void detachDatabase(AndroidDatabase db, String databaseToDetach) {
+    public void detachDatabase(@Nonnull AndroidDatabase db, @Nonnull String databaseToDetach) {
         String sql = "DETACH DATABASE '" + databaseToDetach + "'";
         if (!db.isEncrypted()) {
             db.getSqLiteDatabase().execSQL(sql);
@@ -291,8 +299,11 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public void cleanDatabase(String databaseName) {
-        onCleanDatabase(getDatabase(databaseName));
+    public void cleanDatabase(@Nonnull String databaseName) {
+        AndroidDatabase database = getDatabase(databaseName);
+        if (database != null) {
+            onCleanDatabase(database);
+        }
     }
 
     public void cleanAllDatabases() {
@@ -306,7 +317,8 @@ public abstract class AndroidDatabaseBaseManager {
      * @param databaseName Name of database file
      * @return Database File
      */
-    public File getDatabaseFile(Context context, String databaseName) {
+    @Nonnull
+    public File getDatabaseFile(@Nonnull Context context, @Nonnull String databaseName) {
         File file =  context.getDatabasePath(databaseName);
 
         File directory = new File(file.getParent());
@@ -326,7 +338,8 @@ public abstract class AndroidDatabaseBaseManager {
      * @param databaseName Name of database file
      * @return Database File
      */
-    public File getDatabaseExternalFile(Context context, String databaseSubDir, String databaseName) {
+    @Nonnull
+    public File getDatabaseExternalFile(@Nonnull Context context, @Nonnull String databaseSubDir, @Nonnull String databaseName) {
         boolean mediaMounted = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
         File cacheDir = context.getExternalFilesDir(databaseSubDir);
 
@@ -354,7 +367,7 @@ public abstract class AndroidDatabaseBaseManager {
      * Delete and then recreate the database
      * @param androidDatabase database to clean
      */
-    public void onCleanDatabase(AndroidDatabase androidDatabase) {
+    public void onCleanDatabase(@Nonnull AndroidDatabase androidDatabase) {
         Log.i(TAG, "Cleaning Database");
         deleteDatabase(androidDatabase);
         connectDatabase(androidDatabase.getName(), false);  // do not update here, because it will cause a recursive call
@@ -375,7 +388,7 @@ public abstract class AndroidDatabaseBaseManager {
         identifyDatabases();
     }
 
-    public void deleteDatabase(AndroidDatabase androidDatabase) {
+    public void deleteDatabase(@Nonnull AndroidDatabase androidDatabase) {
         String databasePath = androidDatabase.getPath();
 
         try {
@@ -397,7 +410,7 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public boolean deleteDatabaseFiles(AndroidDatabase db) {
+    public boolean deleteDatabaseFiles(@Nonnull AndroidDatabase db) {
         return deleteDatabaseFiles(new File(db.getPath()));
     }
 
@@ -408,13 +421,13 @@ public abstract class AndroidDatabaseBaseManager {
      * @param file The database file path.
      * @return True if the database was successfully deleted.
      */
-    public boolean deleteDatabaseFiles(File file) {
+    public boolean deleteDatabaseFiles(@Nullable File file) {
         if (file == null) {
             throw new IllegalArgumentException("file must not be null");
         }
 
-        boolean deleted = false;
-        deleted |= file.delete();
+        boolean deleted;
+        deleted = file.delete();
         deleted |= new File(file.getPath() + "-journal").delete();
         deleted |= new File(file.getPath() + "-shm").delete();
         deleted |= new File(file.getPath() + "-wal").delete();
@@ -435,13 +448,13 @@ public abstract class AndroidDatabaseBaseManager {
         return deleted;
     }
 
-    public boolean renameDatabaseFiles(File srcFile, File targetFile) {
+    public boolean renameDatabaseFiles(@Nullable File srcFile, @Nonnull File targetFile) {
         if (srcFile == null) {
             throw new IllegalArgumentException("file must not be null");
         }
 
         boolean renamed = false;
-        renamed |= srcFile.renameTo(new File(targetFile.getPath()));
+        renamed = srcFile.renameTo(new File(targetFile.getPath()));
         renamed |= new File(srcFile.getPath() + "-journal").renameTo(new File(targetFile.getPath() + "-journal"));
         renamed |= new File(srcFile.getPath() + "-shm").renameTo(new File(targetFile.getPath() + "-shm"));
         renamed |= new File(srcFile.getPath() + "-wal").renameTo(new File(targetFile.getPath() + "-wal"));
@@ -463,15 +476,21 @@ public abstract class AndroidDatabaseBaseManager {
         return renamed;
     }
 
-    public void beginTransaction(String databaseName) {
-        getDatabase(databaseName).beginTransaction();
+    public void beginTransaction(@Nonnull String databaseName) {
+        AndroidDatabase database = getDatabase(databaseName);
+        if (database != null) {
+            database.beginTransaction();
+        }
     }
 
-    public void endTransaction(String databaseName, boolean success) {
-        getDatabase(databaseName).endTransaction(success);
+    public void endTransaction(@Nonnull String databaseName, boolean success) {
+        AndroidDatabase database = getDatabase(databaseName);
+        if (database != null) {
+            database.endTransaction(success);
+        }
     }
 
-    public void onUpgradeViews(AndroidDatabase androidDatabase, int oldVersion, int newVersion) {
+    public void onUpgradeViews(@Nonnull AndroidDatabase androidDatabase, int oldVersion, int newVersion) {
         Log.i(TAG, "Upgrading database VIEWS [" + androidDatabase.getName() + "] from version " + oldVersion + " to " + newVersion);
 
         if (oldVersion != newVersion) {
@@ -480,7 +499,7 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    public void createMetaTableIfNotExists(AndroidDatabase androidDatabase) {
+    public void createMetaTableIfNotExists(@Nonnull AndroidDatabase androidDatabase) {
         if (!androidDatabase.isEncrypted()) {
             if (!AndroidBaseManager.tableExists(androidDatabase, DBToolsMetaData.TABLE)) {
                 AndroidBaseManager.executeSql(androidDatabase, DBToolsMetaData.CREATE_TABLE);
@@ -492,11 +511,11 @@ public abstract class AndroidDatabaseBaseManager {
         }
     }
 
-    private String getViewVersionKey(AndroidDatabase androidDatabase) {
+    private String getViewVersionKey(@Nonnull AndroidDatabase androidDatabase) {
         return androidDatabase.getName() + "_view_version";
     }
 
-    private void updateDatabaseMetaViewVersion(AndroidDatabase androidDatabase, int version) {
+    private void updateDatabaseMetaViewVersion(@Nonnull AndroidDatabase androidDatabase, int version) {
         createMetaTableIfNotExists(androidDatabase);
 
         int currentVersion = findViewVersion(androidDatabase);
@@ -529,7 +548,7 @@ public abstract class AndroidDatabaseBaseManager {
     private static final String FIND_VERSION = "SELECT " + DBToolsMetaData.C_VALUE + " FROM " + DBToolsMetaData.TABLE +
             " WHERE " + DBToolsMetaData.KEY_SELECTION;
 
-    public int findViewVersion(AndroidDatabase androidDatabase) {
+    public int findViewVersion(@Nonnull AndroidDatabase androidDatabase) {
         createMetaTableIfNotExists(androidDatabase);
 
         int version;

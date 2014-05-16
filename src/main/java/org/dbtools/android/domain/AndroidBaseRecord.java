@@ -6,6 +6,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -64,7 +66,8 @@ public abstract class AndroidBaseRecord implements Serializable {
 
     // Date - String
 
-    public static String dateToDBString(Date d) {
+    @Nullable
+    public static String dateToDBString(@Nullable Date d) {
         if (d != null) {
             return dateFormat.get().format(d);
         } else {
@@ -72,7 +75,8 @@ public abstract class AndroidBaseRecord implements Serializable {
         }
     }
 
-    public static Date dbStringToDate(String text) {
+    @Nullable
+    public static Date dbStringToDate(@Nullable String text) {
         if (text != null && text.length() > 0 && !text.equals("null")) {
             try {
                 return dateFormat.get().parse(text);
@@ -86,7 +90,8 @@ public abstract class AndroidBaseRecord implements Serializable {
 
     // DateTime - String
 
-    public static String dateTimeToDBString(DateTime d) {
+    @Nullable
+    public static String dateTimeToDBString(@Nullable DateTime d) {
         if (d != null) {
             return d.toString(DB_DATE_FORMAT);
         } else {
@@ -94,7 +99,8 @@ public abstract class AndroidBaseRecord implements Serializable {
         }
     }
 
-    public static DateTime dbStringToDateTime(String text) {
+    @Nullable
+    public static DateTime dbStringToDateTime(@Nullable String text) {
         if (text != null && text.length() > 0 && !text.equals("null")) {
             try {
                 return DB_DATE_FORMATTER.parseDateTime(text);
@@ -108,7 +114,7 @@ public abstract class AndroidBaseRecord implements Serializable {
 
     // DateTime - long
 
-    public static long dateTimeToLong(DateTime d) {
+    public static long dateTimeToLong(@Nonnull DateTime d) {
         return d.getMillis();
     }
 
@@ -118,7 +124,7 @@ public abstract class AndroidBaseRecord implements Serializable {
 
     // Date - long
 
-    public static long dateToLong(Date d) {
+    public static long dateToLong(@Nonnull Date d) {
         return d.getTime();
     }
 

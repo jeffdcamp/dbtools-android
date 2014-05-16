@@ -2,19 +2,35 @@ package org.dbtools.android.domain.secure;
 
 
 import net.sqlcipher.database.SQLiteDatabase;
+import org.dbtools.android.domain.AndroidDatabase;
 import org.dbtools.android.domain.AndroidDatabaseBaseManager;
+
+import javax.annotation.Nonnull;
 
 /**
  * This class helps open, create, and upgrade the database file.
  */
 public abstract class AndroidDatabaseManager extends AndroidDatabaseBaseManager {
-    public SQLiteDatabase getWritableDatabase(String databaseName) {
+    @Nonnull
+    public SQLiteDatabase getWritableDatabase(@Nonnull String databaseName) {
         connectDatabase(databaseName);
-        return getDatabase(databaseName).getSecureSqLiteDatabase();
+
+        AndroidDatabase db = getDatabase(databaseName);
+        if (db != null) {
+            return db.getSecureSqLiteDatabase();
+        }
+
+        throw new IllegalStateException("Unable to get SQLiteDatabase for database [" + databaseName + "]");
     }
 
-    public SQLiteDatabase getReadableDatabase(String databaseName) {
+    @Nonnull
+    public SQLiteDatabase getReadableDatabase(@Nonnull String databaseName) {
         connectDatabase(databaseName);
-        return getDatabase(databaseName).getSecureSqLiteDatabase();
+        AndroidDatabase db = getDatabase(databaseName);
+        if (db != null) {
+            return db.getSecureSqLiteDatabase();
+        }
+
+        throw new IllegalStateException("Unable to get SQLiteDatabase for database [" + databaseName + "]");
     }
 }

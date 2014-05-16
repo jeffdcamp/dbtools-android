@@ -17,7 +17,7 @@ Setup
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.9.+'
+                classpath 'com.android.tools.build:gradle:0.10.+'
                 classpath 'org.dbtools:dbtools-gen:<latest version>' // (2.+)
             }
         }
@@ -42,14 +42,15 @@ Setup
                 System.out.println("Generating DBTools Classes...")
 
                 // properties
-                String schemaFilename = "src/main/database/schema.xml";
-                boolean injectionSupport = true; // support for CDI
-                boolean dateTimeSupport = true; // support for Joda DateTime (must include Joda Time into your project)
-                boolean encryptionSupport = true; // SqlCipher support (must include Sqlcipher into your project)
-
-                String baseOutputDir = "src/main/java/org/company/project/domain";
-                String basePackageName = "org.company.project.domain";
-                org.dbtools.gen.android.AndroidObjectsBuilder.buildAll(schemaFilename, baseOutputDir, basePackageName, injectionSupport, dateTimeSupport, encryptionSupport);
+                org.dbtools.gen.android.AndroidObjectsBuilder builder = new org.dbtools.gen.android.AndroidObjectsBuilder();
+                builder.setXmlFilename("src/main/database/schema.xml");
+                builder.setOutputBaseDir("src/main/java/org/company/project/domain");
+                builder.setPackageBase("org.company.project.domain");
+                builder.setInjectionSupport(true);
+                builder.setJsr305Support(true);
+                builder.setDateTimeSupport(true);
+                builder.setEncryptionSupport(false);
+                builder.build();
             }
         }
 
