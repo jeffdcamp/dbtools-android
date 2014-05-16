@@ -1,7 +1,12 @@
 Change Log
 ==========
 
-Version 2.0.0 *(2014-04)*
+Version 2.1.0 *(2014-05-15)*
+----------------------------
+
+ * NEW JSR 305 support (@Nullable / @Nonnull)
+ 
+ Version 2.0.0 *(2014-04)*
 ----------------------------
 
  * NEW DatabaseBaseManager.java is generated from dbtools-gen Gradle/Android plugin
