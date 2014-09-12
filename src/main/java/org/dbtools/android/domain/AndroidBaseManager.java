@@ -315,7 +315,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return update(getTableName(), values, getPrimaryKey(), rowId);
     }
 
-    public int update(@Nonnull ContentValues values, @Nonnull String where, String[] whereArgs) {
+    public int update(@Nonnull ContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
         return update(getTableName(), values, where, whereArgs);
     }
 
@@ -350,15 +350,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return db.update(tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
     }
 
-    public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String where, @Nonnull String[] whereArgs) {
+    public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         return update(getDatabaseName(), tableName, contentValues, where, whereArgs);
     }
 
-    public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String where, @Nonnull String[] whereArgs) {
+    public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         return update(getWritableDatabase(databaseName), tableName, contentValues, where, whereArgs);
     }
 
-    public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String where, @Nullable String[] whereArgs) {
+    public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         checkDB(db);
         return db.update(tableName, contentValues, where, whereArgs);
     }
@@ -367,7 +367,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return delete(getTableName(), getPrimaryKey(), rowId);
     }
 
-    public long delete(@Nonnull String where, @Nullable String[] whereArgs) {
+    public long delete(@Nullable String where, @Nullable String[] whereArgs) {
         return delete(getTableName(), where, whereArgs);
     }
 
@@ -402,11 +402,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return db.delete(tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
     }
 
-    public long delete(@Nonnull String tableName, @Nonnull String where, @Nullable String[] whereArgs) {
+    public long delete(@Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
         return delete(getDatabaseName(), tableName, where, whereArgs);
     }
 
-    public long delete(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull String where, @Nullable String[] whereArgs) {
+    public long delete(@Nonnull String databaseName, @Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
         return delete(getWritableDatabase(databaseName), tableName, where, whereArgs);
     }
 
@@ -619,7 +619,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public T findByRowId(@Nonnull String databaseName, long rowId) { 
+    public T findByRowId(@Nonnull String databaseName, long rowId) {
         return findBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
     }
 
