@@ -27,13 +27,58 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a standard SQLite database
-     * @param context Android Context
+     * @param context Android Context (used to get database from context.getDatabasePath(databaseName))
      * @param databaseName Name of the database
      * @param version Version of the database
+     * @param viewsVersion Version of the database view
      */
     public void addDatabase(@Nonnull Context context, @Nonnull String databaseName, int version, int viewsVersion) {
         String databasePath = getDatabaseFile(context, databaseName).getAbsolutePath();
-        databaseMap.put(databaseName, new AndroidDatabase(databaseName, databasePath, version, viewsVersion));
+        addDatabase(databaseName, databasePath, null, version, viewsVersion);
+    }
+
+    /**
+     * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
+     * @param context Android Context (used to get database from context.getDatabasePath(databaseName))
+     * @param databaseName Name of the database
+     * @param password Database password
+     * @param version Version of the database
+     * @param viewsVersion Version of the database view
+     */
+    public void addDatabase(@Nonnull Context context, @Nonnull String databaseName, @Nullable String password, int version, int viewsVersion) {
+        String databasePath = getDatabaseFile(context, databaseName).getAbsolutePath();
+        addDatabase(databaseName, databasePath, password, version, viewsVersion);
+    }
+
+    /**
+     * Add a SQLCipher SQLite database.
+     * @param databaseName Name of the database
+     * @param databasePath Absolute path to database
+     * @param version Version of the database
+     * @param viewsVersion Version of the database view
+     */
+    public void addDatabase(@Nonnull String databaseName, @Nonnull String databasePath, int version, int viewsVersion) {
+        addDatabase(databaseName, databasePath, null, version, viewsVersion);
+    }
+
+    /**
+     * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
+     * @param databaseName Name of the database
+     * @param databasePath Absolute path to database
+     * @param password Database password
+     * @param version Version of the database
+     * @param viewsVersion Version of the database view
+     */
+    public void addDatabase(@Nonnull String databaseName, @Nonnull String databasePath, @Nullable String password, int version, int viewsVersion) {
+        if (password != null) {
+            addDatabase(new AndroidDatabase(databaseName, password, databasePath, version, viewsVersion));
+        } else {
+            addDatabase(new AndroidDatabase(databaseName, databasePath, version, viewsVersion));
+        }
+    }
+
+    public void addDatabase(@Nonnull AndroidDatabase database) {
+        databaseMap.put(database.getName(), database);
     }
 
     /**
@@ -77,27 +122,6 @@ public abstract class AndroidDatabaseBaseManager {
             closeDatabase(database);
             databaseMap.remove(databaseName);
         }
-    }
-
-    /**
-     * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
-     * @param context Android Context
-     * @param databaseName Name of the database
-     * @param password Database password
-     * @param version Version of the database
-     */
-    public void addDatabase(@Nonnull Context context, @Nonnull String databaseName, @Nullable String password, int version, int viewsVersion) {
-        String databasePath = getDatabaseFile(context, databaseName).getAbsolutePath();
-
-        if (password != null) {
-            databaseMap.put(databaseName, new AndroidDatabase(databaseName, password, databasePath, version, viewsVersion));
-        } else {
-            databaseMap.put(databaseName, new AndroidDatabase(databaseName, databasePath, version, viewsVersion));
-        }
-    }
-
-    public void addDatabase(@Nonnull AndroidDatabase database) {
-        databaseMap.put(database.getName(), database);
     }
 
     /**
@@ -319,7 +343,7 @@ public abstract class AndroidDatabaseBaseManager {
      */
     @Nonnull
     public File getDatabaseFile(@Nonnull Context context, @Nonnull String databaseName) {
-        File file =  context.getDatabasePath(databaseName);
+        File file = context.getDatabasePath(databaseName);
 
         File directory = new File(file.getParent());
 
