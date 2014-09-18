@@ -53,6 +53,7 @@ public abstract class AndroidBaseRecord implements Serializable {
      * @return values for database (DO NOT INCLUDE THE ID COLUMN)
      */
     public abstract ContentValues getContentValues();
+    public abstract Object[] getValues();
     public abstract void setContent(Cursor cursor);
     public abstract boolean isNewRecord();
 

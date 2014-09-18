@@ -3,7 +3,9 @@ package org.dbtools.android.domain.secure;
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.provider.BaseColumns;
+import net.sqlcipher.MatrixCursor;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteStatement;
 import org.dbtools.android.domain.AndroidBaseRecord;
@@ -13,6 +15,7 @@ import org.dbtools.android.domain.CustomQueryRecord;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -475,6 +478,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         if (db == null) {
             throw new IllegalArgumentException("db cannot be null");
         }
+    }
+
+    @Nullable
+    public Cursor findCursorAll() {
+        return findCursorBySelection(null, null);
     }
 
     @Nullable
@@ -1041,5 +1049,40 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         int count = cursor.getInt(0);
         cursor.close();
         return count > 0;
+    }
+
+    @Nullable
+    public MatrixCursor toMatrixCursor(@Nonnull T record) {
+        List<T> list = new ArrayList<T>(1);
+        list.add(record);
+        return toMatrixCursor(record.getAllKeys(), list);
+    }
+
+    @Nullable
+    public MatrixCursor toMatrixCursor(@Nonnull T... records) {
+        return toMatrixCursor(Arrays.asList(records));
+    }
+
+    @Nullable
+    public MatrixCursor toMatrixCursor(@Nonnull List<T> records) {
+        if (records.isEmpty()) {
+            return null;
+        }
+
+        T record = records.get(0);
+
+        return toMatrixCursor(record.getAllKeys(), records);
+    }
+
+    public MatrixCursor toMatrixCursor(String[] columns, List<T> records) {
+        MatrixCursor mx = new MatrixCursor(columns);
+        for (T record : records) {
+            mx.addRow(record.getValues());
+        }
+        return mx;
+    }
+
+    public MergeCursor toMergeCursor(Cursor... cursors) {
+        return new MergeCursor(cursors);
     }
 }
