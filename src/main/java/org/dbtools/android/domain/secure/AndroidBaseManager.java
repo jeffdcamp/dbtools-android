@@ -1082,7 +1082,23 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return mx;
     }
 
-    public MergeCursor toMergeCursor(Cursor... cursors) {
+    public Cursor mergeCursors(Cursor... cursors) {
         return new MergeCursor(cursors);
+    }
+
+    public Cursor addAllToCursorTop(Cursor cursor, List<T> records) {
+        return mergeCursors(toMatrixCursor(records), cursor);
+    }
+
+    public Cursor addAllToCursorTop(Cursor cursor, T... records) {
+        return mergeCursors(toMatrixCursor(records), cursor);
+    }
+
+    public Cursor addAllToCursorBottom(Cursor cursor, List<T> records) {
+        return mergeCursors(cursor, toMatrixCursor(records));
+    }
+
+    public Cursor addAllToCursorBottom(Cursor cursor, T... records) {
+        return mergeCursors(cursor, toMatrixCursor(records));
     }
 }
