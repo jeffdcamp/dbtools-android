@@ -16,7 +16,7 @@ public abstract class AndroidDatabaseManager extends AndroidDatabaseBaseManager 
         AndroidDatabase db = getDatabase(databaseName);
         if (db != null) {
             return db.getSqLiteDatabase();
-    }
+        }
 
         throw new IllegalStateException("Unable to get SQLiteDatabase for database [" + databaseName + "]");
     }

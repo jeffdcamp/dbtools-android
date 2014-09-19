@@ -28,7 +28,7 @@ public abstract class AndroidDatabaseBaseManager {
     /**
      * Add a standard SQLite database
      * @param context Android Context (used to get database from context.getDatabasePath(databaseName))
-     * @param databaseName Name of the database
+     * @param databaseName Name of the database (DBTools reference name)
      * @param version Version of the database
      * @param viewsVersion Version of the database view
      */
@@ -40,7 +40,7 @@ public abstract class AndroidDatabaseBaseManager {
     /**
      * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
      * @param context Android Context (used to get database from context.getDatabasePath(databaseName))
-     * @param databaseName Name of the database
+     * @param databaseName Name of the database (DBTools reference name)
      * @param password Database password
      * @param version Version of the database
      * @param viewsVersion Version of the database view
@@ -52,7 +52,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a SQLCipher SQLite database.
-     * @param databaseName Name of the database
+     * @param databaseName Name of the database (DBTools reference name)
      * @param databasePath Absolute path to database
      * @param version Version of the database
      * @param viewsVersion Version of the database view
@@ -63,7 +63,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
-     * @param databaseName Name of the database
+     * @param databaseName Name of the database (DBTools reference name)
      * @param databasePath Absolute path to database
      * @param password Database password
      * @param version Version of the database
@@ -83,7 +83,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a standard SQLite database
-     * @param databaseName Name of the attached database
+     * @param databaseName Name of the attached database (DBTools reference name)
      * @param primaryDatabaseName Primary Database name
      * @param attachedDatabaseNames Database names to be attached to Primary Database
      */
