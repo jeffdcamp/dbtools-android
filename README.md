@@ -184,13 +184,13 @@ Usage
         
   * Access data from Cursor
 
-      Cursor cursor;
-      Individual individual = new Individual(cursor); // populate all items from cursor into Individual
-      
-      // Get single pieces of data from a curser.  (for use in places such as Adapters, etc) Examples:
-      String name = Individual.getName(cursor);
-      IndividualType type = Individual.getType(cursor);
-      Date birthDate = Individual.getBirthDate(cursor);
+        Cursor cursor;
+        Individual individual = new Individual(cursor); // populate all items from cursor into Individual
+        
+        // Get single pieces of data from a curser.  (for use in places such as Adapters, etc) Examples:
+        String name = Individual.getName(cursor);
+        IndividualType type = Individual.getType(cursor);
+        Date birthDate = Individual.getBirthDate(cursor);
 
   * Count number of items in the database
 
