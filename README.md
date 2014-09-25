@@ -17,8 +17,8 @@ Setup
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.10.+'
-                classpath 'org.dbtools:dbtools-gen:<latest version>' // (2.+)
+                classpath 'com.android.tools.build:gradle:0.13.+'
+                classpath 'org.dbtools:dbtools-gen:<latest version>' // (2.2.1)
             }
         }
 
@@ -31,7 +31,7 @@ Setup
   3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version is found in Maven Central Repo)
 
         dependencies {
-            compile 'org.dbtools:dbtools-android:<latest version>' // (2.+)
+            compile 'org.dbtools:dbtools-android:<latest version>' // (2.2.1)
         }
 
   4. Add dbtools "task" to your build.gradle file.  Be sure to modify the variables/properties in this task (especially "baseOutputDir" and "basePackageName")
@@ -49,6 +49,7 @@ Setup
                 builder.setInjectionSupport(true);
                 builder.setJsr305Support(true);
                 builder.setDateTimeSupport(true);
+                builder.setIncludeDatabaseNameInPackage(true);
                 builder.setEncryptionSupport(false);
                 builder.build();
             }
@@ -161,6 +162,9 @@ Usage
 
         Individual individual = individualManager.findByRowId(1);
         individualManager.delete(individual);
+        
+        individualManager.delete(1); // delete by primarykey id
+        individualManager.delete(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // delete all individuals who has "555" in their phone number
 
   DBTools Manager has a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
 
@@ -177,6 +181,16 @@ Usage
 
         Cursor cursor = individualManager.findCursorBySelection(null, null, Individual.C_NAME); // find all, order by NAME column
         Cursor cursor = individualManager.findCursorBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find cursor of those who have "555" in their phone number
+        
+  * Access data from Cursor
+
+      Cursor cursor;
+      Individual individual = new Individual(cursor); // populate all items from cursor into Individual
+      
+      // Get single pieces of data from a curser.  (for use in places such as Adapters, etc) Examples:
+      String name = Individual.getName(cursor);
+      IndividualType type = Individual.getType(cursor);
+      Date birthDate = Individual.getBirthDate(cursor);
 
   * Count number of items in the database
 
