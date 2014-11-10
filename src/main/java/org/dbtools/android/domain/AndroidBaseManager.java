@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 
@@ -19,6 +20,8 @@ import java.util.List;
  * @author jcampbell
  */
 public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
+
+    private static final int MAX_TRY_COUNT = 3;
 
     public static final String DEFAULT_COLLATE_LOCALIZED = " COLLATE LOCALIZED";
 
@@ -242,7 +245,21 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     public static long insert(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
         checkDB(db);
-        long rowId = db.insert(e.getTableName(), null, e.getContentValues());
+        long rowId = -1;
+
+        //Makes sure that if there is an error (LockedException) inserting, that we try at least once more.
+        int tryCount = 0;
+        boolean failed = true;
+        while(tryCount < MAX_TRY_COUNT && failed) {
+            try {
+                rowId = db.insert(e.getTableName(), null, e.getContentValues());
+                failed = false;
+            } catch (Exception ex) {
+                tryCount++;
+                failed = true;
+            }
+        }
+
         e.setPrimaryKeyId(rowId);
         return rowId;
     }
@@ -350,7 +367,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
         checkDB(db);
-        return db.update(tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+        int rowsAffected = 0;
+
+        //Makes sure that if there is an error (LockedException) inserting, that we try at least once more.
+        int tryCount = 0;
+        boolean failed = true;
+        while(tryCount < MAX_TRY_COUNT && failed) {
+            try {
+                rowsAffected = db.update(tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+                failed = false;
+            } catch (Exception ex) {
+                tryCount++;
+                failed = true;
+            }
+        }
+
+        return rowsAffected;
     }
 
     public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
@@ -402,7 +434,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static long delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         checkDB(db);
-        return db.delete(tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+        long rowsAffected = 0;
+
+        //Makes sure that if there is an error (LockedException) inserting, that we try at least once more.
+        int tryCount = 0;
+        boolean failed = true;
+        while(tryCount < MAX_TRY_COUNT && failed) {
+            try {
+                rowsAffected = db.delete(tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+                failed = false;
+            } catch (Exception ex) {
+                tryCount++;
+                failed = true;
+            }
+        }
+
+        return rowsAffected;
     }
 
     public long delete(@Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
