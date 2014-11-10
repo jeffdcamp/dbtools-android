@@ -47,8 +47,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return androidDatabase.getSqLiteDatabase();
     }
 
-    public static void openDatabase(@Nonnull AndroidDatabase androidDatabase) {
-        androidDatabase.setSqLiteDatabase(SQLiteDatabase.openOrCreateDatabase(androidDatabase.getPath(), null));
+    public static boolean openDatabase(@Nonnull AndroidDatabase androidDatabase) {
+        SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(androidDatabase.getPath(), null);
+        androidDatabase.setSqLiteDatabase(database);
+        return database.isOpen();
     }
 
     public static boolean closeDatabase(@Nonnull AndroidDatabase androidDatabase) {
@@ -246,20 +248,18 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         checkDB(db);
         long rowId = -1;
 
-        //Makes sure that if there is an error (LockedException) inserting, that we try at least once more.
-        int tryCount = 0;
-        boolean failed = true;
-        while(tryCount < MAX_TRY_COUNT && failed) {
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
                 rowId = db.insert(e.getTableName(), null, e.getContentValues());
-                failed = false;
+                e.setPrimaryKeyId(rowId);
+                success = true;
             } catch (Exception ex) {
-                tryCount++;
-                failed = true;
+                ex.printStackTrace();
             }
         }
 
-        e.setPrimaryKeyId(rowId);
         return rowId;
     }
 
@@ -365,19 +365,17 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
-        checkDB(db);
         int rowsAffected = 0;
 
-        //Makes sure that if there is an error (LockedException) inserting, that we try at least once more.
-        int tryCount = 0;
-        boolean failed = true;
-        while(tryCount < MAX_TRY_COUNT && failed) {
+        checkDB(db);
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
                 rowsAffected = db.update(tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
-                failed = false;
+                success = true;
             } catch (Exception ex) {
-                tryCount++;
-                failed = true;
+                ex.printStackTrace();
             }
         }
 
@@ -435,16 +433,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         checkDB(db);
         long rowsAffected = 0;
 
-        //Makes sure that if there is an error (LockedException) inserting, that we try at least once more.
-        int tryCount = 0;
-        boolean failed = true;
-        while(tryCount < MAX_TRY_COUNT && failed) {
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
                 rowsAffected = db.delete(tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
-                failed = false;
+                success = true;
             } catch (Exception ex) {
-                tryCount++;
-                failed = true;
+                ex.printStackTrace();
             }
         }
 

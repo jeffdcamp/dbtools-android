@@ -152,6 +152,10 @@ public abstract class AndroidDatabaseBaseManager {
         return databaseMap.get(databaseName);
     }
 
+    public boolean containsDatabase(@Nonnull String databaseName) {
+        return databaseMap.containsKey(databaseName);
+    }
+
     private boolean isDatabaseAlreadyOpen(@Nonnull AndroidDatabase db) {
         if (!db.isEncrypted()) {
             return AndroidBaseManager.isDatabaseAlreadyOpen(db);
@@ -177,11 +181,16 @@ public abstract class AndroidDatabaseBaseManager {
         net.sqlcipher.database.SQLiteDatabase.loadLibs(context, workingDir); // Initialize SQLCipher
     }
 
-    public void openDatabase(@Nonnull AndroidDatabase androidDatabase) {
+    public boolean openDatabase(@Nonnull String databaseName) {
+        AndroidDatabase database = getDatabase(databaseName);
+        return database != null && openDatabase(database);
+    }
+
+    public boolean openDatabase(@Nonnull AndroidDatabase androidDatabase) {
         if (!androidDatabase.isEncrypted()) {
-            AndroidBaseManager.openDatabase(androidDatabase);
+            return AndroidBaseManager.openDatabase(androidDatabase);
         } else {
-            org.dbtools.android.domain.secure.AndroidBaseManager.openDatabase(androidDatabase);
+            return org.dbtools.android.domain.secure.AndroidBaseManager.openDatabase(androidDatabase);
         }
     }
 

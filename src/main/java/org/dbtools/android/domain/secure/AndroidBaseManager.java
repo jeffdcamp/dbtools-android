@@ -23,6 +23,8 @@ import java.util.List;
  */
 public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
+    private static final int MAX_TRY_COUNT = 3;
+
     public static final String DEFAULT_COLLATE_LOCALIZED = " COLLATE LOCALIZED";
 
     public abstract SQLiteDatabase getReadableDatabase(String databaseName);
@@ -48,9 +50,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return androidDatabase.getSecureSqLiteDatabase();
     }
 
-    public static void openDatabase(@Nonnull AndroidDatabase androidDatabase) {
+    public static boolean openDatabase(@Nonnull AndroidDatabase androidDatabase) {
         try {
-            androidDatabase.setSecureSqLiteDatabase(SQLiteDatabase.openOrCreateDatabase(androidDatabase.getPath(), androidDatabase.getPassword(), null));
+            SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(androidDatabase.getPath(), androidDatabase.getPassword(), null);
+            androidDatabase.setSecureSqLiteDatabase(database);
+            return database.isOpen();
         } catch (UnsatisfiedLinkError e) {
             throw new IllegalStateException("Could not find native libs (be sure to call initSQLCipherLibs(...))", e);
         }
@@ -249,8 +253,20 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     public static long insert(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
         checkDB(db);
-        long rowId = db.insert(e.getTableName(), null, e.getContentValues());
-        e.setPrimaryKeyId(rowId);
+        long rowId = -1;
+
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
+            try {
+                rowId = db.insert(e.getTableName(), null, e.getContentValues());
+                e.setPrimaryKeyId(rowId);
+                success = true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
         return rowId;
     }
 
@@ -356,8 +372,21 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
+        int rowsAffected = 0;
+
         checkDB(db);
-        return db.update(tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
+            try {
+                rowsAffected = db.update(tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+                success = true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return rowsAffected;
     }
 
     public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
@@ -409,7 +438,20 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static long delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         checkDB(db);
-        return db.delete(tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+        long rowsAffected = 0;
+
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
+            try {
+                rowsAffected = db.delete(tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+                success = true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return rowsAffected;
     }
 
     public long delete(@Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
