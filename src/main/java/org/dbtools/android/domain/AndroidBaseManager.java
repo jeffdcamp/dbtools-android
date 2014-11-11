@@ -365,21 +365,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
-        int rowsAffected = 0;
-
-        checkDB(db);
-        // Make sure that if there is an error (LockedException), that we try again.
-        boolean success = false;
-        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
-            try {
-                rowsAffected = db.update(tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
-                success = true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return rowsAffected;
+        return update(db, tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
     }
 
     public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
@@ -391,8 +377,21 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public static int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+        int rowsAffected = 0;
+
         checkDB(db);
-        return db.update(tableName, contentValues, where, whereArgs);
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
+            try {
+                rowsAffected = db.update(tableName, contentValues, where, whereArgs);
+                success = true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return rowsAffected;
     }
 
     public long delete(long rowId) {
@@ -430,21 +429,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public static long delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
-        checkDB(db);
-        long rowsAffected = 0;
-
-        // Make sure that if there is an error (LockedException), that we try again.
-        boolean success = false;
-        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
-            try {
-                rowsAffected = db.delete(tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
-                success = true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return rowsAffected;
+        return delete(db, tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
     }
 
     public long delete(@Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
@@ -457,7 +442,20 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static long delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
         checkDB(db);
-        return db.delete(tableName, where, whereArgs);
+        long rowsAffected = 0;
+
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
+            try {
+                rowsAffected = db.delete(tableName, where, whereArgs);
+                success = true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return rowsAffected;
     }
 
     public long deleteAll() {
