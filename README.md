@@ -4,6 +4,7 @@ DBTools for Android
 DBTools for Android is an Android ORM library that makes it easy to work with SQLite Databases.
 
 Instructions for migration from 1.x to 2.x (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md)
+Instructions for migration from 2.x to 2.3+ (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-2.x-2.3.md)
 
 Setup
 =====
@@ -17,8 +18,8 @@ Setup
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.13.+'
-                classpath 'org.dbtools:dbtools-gen:<latest version>' // (2.2.1)
+                classpath 'com.android.tools.build:gradle:0.14.+'
+                classpath 'org.dbtools:dbtools-gen:<latest version>' // (2.3.0)
             }
         }
 
@@ -31,7 +32,7 @@ Setup
   3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version is found in Maven Central Repo)
 
         dependencies {
-            compile 'org.dbtools:dbtools-android:<latest version>' // (2.2.1)
+            compile 'org.dbtools:dbtools-android:<latest version>' // (2.3.0)
         }
 
   4. Add dbtools "task" to your build.gradle file.  Be sure to modify the variables/properties in this task (especially "baseOutputDir" and "basePackageName")
@@ -41,16 +42,21 @@ Setup
             doLast {
                 System.out.println("Generating DBTools Classes...")
 
-                // properties
                 org.dbtools.gen.android.AndroidObjectsBuilder builder = new org.dbtools.gen.android.AndroidObjectsBuilder();
+
                 builder.setXmlFilename("src/main/database/schema.xml");
                 builder.setOutputBaseDir("src/main/java/org/company/project/domain");
                 builder.setPackageBase("org.company.project.domain");
-                builder.setInjectionSupport(true);
-                builder.setJsr305Support(true);
-                builder.setDateTimeSupport(true);
-                builder.setIncludeDatabaseNameInPackage(true);
-                builder.setEncryptionSupport(false);
+
+                org.dbtools.gen.GenConfig genConfig = new org.dbtools.gen.GenConfig();
+                genConfig.setInjectionSupport(true); // support for @Inject (using Dagger or Guice)
+                genConfig.setJsr305Support(true); // support for @Notnull / @Nullable etc
+                genConfig.setDateTimeSupport(true); // support Joda DateTime
+                genConfig.setEncryptionSupport(false); // support SQLCipher
+                genConfig.setIncludeDatabaseNameInPackage(true); // place each set of domain objects into a package named after its database
+                genConfig.setOttoSupport(true); // support Event Bus using Otto
+
+                builder.setGenConfig(genConfig);
                 builder.build();
             }
         }
@@ -197,6 +203,38 @@ Usage
         int count = individualManager.findCount();
         int count = individualManager.findCountBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find count of those who have "555" in their phone number
 
+  Event Bus (via Otto) support.  This allow your app to be notified if the database changed.  Examples:
+
+  * Watch for any Insert/Update/Delete event
+
+        @Subscribe
+        public void onDatabaseChanged(DatabaseChangeEvent event) {
+            Log.i(TAG, "Database changed on table " + event.getTableName());
+        }
+
+  * Watch for any Insert event
+
+        @Subscribe
+        public void onInsert(DatabaseInsertEvent event) {
+            Log.i(TAG, "Item inserted on table " + event.getTableName());
+            Log.i(TAG, "Item ID inserted " + event.getNewId());
+        }
+
+  * Watch for any Update event
+
+        @Subscribe
+        public void onUpdate(DatabaseUpdateEvent event) {
+            Log.i(TAG, "Item inserted on table " + event.getTableName());
+            Log.i(TAG, "RowsAffected " + event.getRowsAffected());
+        }
+
+  * Transactions.  Events will NOT be posted if in a transaction.  You can subscribe to watch for the end of a transaction:
+
+        @Subscribe
+        public void onDatabaseChangedTransaction(DatabaseEndTransactionEvent event) {
+            Log.i(TAG, "Database changed, transaction end.  Tables changed: " + event.getAllTableName());
+            boolean myTableUpdated = event.containsTable(Individual.TABLE);
+        }
 
 
 License
