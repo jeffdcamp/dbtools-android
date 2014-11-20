@@ -1,6 +1,24 @@
 Change Log
 ==========
 
+  Version 2.5.0 *(2014-10)*
+----------------------------
+
+ * NEW Support for Async writes (insertAsync, updateAsync, deleteAsync, saveAsync)
+
+  Version 2.3.0 *(2014-10)*
+----------------------------
+
+  * NEW Query database type (ability to query across attached databases)
+  * NEW Merge cursor support
+  * NEW Matrix cursor support
+  * NEW JSR 305 support (@Nullable / @Notnull)
+  * NEW Otto Event But support
+  * Improved support for pulling data from a Cursor (Individual.getName(cursor))
+  * Bug fixes
+
+
+
 Version 2.1.0 *(2014-05-15)*
 ----------------------------
 
@@ -15,16 +33,5 @@ Version 2.1.0 *(2014-05-15)*
  * NEW DatabaseBaseManager.java creates
  * NEW View Support <view/> element added to schema.xml file
  * dbschema.xsd is auto-updated from dbtools-gen Gradle/Android plugin
- * Bug fixes
-
-  Version 2.3.0 *(2014-10)*
-----------------------------
-
- * NEW Query database type (ability to query across attached databases)
- * NEW Merge cursor support
- * NEW Matrix cursor support
- * NEW JSR 305 support (@Nullable / @Notnull)
- * NEW Otto Event But support
- * Improved support for pulling data from a Cursor (Individual.getName(cursor))
  * Bug fixes
 

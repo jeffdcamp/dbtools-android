@@ -203,6 +203,15 @@ Usage
         int count = individualManager.findCount();
         int count = individualManager.findCountBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find count of those who have "555" in their phone number
 
+  Support for ASync writes (guarantees single write per database)
+
+  * Sample save
+
+        Individual individual = individualManager.findByRowId(1);
+        individual.setPhone("801-555-0000");
+        individualManager.saveAsync(individual);
+
+
   Event Bus (via Otto) support.  This allow your app to be notified if the database changed.  Examples:
 
   * Watch for any Insert/Update/Delete event
