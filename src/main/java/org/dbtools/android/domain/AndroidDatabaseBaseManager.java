@@ -348,6 +348,8 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Get Database File for an Internal Memory Database
+     *
+     * @param context Android Context
      * @param databaseName Name of database file
      * @return Database File
      */

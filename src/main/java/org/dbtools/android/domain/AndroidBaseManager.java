@@ -697,7 +697,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
-     * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
      *
      * @param rawQuery Custom query
      * @return List of object T
@@ -708,9 +708,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
-     * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
      *
      * @param rawQuery Custom query
+     * @param selectionArgs query arguments
      * @return List of object T
      */
     @Nonnull
@@ -719,7 +720,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
-     * Populate of List<T> from a rawQuery.  The raw query must contain all of the columns names for the object
+     * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
      *
      * @param databaseName  Name of database
      * @param rawQuery      Custom query
@@ -878,6 +879,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     /**
      * Find count by raw query.  Raw query assumes first SELECT param is count(1).
      *
+     * @param databaseName name of database to use
      * @param rawQuery Query
      * @return total count
      */
@@ -982,7 +984,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
-     * Return a list of all of the first column values as a List<Long> for given rawQuery and selectionArgs.
+     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
      *
      * @param rawQuery      Query contain first column which is a Long value
      * @param selectionArgs Query parameters
@@ -994,7 +996,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
-     * Return a list of all of the first column values as a List<Long> for given rawQuery and selectionArgs.
+     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
      *
      * @param databaseName  Name of database to query
      * @param rawQuery      Query contain first column which is a Long value
@@ -1022,7 +1024,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
-     * Return a list of all of the first column values as a List<String> for given rawQuery and selectionArgs.
+     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
      *
      * @param rawQuery      Query contain first column which is a String value
      * @param selectionArgs Query parameters
@@ -1034,10 +1036,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
-     * Return a list of all of the first column values as a List<String> for given rawQuery and selectionArgs.
+     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
      *
      * @param databaseName  Name of database to query
-     * @param rawQuery      Query contain first column which is a String value
+     * @param rawQuery      Query contain first column which is a string value
      * @param selectionArgs Query parameters
      * @return query results List or empty List returned
      */
@@ -1061,40 +1063,42 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return foundItems;
     }
 
-    /**
+    /*
      * Use a custom query to populate a custom class that extends CustomQueryRecord
      * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of objects based on CustomQueryRecord.getColumnTypes())
      *
      * @param rawQuery      Query
      * @param selectionArgs Query parameters
+     * @param type Type of Class
      * @return List of CustomQueryRecord
      */
     @Nonnull
-    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<T> type) {
+    public <S extends CustomQueryRecord> List<S> findAllCustomRecordByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<S> type) {
         return findAllCustomRecordByRawQuery(getDatabaseName(), rawQuery, selectionArgs, type);
     }
 
-    /**
+    /*
      * Use a custom query to populate a custom class that extends CustomQueryRecord
      * CustomQueryRecord.setRowData(Object[] data) is called with each result (Object[] items contain and array of objects based on CustomQueryRecord.getColumnTypes())
      *
      * @param databaseName  Name of database to query
      * @param rawQuery      Query
      * @param selectionArgs Query parameters
+     * @param type Type of Class
      * @return List of CustomQueryRecord
      */
     @Nonnull
-    public <T extends CustomQueryRecord> List<T> findAllCustomRecordByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<T> type) {
-        List<T> foundItems;
+    public <S extends CustomQueryRecord> List<S> findAllCustomRecordByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<S> type) {
+        List<S> foundItems;
 
         Class[] colTypes = null;
 
         Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
         if (cursor != null) {
-            foundItems = new ArrayList<T>(cursor.getCount());
+            foundItems = new ArrayList<S>(cursor.getCount());
             if (cursor.moveToFirst()) {
                 do {
-                    T item;
+                    S item;
 
                     try {
                         item = type.newInstance();
@@ -1141,7 +1145,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             }
             cursor.close();
         } else {
-            foundItems = new ArrayList<T>();
+            foundItems = new ArrayList<S>();
         }
 
         return foundItems;
