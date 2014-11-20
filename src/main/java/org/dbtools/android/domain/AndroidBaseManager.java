@@ -195,6 +195,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     /**
      * Save Record.
      *
+     * @param databaseName database name to use
      * @param e Record to be saved
      * @return true if record was saved
      */
