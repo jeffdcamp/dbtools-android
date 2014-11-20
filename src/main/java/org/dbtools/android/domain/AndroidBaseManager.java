@@ -13,6 +13,7 @@ import org.dbtools.android.domain.event.DatabaseDeleteEvent;
 import org.dbtools.android.domain.event.DatabaseEndTransactionEvent;
 import org.dbtools.android.domain.event.DatabaseInsertEvent;
 import org.dbtools.android.domain.event.DatabaseUpdateEvent;
+import org.dbtools.android.domain.task.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,7 +22,7 @@ import java.util.*;
 /**
  * @author jcampbell
  */
-public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
+public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements AsyncManager<T> {
 
     private static final int MAX_TRY_COUNT = 3;
 
@@ -30,6 +31,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public abstract SQLiteDatabase getReadableDatabase(String databaseName);
 
     public abstract SQLiteDatabase getWritableDatabase(String databaseName);
+
+    public abstract AndroidDatabase getAndroidDatabase(String databaseName);
 
     public abstract String getDatabaseName();
 
@@ -212,13 +215,25 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e  Record to be saved
      * @return true if record was saved
      */
-    public boolean save(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
+    public boolean save(@Nonnull SQLiteDatabase db, @Nonnull T e) {
         if (e.isNewRecord()) {
             long newId = insert(db, e);
             return newId != 0;
         } else {
             int count = update(db, e);
             return count != 0;
+        }
+    }
+
+    public void saveAsync(@Nonnull T e) {
+        saveAsync(getDatabaseName(), e);
+    }
+
+    public void saveAsync(@Nonnull String databaseName, @Nonnull T e) {
+        if (e.isNewRecord()) {
+            insertAsync(databaseName, e);
+        } else {
+            updateAsync(databaseName, e);
         }
     }
 
@@ -249,19 +264,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param e  record to be inserted
      * @return long value of new id
      */
-    public long insert(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
-        return insert(db, e, null);
-    }
-
-    /**
-     * Insert record into database.
-     *
-     * @param db database for the record inserted into
-     * @param e  record to be inserted
-     * @param bus Event bus
-     * @return long value of new id
-     */
-    public long insert(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e, @Nullable Bus bus) {
+    public long insert(@Nonnull SQLiteDatabase db, @Nonnull T e) {
         checkDB(db);
         long rowId = -1;
 
@@ -279,6 +282,24 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
 
         return rowId;
+    }
+
+    public void insertAsync(@Nonnull T e) {
+        insertAsync(getDatabaseName(), e);
+    }
+
+    public void insertAsync(@Nonnull String databaseName, @Nonnull T e) {
+        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
+        androidDatabase.getManagerExecutorServiceInstance().submit(new InsertTask<T>(databaseName, this, e));
+    }
+
+    public void updateAsync(@Nonnull T e) {
+        updateAsync(getDatabaseName(), e);
+    }
+
+    public void updateAsync(@Nonnull String databaseName, @Nonnull T e) {
+        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
+        androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateTask<T>(databaseName, this, e));
     }
 
     @Nonnull
@@ -319,7 +340,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return db.compileStatement(sql.toString());
     }
 
-    public long insert(@Nonnull SQLiteStatement statement, @Nonnull AndroidBaseRecord e) {
+    public long insert(@Nonnull SQLiteStatement statement, @Nonnull T e) {
         ContentValues contentValues = e.getContentValues();
         int bindItemCount = 1;
         for (String key : e.getAllKeys()) {
@@ -365,7 +386,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return update(getWritableDatabase(databaseName), e);
     }
 
-    public int update(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
+    public int update(@Nonnull SQLiteDatabase db, @Nonnull T e) {
         checkDB(db);
         long rowId = e.getPrimaryKeyId();
         if (rowId <= 0) {
@@ -379,27 +400,27 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return update(getDatabaseName(), tableName, contentValues, rowKey, rowId);
     }
 
+    @Deprecated
     public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
         return update(getWritableDatabase(databaseName), tableName, contentValues, rowKey, rowId);
     }
 
+    @Deprecated
     public int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
-        return update(db, tableName, null, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+        return update(db, tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
     }
 
+    @Deprecated
     public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         return update(getDatabaseName(), tableName, contentValues, where, whereArgs);
     }
 
+    @Deprecated
     public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        return update(getWritableDatabase(databaseName), tableName, null, contentValues, where, whereArgs);
+        return update(getWritableDatabase(databaseName), tableName, contentValues, where, whereArgs);
     }
 
     public int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        return update(db, tableName, null, contentValues, where, whereArgs);
-    }
-
-    public int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nullable Bus bus, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         int rowsAffected = 0;
 
         checkDB(db);
@@ -418,6 +439,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return rowsAffected;
     }
 
+    public void updateAsync(@Nullable String where, @Nonnull ContentValues contentValues, long rowId) {
+        updateAsync(getDatabaseName(), contentValues, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)});
+    }
+
+    public void updateAsync(@Nonnull String databaseName,  @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
+        androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateWhereTask<T>(databaseName, this, contentValues, where, whereArgs));
+    }
+
     public int delete(long rowId) {
         return delete(getTableName(), getPrimaryKey(), rowId);
     }
@@ -434,7 +464,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return delete(getWritableDatabase(databaseName), e);
     }
 
-    public int delete(@Nonnull SQLiteDatabase db, @Nonnull AndroidBaseRecord e) {
+    public int delete(@Nonnull SQLiteDatabase db, @Nonnull T e) {
         checkDB(db);
         long rowId = e.getPrimaryKeyId();
         if (rowId <= 0) {
@@ -444,22 +474,36 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return delete(db, e.getTableName(), e.getIdColumnName(), rowId);
     }
 
+    public void deleteAsync(@Nonnull T e) {
+        deleteAsync(getDatabaseName(), e);
+    }
+
+    public void deleteAsync(@Nonnull String databaseName, @Nonnull T e) {
+        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
+        androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteTask<T>(databaseName, this, e));
+    }
+
+    @Deprecated
     public int delete(@Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         return delete(getDatabaseName(), tableName, rowKey, rowId);
     }
 
+    @Deprecated
     public int delete(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         return delete(getWritableDatabase(databaseName), tableName, rowKey, rowId);
     }
 
+    @Deprecated
     public int delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
         return delete(db, tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
     }
 
+    @Deprecated
     public int delete(@Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
         return delete(getDatabaseName(), tableName, where, whereArgs);
     }
 
+    @Deprecated
     public int delete(@Nonnull String databaseName, @Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
         return delete(getWritableDatabase(databaseName), tableName, where, whereArgs);
     }
@@ -483,6 +527,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return rowsAffected;
     }
 
+    public void deleteAsync(@Nullable String where, @Nullable String[] whereArgs) {
+        deleteAsync(getDatabaseName(), where, whereArgs);
+    }
+
+    public void deleteAsync(@Nonnull String databaseName, @Nullable String where, @Nullable String[] whereArgs) {
+        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
+        androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteWhereTask<T>(databaseName, this, where, whereArgs));
+    }
+
     public long deleteAll() {
         return deleteAll(getDatabaseName());
     }
@@ -491,12 +544,23 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return delete(getWritableDatabase(databaseName), getTableName(), null, null);
     }
 
+    @Deprecated
     public long deleteAll(@Nonnull String databaseName, @Nonnull String tableName) {
         return delete(getWritableDatabase(databaseName), tableName, null, null);
     }
 
+    @Deprecated
     public long deleteAll(@Nonnull SQLiteDatabase db, @Nonnull String tableName) {
         return delete(db, tableName, null, null);
+    }
+
+    public void deleteAllAsync() {
+        deleteAllAsync(getDatabaseName());
+    }
+
+    public void deleteAllAsync(@Nonnull String databaseName) {
+        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
+        androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteWhereTask<T>(databaseName, this, null, null));
     }
 
     private static final String DEFAULT_SEARCH_SUG_INTENT = BaseColumns._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID;

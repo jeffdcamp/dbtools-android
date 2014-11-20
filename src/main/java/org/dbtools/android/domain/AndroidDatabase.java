@@ -2,7 +2,10 @@ package org.dbtools.android.domain;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AndroidDatabase {
     private final boolean encrypted;
@@ -20,6 +23,8 @@ public class AndroidDatabase {
     // attached Database info
     private final AndroidDatabase attachedMainDatabase;
     private final List<AndroidDatabase> attachedDatabases;
+
+    private static ExecutorService managerExecutorService;
 
     public AndroidDatabase(String name, String path, int version, int viewsVersion) {
         this.name = name;
@@ -167,6 +172,28 @@ public class AndroidDatabase {
                     sqLiteDatabase.setTransactionSuccessful();
                 }
                 sqLiteDatabase.endTransaction();
+            }
+        }
+    }
+
+    @Nonnull
+    public ExecutorService getManagerExecutorServiceInstance() {
+        if (managerExecutorService == null) {
+            managerExecutorService = Executors.newFixedThreadPool(1);
+        }
+        return managerExecutorService;
+    }
+
+    public void shutdownManagerExecutorService() {
+        shutdownManagerExecutorService(false);
+    }
+
+    public void shutdownManagerExecutorService(boolean now) {
+        if (managerExecutorService != null && !managerExecutorService.isShutdown()) {
+            if (now) {
+                managerExecutorService.shutdownNow();
+            } else {
+                managerExecutorService.shutdown();
             }
         }
     }

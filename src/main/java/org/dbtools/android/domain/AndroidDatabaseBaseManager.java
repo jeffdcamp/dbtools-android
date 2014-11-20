@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 public abstract class AndroidDatabaseBaseManager {
     public static final String TAG = "AndroidDBTools";
@@ -594,5 +595,26 @@ public abstract class AndroidDatabaseBaseManager {
         }
 
         return version;
+    }
+
+    public void shutdownAllManagerExecutorServices() {
+        for (AndroidDatabase androidDatabase : getDatabases()) {
+            shutdownManagerExecutorService(androidDatabase);
+        }
+    }
+
+    public void shutdownManagerExecutorService(String databaseName) {
+        AndroidDatabase androidDatabase = getDatabase(databaseName);
+
+        if (androidDatabase != null) {
+            shutdownManagerExecutorService(androidDatabase);
+        }
+    }
+
+    public void shutdownManagerExecutorService(@Nonnull AndroidDatabase androidDatabase) {
+        ExecutorService service = androidDatabase.getManagerExecutorServiceInstance();
+        if (service != null && !service.isShutdown()) {
+            service.shutdown();
+        }
     }
 }
