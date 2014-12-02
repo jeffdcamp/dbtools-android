@@ -302,15 +302,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         androidDatabase.getManagerExecutorServiceInstance().submit(new InsertTask<T>(databaseName, this, e));
     }
 
-    public void updateAsync(@Nonnull T e) {
-        updateAsync(getDatabaseName(), e);
-    }
-
-    public void updateAsync(@Nonnull String databaseName, @Nonnull T e) {
-        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
-        androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateTask<T>(databaseName, this, e));
-    }
-
     @Nonnull
     public SQLiteStatement createCompiledInsert() {
         return createCompiledInsert(getDatabaseName());
@@ -379,14 +370,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return rowId;
     }
 
-    public int update(@Nonnull ContentValues values, long rowId) {
-        return update(getTableName(), values, getPrimaryKey(), rowId);
-    }
-
-    public int update(@Nonnull ContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
-        return update(getTableName(), values, where, whereArgs);
-    }
-
     public int update(@Nonnull T e) {
         return update(getDatabaseName(), e);
     }
@@ -402,34 +385,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
-        return update(db, e.getTableName(), e.getContentValues(), e.getIdColumnName(), rowId);
+        return update(db, e.getContentValues(), e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
-    public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
-        return update(getDatabaseName(), tableName, contentValues, rowKey, rowId);
+    public int update(@Nonnull ContentValues values, long rowId) {
+        return update(getDatabaseName(), values, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
-    @Deprecated
-    public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
-        return update(getWritableDatabase(databaseName), tableName, contentValues, rowKey, rowId);
+    public int update(@Nonnull ContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
+        return update(getDatabaseName(), values, where, whereArgs);
     }
 
-    @Deprecated
-    public int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nonnull String rowKey, long rowId) {
-        return update(db, tableName, contentValues, rowKey + "= ?", new String[]{String.valueOf(rowId)});
+    public int update(@Nonnull String databaseName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+        return update(getWritableDatabase(databaseName), contentValues, where, whereArgs);
     }
 
-    @Deprecated
-    public int update(@Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        return update(getDatabaseName(), tableName, contentValues, where, whereArgs);
-    }
-
-    @Deprecated
-    public int update(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        return update(getWritableDatabase(databaseName), tableName, contentValues, where, whereArgs);
-    }
-
-    public int update(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+    public int update(@Nonnull SQLiteDatabase db, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         int rowsAffected = 0;
 
         checkDB(db);
@@ -437,8 +408,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowsAffected = db.update(tableName, contentValues, where, whereArgs);
-                postUpdateEvent(db, tableName, rowsAffected);
+                rowsAffected = db.update(getTableName(), contentValues, where, whereArgs);
+                postUpdateEvent(db, getTableName(), rowsAffected);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -448,6 +419,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return rowsAffected;
     }
 
+    public void updateAsync(@Nonnull T e) {
+        updateAsync(getDatabaseName(), e);
+    }
+
+    public void updateAsync(@Nonnull String databaseName, @Nonnull T e) {
+        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
+        androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateTask<T>(databaseName, this, e));
+    }
+
     public void updateAsync(@Nullable String where, @Nonnull ContentValues contentValues, long rowId) {
         updateAsync(getDatabaseName(), contentValues, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)});
     }
@@ -455,14 +435,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     public void updateAsync(@Nonnull String databaseName,  @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
         androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateWhereTask<T>(databaseName, this, contentValues, where, whereArgs));
-    }
-
-    public int delete(long rowId) {
-        return delete(getTableName(), getPrimaryKey(), rowId);
-    }
-
-    public int delete(@Nullable String where, @Nullable String[] whereArgs) {
-        return delete(getTableName(), where, whereArgs);
     }
 
     public int delete(@Nonnull T e) {
@@ -480,7 +452,38 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "]");
         }
 
-        return delete(db, e.getTableName(), e.getIdColumnName(), rowId);
+        return delete(db, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+    }
+
+    public int delete(long rowId) {
+        return delete(getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
+    }
+
+    public int delete(@Nullable String where, @Nullable String[] whereArgs) {
+        return delete(getDatabaseName(), where, whereArgs);
+    }
+
+    public int delete(@Nonnull String databaseName, @Nullable String where, @Nullable String[] whereArgs) {
+        return delete(databaseName, where, whereArgs);
+    }
+
+    public int delete(@Nonnull SQLiteDatabase db, @Nullable String where, @Nullable String[] whereArgs) {
+        checkDB(db);
+        int rowsAffected = 0;
+
+        // Make sure that if there is an error (LockedException), that we try again.
+        boolean success = false;
+        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
+            try {
+                rowsAffected = db.delete(getTableName(), where, whereArgs);
+                postDeleteEvent(db, getTableName(), rowsAffected);
+                success = true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return rowsAffected;
     }
 
     public void deleteAsync(@Nonnull T e) {
@@ -490,50 +493,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     public void deleteAsync(@Nonnull String databaseName, @Nonnull T e) {
         AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
         androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteTask<T>(databaseName, this, e));
-    }
-
-    @Deprecated
-    public int delete(@Nonnull String tableName, @Nonnull String rowKey, long rowId) {
-        return delete(getDatabaseName(), tableName, rowKey, rowId);
-    }
-
-    @Deprecated
-    public int delete(@Nonnull String databaseName, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
-        return delete(getWritableDatabase(databaseName), tableName, rowKey, rowId);
-    }
-
-    @Deprecated
-    public int delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nonnull String rowKey, long rowId) {
-        return delete(db, tableName, rowKey + "= ?", new String[]{String.valueOf(rowId)});
-    }
-
-    @Deprecated
-    public int delete(@Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
-        return delete(getDatabaseName(), tableName, where, whereArgs);
-    }
-
-    @Deprecated
-    public int delete(@Nonnull String databaseName, @Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
-        return delete(getWritableDatabase(databaseName), tableName, where, whereArgs);
-    }
-
-    public int delete(@Nonnull SQLiteDatabase db, @Nonnull String tableName, @Nullable String where, @Nullable String[] whereArgs) {
-        checkDB(db);
-        int rowsAffected = 0;
-
-        // Make sure that if there is an error (LockedException), that we try again.
-        boolean success = false;
-        for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
-            try {
-                rowsAffected = db.delete(tableName, where, whereArgs);
-                postDeleteEvent(db, tableName, rowsAffected);
-                success = true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return rowsAffected;
     }
 
     public void deleteAsync(@Nullable String where, @Nullable String[] whereArgs) {
@@ -550,17 +509,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     public long deleteAll(@Nonnull String databaseName) {
-        return delete(getWritableDatabase(databaseName), getTableName(), null, null);
-    }
-
-    @Deprecated
-    public long deleteAll(@Nonnull String databaseName, @Nonnull String tableName) {
-        return delete(getWritableDatabase(databaseName), tableName, null, null);
-    }
-
-    @Deprecated
-    public long deleteAll(@Nonnull SQLiteDatabase db, @Nonnull String tableName) {
-        return delete(db, tableName, null, null);
+        return delete(getWritableDatabase(databaseName), null, null);
     }
 
     public void deleteAllAsync() {
