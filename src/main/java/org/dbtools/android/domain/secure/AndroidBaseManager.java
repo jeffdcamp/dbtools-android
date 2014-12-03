@@ -26,6 +26,7 @@ import java.util.*;
 /**
  * @author jcampbell
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements AsyncManager<T> {
 
     private static final int MAX_TRY_COUNT = 3;
@@ -52,6 +53,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
 
     public abstract T newRecord();
 
+    /**
+     * Otto Event Bus
+     * @return instance of Bus or null if disabled
+     */
     @Nullable
     public Bus getBus() {
         return null;
@@ -315,7 +320,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     @Nonnull
     public SQLiteStatement createCompiledInsert(@Nonnull SQLiteDatabase db) {
         StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO " + getTableName() + " (");
+        sql.append("INSERT INTO ").append(getTableName()).append(" (");
 
         int keyCount = 0;
         for (String key : getAllKeys()) {
@@ -428,11 +433,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateTask<T>(databaseName, this, e));
     }
 
-    public void updateAsync(@Nullable String where, @Nonnull ContentValues contentValues, long rowId) {
+    public void updateAsync(@Nonnull ContentValues contentValues, long rowId) {
         updateAsync(getDatabaseName(), contentValues, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)});
     }
 
-    public void updateAsync(@Nonnull String databaseName,  @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+    public void updateAsync(@Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+        updateAsync(getDatabaseName(),  contentValues, where, whereArgs);
+    }
+
+    public void updateAsync(@Nonnull String databaseName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
         androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateWhereTask<T>(databaseName, this, contentValues, where, whereArgs));
     }
@@ -464,7 +473,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     public int delete(@Nonnull String databaseName, @Nullable String where, @Nullable String[] whereArgs) {
-        return delete(databaseName, where, whereArgs);
+        return delete(getWritableDatabase(databaseName), where, whereArgs);
     }
 
     public int delete(@Nonnull SQLiteDatabase db, @Nullable String where, @Nullable String[] whereArgs) {

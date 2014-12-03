@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 /**
  * This class helps open, create, and upgrade the database file.
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidDatabaseManager extends AndroidDatabaseBaseManager {
     @Nonnull
     public SQLiteDatabase getWritableDatabase(@Nonnull String databaseName) {

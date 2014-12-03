@@ -1,11 +1,12 @@
 Change Log
 ==========
 
-  Version 2.5.1 *(2014-11)*
+  Version 2.5.2 *(2014-11)*
 ----------------------------
 
  * Removed deprecated methods
  * Minor improvements to AndroidBaseManager insert(...) update(...) delete(...) methods
+ * Bug fixes
 
   Version 2.5.0 *(2014-10)*
 ----------------------------

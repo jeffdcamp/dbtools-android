@@ -1,5 +1,6 @@
 package org.dbtools.android.domain;
 
+@SuppressWarnings("UnusedDeclaration")
 public class DBToolsMetaData {
     public static final String TABLE = "DBTOOLS_METADATA";
     public static final String C_KEY = "DB_KEY";

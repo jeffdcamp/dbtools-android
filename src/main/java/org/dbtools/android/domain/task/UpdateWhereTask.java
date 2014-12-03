@@ -23,6 +23,7 @@ public class UpdateWhereTask<T extends AndroidBaseRecord> implements Runnable {
     public UpdateWhereTask(@Nonnull String databaseName, @Nonnull AsyncManager<T> manager,  @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         this.databaseName = databaseName;
         this.manager = manager;
+        this.contentValues = contentValues;
         this.where = where;
         this.whereArgs = whereArgs;
     }

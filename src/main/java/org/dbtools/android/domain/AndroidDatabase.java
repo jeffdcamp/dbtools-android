@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@SuppressWarnings("UnusedDeclaration")
 public class AndroidDatabase {
     private final boolean encrypted;
     private final boolean attached;

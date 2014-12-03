@@ -19,6 +19,7 @@ import java.util.Date;
  *
  * @author jcampbell
  */
+@SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidBaseRecord implements Serializable {
 
     public static final String DB_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.sss";

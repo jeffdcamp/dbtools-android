@@ -12,6 +12,7 @@ import java.io.FileFilter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
+@SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidDatabaseBaseManager {
     public static final String TAG = "AndroidDBTools";
 
@@ -489,7 +490,7 @@ public abstract class AndroidDatabaseBaseManager {
             throw new IllegalArgumentException("file must not be null");
         }
 
-        boolean renamed = false;
+        boolean renamed;
         renamed = srcFile.renameTo(new File(targetFile.getPath()));
         renamed |= new File(srcFile.getPath() + "-journal").renameTo(new File(targetFile.getPath() + "-journal"));
         renamed |= new File(srcFile.getPath() + "-shm").renameTo(new File(targetFile.getPath() + "-shm"));
@@ -615,7 +616,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     public void shutdownManagerExecutorService(@Nonnull AndroidDatabase androidDatabase) {
         ExecutorService service = androidDatabase.getManagerExecutorServiceInstance();
-        if (service != null && !service.isShutdown()) {
+        if (!service.isShutdown()) {
             service.shutdown();
         }
     }
