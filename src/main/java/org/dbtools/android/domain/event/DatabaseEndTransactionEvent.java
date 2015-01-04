@@ -1,11 +1,11 @@
 package org.dbtools.android.domain.event;
 
 import javax.annotation.Nonnull;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class DatabaseEndTransactionEvent extends DatabaseChangeEvent {
-    private Set<String> tablesChanged = new HashSet<String>();
+    private Set<String> tablesChanged = new CopyOnWriteArraySet<String>();  // thread safe set
     private boolean success;
 
     public DatabaseEndTransactionEvent(boolean success, @Nonnull Set<String> tablesChanged) {
