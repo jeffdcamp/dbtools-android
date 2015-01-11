@@ -161,7 +161,7 @@ Setup
 
 *For a working implementation of DBTools for Android see the Android-Template application (https://github.com/jeffdcamp/android-template)
 
-  1. Add DBTools Generator to your "buildscript" section of the build.gradle file
+  1. Add DBTools Generator to your "buildscript" section of the build.gradle file.  (latest version in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-gen%22)
 
         buildscript {
             repositories {
@@ -179,7 +179,7 @@ Setup
             mavenCentral()
         }
 
-  3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version is found in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-android%22)
+  3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-android%22)
 
         dependencies {
             compile 'org.dbtools:dbtools-android:<latest version>'
