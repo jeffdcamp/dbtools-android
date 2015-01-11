@@ -18,8 +18,8 @@ Setup
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:0.14.+'
-                classpath 'org.dbtools:dbtools-gen:<latest version>' // (2.3.0)
+                classpath 'com.android.tools.build:gradle:1.0.0'
+                classpath 'org.dbtools:dbtools-gen:<latest version>'
             }
         }
 
@@ -32,7 +32,7 @@ Setup
   3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version is found in Maven Central Repo)
 
         dependencies {
-            compile 'org.dbtools:dbtools-android:<latest version>' // (2.3.0)
+            compile 'org.dbtools:dbtools-android:<latest version>'
         }
 
   4. Add dbtools "task" to your build.gradle file.  Be sure to modify the variables/properties in this task (especially "baseOutputDir" and "basePackageName")
@@ -169,7 +169,7 @@ Usage
         Individual individual = individualManager.findByRowId(1);
         individualManager.delete(individual);
         
-        individualManager.delete(1); // delete by primarykey id
+        individualManager.delete(1); // delete by primary key id
         individualManager.delete(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // delete all individuals who has "555" in their phone number
 
   DBTools Manager has a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
@@ -193,7 +193,7 @@ Usage
         Cursor cursor;
         Individual individual = new Individual(cursor); // populate all items from cursor into Individual
         
-        // Get single pieces of data from a curser.  (for use in places such as Adapters, etc) Examples:
+        // Get single pieces of data from a cursor.  (for use in places such as Adapters, etc) Examples:
         String name = Individual.getName(cursor);
         IndividualType type = Individual.getType(cursor);
         Date birthDate = Individual.getBirthDate(cursor);
