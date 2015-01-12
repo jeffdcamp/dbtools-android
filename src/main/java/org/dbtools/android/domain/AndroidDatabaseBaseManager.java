@@ -212,6 +212,8 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     public void connectAllDatabases() {
+        createDatabaseMap();
+
         Collection<AndroidDatabase> databases = getDatabases();
         for (AndroidDatabase database : databases) {
             connectDatabase(database.getName());
