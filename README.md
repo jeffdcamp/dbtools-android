@@ -3,15 +3,165 @@ DBTools for Android
 
 DBTools for Android is an Android ORM library that makes it easy to work with SQLite Databases.
 
-Instructions for migration from 1.x to 2.x (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md)
-Instructions for migration from 2.x to 2.3+ (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-2.x-2.3.md)
+Usage
+=====
+
+The following are some examples DBTools can be used:
+
+  * Use manager classes to perform CRUD operations on tables (2 options: With injection or without injection)
+
+        // USING INJECTION (recommended) (when using injection frameworks such as Dagger, RoboGuice, etc)
+        @Inject
+        IndividualManager individualManager;  // simply "Inject" your manager (it has access to the database directly)
+
+        public void onSaveClicked() {
+            // save
+            individualManager.save(individual);
+        }
+
+        ... or ...
+
+        // NO INJECTION
+        public void onSaveClicked() {
+            // get your database (can be pulled from shared location)
+            DatabaseManager databaseManager = new DatabaseManager();
+            databaseManager.setContext(this);
+            SQLiteDatabase db = databaseManager.getWritableDatabase(DatabaseManager.MAIN_DATABASE_NAME);
+
+            // save
+            IndividualManager.save(db, individual); // static method call to manager
+        }
+
+  * Add data to the database
+
+        // create a new domain object
+        Individual individual = new Individual();
+        individual.setName("Jeff Campbell");
+        individual.setPhone("801-555-1234");
+        individual.setIndividualType(IndividualType.HEAD); // enum table example
+
+        individualManager.save(individual);
+
+  * Transactions
+
+        // managers share transactions (use any manager to begin/end a transaction)
+        individualManager.beginTransaction();  
+        boolean success = true;
+
+        individualManager.save(individual1);
+        individualManager.save(individual2);
+        individualManager.save(individual3);
+        individualManager.save(individual4);
+        individualManager.save(individual5);
+
+        // if false, transaction is reverted
+        individualManager.endTransaction(success); 
+
+  * Update data to the database
+
+        Individual individual = individualManager.findByRowId(1);
+        individual.setPhone("801-555-0000");
+        individualManager.save(individual);
+
+  * Delete data from the database
+
+        Individual individual = individualManager.findByRowId(1);
+        individualManager.delete(individual);
+        
+        individualManager.delete(1); // delete by primary key id
+        
+        // delete all individuals who has "555" in their phone number
+        individualManager.delete(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+
+  DBTools Manager classes have a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
+
+  * Get records
+
+        Individual individual = individualManager.findByRowId(1);
+        
+        // find FIRST individual who has "555" in their phone number
+        Individual individual = individualManager.findBySelection(Individual.C_PHONE + " LIKE ?", new String[]{"555"}); 
+
+
+        List<Individual> allIndividuals = individualManager.findAll();
+        List<Individual> allOrderedIndividuals = individualManager.findAllOrderBy(Individual.C_NAME);
+        
+        // find all those who have "555" in their phone number
+        List<Individual> specificIndividuals = individualManager.findAllBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+
+  * Using cursors
+
+        // find all, order by NAME column
+        Cursor cursor = individualManager.findCursorBySelection(null, null, Individual.C_NAME); 
+        
+        // find cursor of those who have "555" in their phone number
+        Cursor cursor = individualManager.findCursorBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+        
+  * Access data from Cursor
+
+        Cursor cursor;
+        // populate all items from cursor into Individual
+        Individual individual = new Individual(cursor); 
+        
+        // Get data from a single field, from a cursor.  (for use in places such as Adapters, etc) Examples:
+        String name = Individual.getName(cursor);
+        IndividualType type = Individual.getType(cursor);
+        Date birthDate = Individual.getBirthDate(cursor);
+
+  * Count number of items in the database
+
+        int count = individualManager.findCount();
+        // find count of those who have "555" in their phone number
+        int count = individualManager.findCountBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+
+  Support for ASync writes (guarantees single write per database)
+
+  * Sample save
+
+        Individual individual = individualManager.findByRowId(1);
+        individual.setPhone("801-555-0000");
+        individualManager.saveAsync(individual);
+
+
+  Event Bus (via Otto) support.  This allow your app to be notified if the database changed.  Examples:
+
+  * Watch for any Insert/Update/Delete event
+
+        @Subscribe
+        public void onDatabaseChanged(DatabaseChangeEvent event) {
+            Log.i(TAG, "Database changed on table " + event.getTableName());
+        }
+
+  * Watch for any Insert event
+
+        @Subscribe
+        public void onInsert(DatabaseInsertEvent event) {
+            Log.i(TAG, "Item inserted on table " + event.getTableName());
+            Log.i(TAG, "Item ID inserted " + event.getNewId());
+        }
+
+  * Watch for any Update event
+
+        @Subscribe
+        public void onUpdate(DatabaseUpdateEvent event) {
+            Log.i(TAG, "Item inserted on table " + event.getTableName());
+            Log.i(TAG, "RowsAffected " + event.getRowsAffected());
+        }
+
+  * Transactions.  Events will NOT be posted if in a transaction.  You can subscribe to watch for the end of a transaction:
+
+        @Subscribe
+        public void onDatabaseChangedTransaction(DatabaseEndTransactionEvent event) {
+            Log.i(TAG, "Database changed, transaction end.  Tables changed: " + event.getAllTableName());
+            boolean myTableUpdated = event.containsTable(Individual.TABLE);
+        }
 
 Setup
 =====
 
 *For a working implementation of DBTools for Android see the Android-Template application (https://github.com/jeffdcamp/android-template)
 
-  1. Add DBTools Generator to your "buildscript" section of the build.gradle file
+  1. Add DBTools Generator to your "buildscript" section of the build.gradle file.  (latest version in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-gen%22)
 
         buildscript {
             repositories {
@@ -29,7 +179,7 @@ Setup
             mavenCentral()
         }
 
-  3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version is found in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-android%22)
+  3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-android%22)
 
         dependencies {
             compile 'org.dbtools:dbtools-android:<latest version>'
@@ -61,7 +211,7 @@ Setup
             }
         }
 
-  5. Add schema.xml file (after executing the "dbtools" task (from above) an XSD definition file will be created (this may help writing the XML file in some IDE's)), to the /src/main/database directory.  This file contains a list of all of the databases and tables in each database.  The following is a sample of this file:
+  5. Define your database: Add schema.xml file (after executing the "dbtools" task (from above) an XSD definition file will be created (this may help writing the XML file in some IDE's)), to the /src/main/database directory.  This file contains a list of all of the databases and tables in each database.  The following is a sample of this file:
 
         <?xml version="1.0" encoding="UTF-8" ?>
         <dbSchema xmlns='https://github.com/jeffdcamp/dbtools-gen'
@@ -106,145 +256,17 @@ Setup
                IndividualManager.java (extends IndividualBaseManager and is used for developer customizations (such as adding new findByXXX(...) methods) (NEVER overwritten by generator)
                IndividualBaseManager.java (contains boiler-plate code for doing CRUD operations) (this file is ALWAYS overwritten by generator)
 
-Usage
-=====
+Upgrade
+=======
+Instructions for migration from 1.x to 2.x     (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md)
+  
+Instructions for migration from 2.x to 2.3+ (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-2.x-2.3.md)
 
-  At this point DBTools for Android is all setup and your Domain classes have been created.  The following are some use cases:
+Other Projects
+==============
+DBTools Query - https://github.com/jeffdcamp/dbtools-query
 
-  * Use manager classes to perform CRUD operations on tables (2 options: With injection or without injection)
-
-        // USING INJECTION (recommended) (when using injection frameworks such as Dagger, RoboGuice, etc)
-        @Inject
-        IndividualManager individualManager;  // simply "Inject" your manager (it has access to the database directly)
-
-        public void onSaveClicked() {
-            // save
-            individualManager.save(individual);
-        }
-
-        ... or ...
-
-        // NO INJECTION
-        public void onSaveClicked() {
-            // get your database (can be pulled from shared location)
-            DatabaseManager databaseManager = new DatabaseManager();
-            databaseManager.setContext(this);
-            SQLiteDatabase db = databaseManager.getWritableDatabase(DatabaseManager.MAIN_DATABASE_NAME);
-
-            // save
-            IndividualManager.save(db, individual); // static method call to manager
-        }
-
-  * Add data to the database
-
-        // create a new domain object
-        Individual individual = new Individual();
-        individual.setName("Jeff Campbell");
-        individual.setPhone("801-555-1234");
-        individual.setIndividualType(IndividualType.HEAD); // enum table example
-
-        individualManager.save(individual);
-
-  * Transactions
-
-        individualManager.beginTransaction();  // managers share transactions (use any manager to begin/end a transaction)
-        boolean success = true;
-
-        individualManager.save(individual1);
-        individualManager.save(individual2);
-        individualManager.save(individual3);
-        individualManager.save(individual4);
-        individualManager.save(individual5);
-
-        individualManager.endTransaction(success); // if false, transaction is reverted
-
-  * Update data to the database
-
-        Individual individual = individualManager.findByRowId(1);
-        individual.setPhone("801-555-0000");
-        individualManager.save(individual);
-
-  * Delete data from the database
-
-        Individual individual = individualManager.findByRowId(1);
-        individualManager.delete(individual);
-        
-        individualManager.delete(1); // delete by primary key id
-        individualManager.delete(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // delete all individuals who has "555" in their phone number
-
-  DBTools Manager has a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
-
-  * Get records
-
-        Individual individual = individualManager.findByRowId(1);
-        Individual individual = individualManager.findBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find FIRST individual who has "555" in their phone number
-
-        List<Individual> allIndividuals = individualManager.findAll();
-        List<Individual> allOrderedIndividuals = individualManager.findAllOrderBy(Individual.C_NAME);
-        List<Individual> specificIndividuals = individualManager.findAllBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find all those who have "555" in their phone number
-
-  * Using cursors
-
-        Cursor cursor = individualManager.findCursorBySelection(null, null, Individual.C_NAME); // find all, order by NAME column
-        Cursor cursor = individualManager.findCursorBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find cursor of those who have "555" in their phone number
-        
-  * Access data from Cursor
-
-        Cursor cursor;
-        Individual individual = new Individual(cursor); // populate all items from cursor into Individual
-        
-        // Get single pieces of data from a cursor.  (for use in places such as Adapters, etc) Examples:
-        String name = Individual.getName(cursor);
-        IndividualType type = Individual.getType(cursor);
-        Date birthDate = Individual.getBirthDate(cursor);
-
-  * Count number of items in the database
-
-        int count = individualManager.findCount();
-        int count = individualManager.findCountBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); // find count of those who have "555" in their phone number
-
-  Support for ASync writes (guarantees single write per database)
-
-  * Sample save
-
-        Individual individual = individualManager.findByRowId(1);
-        individual.setPhone("801-555-0000");
-        individualManager.saveAsync(individual);
-
-
-  Event Bus (via Otto) support.  This allow your app to be notified if the database changed.  Examples:
-
-  * Watch for any Insert/Update/Delete event
-
-        @Subscribe
-        public void onDatabaseChanged(DatabaseChangeEvent event) {
-            Log.i(TAG, "Database changed on table " + event.getTableName());
-        }
-
-  * Watch for any Insert event
-
-        @Subscribe
-        public void onInsert(DatabaseInsertEvent event) {
-            Log.i(TAG, "Item inserted on table " + event.getTableName());
-            Log.i(TAG, "Item ID inserted " + event.getNewId());
-        }
-
-  * Watch for any Update event
-
-        @Subscribe
-        public void onUpdate(DatabaseUpdateEvent event) {
-            Log.i(TAG, "Item inserted on table " + event.getTableName());
-            Log.i(TAG, "RowsAffected " + event.getRowsAffected());
-        }
-
-  * Transactions.  Events will NOT be posted if in a transaction.  You can subscribe to watch for the end of a transaction:
-
-        @Subscribe
-        public void onDatabaseChangedTransaction(DatabaseEndTransactionEvent event) {
-            Log.i(TAG, "Database changed, transaction end.  Tables changed: " + event.getAllTableName());
-            boolean myTableUpdated = event.containsTable(Individual.TABLE);
-        }
-
+Android Template - https://github.com/jeffdcamp/android-template
 
 License
 =======
