@@ -14,6 +14,7 @@ import org.dbtools.android.domain.event.DatabaseEndTransactionEvent;
 import org.dbtools.android.domain.event.DatabaseInsertEvent;
 import org.dbtools.android.domain.event.DatabaseUpdateEvent;
 import org.dbtools.android.domain.task.*;
+import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -892,6 +893,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return findLongByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
     }
 
+    /**
+     * Return the first column and first row value as a Long for given rawQuery and selectionArgs.
+     *
+     * @param database      SQLiteDatabase Name of database to query
+     * @param rawQuery      Query contain first column which is a long value
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
     public static long findLongByRawQuery(@Nonnull SQLiteDatabase database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         long value = -1;
 
@@ -903,6 +912,288 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             c.close();
         }
 
+        return value;
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a long for given selection and selectionArgs.
+     *
+     * @param column        Column which long value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
+    public long findLongBySelection(@Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return findLongBySelection(getDatabaseName(), column, selection, selectionArgs);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a long for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param column        Column which long value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
+    public long findLongBySelection(@Nonnull String databaseName, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        long value = -1;
+
+        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = c.getLong(0);
+            }
+            c.close();
+        }
+        return value;
+    }
+
+    /**
+     * Return the first column and first row value as a int for given rawQuery and selectionArgs.
+     *
+     * @param rawQuery      Query contain first column which is a int value
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
+    public int findIntByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findIntByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a int for given rawQuery and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a int value
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
+    public int findIntByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findIntByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a Long for given rawQuery and selectionArgs.
+     *
+     * @param database      SQLiteDatabase Name of database to query
+     * @param rawQuery      Query contain first column which is a long value
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
+    public static int findIntByRawQuery(@Nonnull SQLiteDatabase database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        int value = -1;
+
+        Cursor c = database.rawQuery(rawQuery, selectionArgs);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = c.getInt(0);
+            }
+            c.close();
+        }
+
+        return value;
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a int for given selection and selectionArgs.
+     *
+     * @param column        Column which int value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
+    public int findIntBySelection(@Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return findIntBySelection(getDatabaseName(), column, selection, selectionArgs);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a int for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param column        Column which int value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or -1 if no data was returned
+     */
+    public int findIntBySelection(@Nonnull String databaseName, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        int value = -1;
+
+        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = c.getInt(0);
+            }
+            c.close();
+        }
+        return value;
+    }
+
+    /**
+     * Return the first column and first row value as a boolean for given rawQuery and selectionArgs.
+     *
+     * @param rawQuery      Query contain first column which is a boolean value
+     * @param selectionArgs Query parameters
+     * @return query results value or false if no data was returned
+     */
+    public boolean findBooleanByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findBooleanByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a Boolean for given rawQuery and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a boolean value
+     * @param selectionArgs Query parameters
+     * @return query results value or false if no data was returned
+     */
+    public boolean findBooleanByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findBooleanByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a Boolean for given rawQuery and selectionArgs.
+     *
+     * @param database      SQLiteDatabase Name of database to query
+     * @param rawQuery      Query contain first column which is a boolean value
+     * @param selectionArgs Query parameters
+     * @return query results value or false if no data was returned
+     */
+    public static boolean findBooleanByRawQuery(@Nonnull SQLiteDatabase database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        boolean value = false;
+
+        Cursor c = database.rawQuery(rawQuery, selectionArgs);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = c.getInt(0) != 0;
+            }
+            c.close();
+        }
+
+        return value;
+    }
+
+    /**
+     * Return the first column and first row value as a DateTime for given rawQuery and selectionArgs.
+     *
+     * @param rawQuery      Query contain first column which is a DateTime value
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    public DateTime findDateTimeByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findDateTimeByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a DateTime for given rawQuery and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a DateTime value
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    public DateTime findDateTimeByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findDateTimeByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a DateTime for given rawQuery and selectionArgs.
+     *
+     * @param database      SQLiteDatabase Name of database to query
+     * @param rawQuery      Query contain first column which is a DateTime value
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    public static DateTime findDateTimeByRawQuery(@Nonnull SQLiteDatabase database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        DateTime value = null;
+
+        Cursor c = database.rawQuery(rawQuery, selectionArgs);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = !c.isNull(0) ? new org.joda.time.DateTime(c.getLong(0)) : null;
+            }
+            c.close();
+        }
+
+        return value;
+    }
+
+    /**
+     * Return the first column and first row value as a Date for given rawQuery and selectionArgs.
+     *
+     * @param rawQuery      Query contain first column which is a Date value
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    public Date findDateByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findDateByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a Date for given rawQuery and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a Date value
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    public Date findDateByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findDateByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return the first column and first row value as a Date for given rawQuery and selectionArgs.
+     *
+     * @param database      SQLiteDatabase Name of database to query
+     * @param rawQuery      Query contain first column which is a Date value
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    public static Date findDateByRawQuery(@Nonnull SQLiteDatabase database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        Date value = null;
+
+        Cursor c = database.rawQuery(rawQuery, selectionArgs);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = !c.isNull(0) ? new Date(c.getLong(0)) : null;
+            }
+            c.close();
+        }
+
+        return value;
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a boolean for given selection and selectionArgs.
+     *
+     * @param column        Column which boolean value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or false if no data was returned
+     */
+    public boolean findBooleanBySelection(@Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return findBooleanBySelection(getDatabaseName(), column, selection, selectionArgs);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a boolean for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param column        Column which boolean value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or false if no data was returned
+     */
+    public boolean findBooleanBySelection(@Nonnull String databaseName, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        boolean value = false;
+
+        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = c.getInt(0) != 0;
+            }
+            c.close();
+        }
         return value;
     }
 
@@ -942,6 +1233,114 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     /**
+     * Return the value for the specified column and first row value as a String for given selection and selectionArgs.
+     *
+     * @param column        Column which String value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    @Nullable
+    public String findStringBySelection(@Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return findStringBySelection(getDatabaseName(), column, selection, selectionArgs);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a String for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param column        Column which String value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    @Nullable
+    public String findStringBySelection(@Nonnull String databaseName, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        String value = null;
+
+        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = c.getString(0);
+            }
+            c.close();
+        }
+        return value;
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a DateTime for given selection and selectionArgs.
+     *
+     * @param column        Column which DateTime value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    @Nullable
+    public DateTime findDateTimeBySelection(@Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return findDateTimeBySelection(getDatabaseName(), column, selection, selectionArgs);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a DateTime for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param column        Column which DateTime value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    @Nullable
+    public DateTime findDateTimeBySelection(@Nonnull String databaseName, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        DateTime value = null;
+
+        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = !c.isNull(0) ? new org.joda.time.DateTime(c.getLong(0)) : null;
+            }
+            c.close();
+        }
+        return value;
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a Date for given selection and selectionArgs.
+     *
+     * @param column        Column which Date value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    @Nullable
+    public Date findDateBySelection(@Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return findDateBySelection(getDatabaseName(), column, selection, selectionArgs);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as a Date for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param column        Column which Date value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @return query results value or null if no data was returned
+     */
+    @Nullable
+    public Date findDateBySelection(@Nonnull String databaseName, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+        Date value = null;
+
+        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                value = !c.isNull(0) ? new Date(c.getLong(0)) : null;
+            }
+            c.close();
+        }
+        return value;
+    }
+
+    /**
      * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
      *
      * @param rawQuery      Query contain first column which is a Long value
@@ -976,6 +1375,46 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             cursor.close();
         } else {
             foundItems = new ArrayList<Long>();
+        }
+
+        return foundItems;
+    }
+
+    /**
+     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
+     *
+     * @param rawQuery      Query contain first column which is a Int value
+     * @param selectionArgs Query parameters
+     * @return query results List or empty List returned
+     */
+    @Nonnull
+    public List<Integer> findAllIntByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findAllIntByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param rawQuery      Query contain first column which is a Int value
+     * @param selectionArgs Query parameters
+     * @return query results List or empty List returned
+     */
+    @Nonnull
+    public List<Integer> findAllIntByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        List<Integer> foundItems;
+
+        Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+        if (cursor != null) {
+            foundItems = new ArrayList<Integer>(cursor.getCount());
+            if (cursor.moveToFirst()) {
+                do {
+                    foundItems.add(cursor.getInt(0));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } else {
+            foundItems = new ArrayList<Integer>();
         }
 
         return foundItems;
