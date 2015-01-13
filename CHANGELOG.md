@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+  Version 2.5.4 *(2015-01)*
+----------------------------
+
+ * Added findLongBySelection(...), findIntBySelection(...), findStringBySelection(...), findBooleanBySelection(...), findDateBySelection(...), findDateTimeBySelection(...) 
+ * Improved findXXXByRawQuery(...) support for Int, Boolean, Date, DateTime
+ * Fix for issue #5 (ConnectAllDatabases should call IdentifyDatabases)
+
+
   Version 2.5.2 *(2014-11)*
 ----------------------------
 
