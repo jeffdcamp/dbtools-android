@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+  Version 2.6.0 *(2015-01)*
+----------------------------
+
+ * Consolidated all of the different findXXXBySelection(...) to findValueBySelection(...) to allow better support for more datatypes
+ * Migration to 2.6.0
+
+   findXXXBySelection(...) to findValueBySelection(class, ...)
+   findXXXByRawQuery(...) to findValueByRawQuery(class, ...)
+   findAllIntByRawQuery(...) to findAllValuesByRawQuery(class, ...)
+   NEW: findAllValuesBySelection(class, ...)
+
   Version 2.5.4 *(2015-01)*
 ----------------------------
 

@@ -594,9 +594,9 @@ public abstract class AndroidDatabaseBaseManager {
         String[] selectionArgs = new String[]{getViewVersionKey(androidDatabase)};
 
         if (!androidDatabase.isEncrypted()) {
-            version = (int) AndroidBaseManager.findLongByRawQuery(androidDatabase.getSqLiteDatabase(), FIND_VERSION, selectionArgs);
+            version = AndroidBaseManager.findValueByRawQuery(androidDatabase.getSqLiteDatabase(), Integer.class, FIND_VERSION, selectionArgs, 0);
         } else {
-            version = (int) org.dbtools.android.domain.secure.AndroidBaseManager.findLongByRawQuery(androidDatabase.getSecureSqLiteDatabase(), FIND_VERSION, selectionArgs);
+            version = org.dbtools.android.domain.secure.AndroidBaseManager.findValueByRawQuery(androidDatabase.getSecureSqLiteDatabase(), Integer.class, FIND_VERSION, selectionArgs, 0);
         }
 
         return version;
