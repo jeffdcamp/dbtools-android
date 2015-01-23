@@ -103,15 +103,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     public void dropTable() {
-        executeSql(getDatabaseName(), getCreateSql());
+        executeSql(getDatabaseName(), getDropSql());
     }
 
     public void dropTable(@Nonnull String databaseName) {
-        executeSql(getWritableDatabase(databaseName), getCreateSql());
+        executeSql(getWritableDatabase(databaseName), getDropSql());
     }
 
     public void dropTable(@Nonnull SQLiteDatabase db) {
-        executeSql(db, getCreateSql());
+        executeSql(db, getDropSql());
     }
 
     // for use with enum records
