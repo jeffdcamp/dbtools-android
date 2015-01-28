@@ -202,7 +202,6 @@ Setup
                 genConfig.setInjectionSupport(true); // support for @Inject (using Dagger or Guice)
                 genConfig.setJsr305Support(true); // support for @Notnull / @Nullable etc
                 genConfig.setDateTimeSupport(true); // support Joda DateTime
-                genConfig.setEncryptionSupport(false); // support SQLCipher
                 genConfig.setIncludeDatabaseNameInPackage(true); // place each set of domain objects into a package named after its database
                 genConfig.setOttoSupport(true); // support Event Bus using Otto
 
@@ -256,11 +255,28 @@ Setup
                IndividualManager.java (extends IndividualBaseManager and is used for developer customizations (such as adding new findByXXX(...) methods) (NEVER overwritten by generator)
                IndividualBaseManager.java (contains boiler-plate code for doing CRUD operations) (this file is ALWAYS overwritten by generator)
 
+Proguard Rules
+==============
+
+    # DBTools
+    -dontwarn org.dbtools.query.**
+    -dontwarn org.sqlite.**
+    -dontwarn net.sqlcipher.**
+
+    # SQLCipher (if using SQLCipher)
+    -keep public class net.sqlcipher.** { *; }
+    -keep public class net.sqlcipher.database.** { *; }
+
+    # SQLite.org (if using sqlite from sqlite.org)
+    -keep public class org.sqlite.** { *; }
+    -keep public class org.sqlite.database.** { *; }
+
+
 Upgrade
 =======
-Instructions for migration from 1.x to 2.x     (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md)
-  
+Instructions for migration from 2.x to 3.x+ (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-3.x.md)
 Instructions for migration from 2.x to 2.3+ (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-2.x-2.3.md)
+Instructions for migration from 1.x to 2.x  (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md)
 
 Other Projects
 ==============

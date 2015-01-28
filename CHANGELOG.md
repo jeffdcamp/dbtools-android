@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+  Version 3.0.0 *(2015-01)*
+----------------------------
+
+ * Changed DBTools to use DatabaseWrapper interface to identify the type of SQLite Database to use (Build-in Android, SQLCipher, SQLite.org build of SQLite, etc).  Allows the use of any custom build of SQLite.
+ * Added several default implementations of DatabaseWrapper interface (AndroidDatabaseWrapper, SQLCipherDatabaseWrapper, SQLiteDatabaseWrapper)
+ * Removed unneeded
+ * Minor bug fixes from 2.6.0
+
+
   Version 2.6.0 *(2015-01)*
 ----------------------------
 

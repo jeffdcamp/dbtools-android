@@ -5,10 +5,10 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import com.squareup.otto.Bus;
+import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.dbtype.DatabaseValue;
 import org.dbtools.android.domain.dbtype.DatabaseValueUtil;
 import org.dbtools.android.domain.event.DatabaseDeleteEvent;
@@ -31,9 +31,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
 
     public static final String DEFAULT_COLLATE_LOCALIZED = " COLLATE LOCALIZED";
 
-    public abstract SQLiteDatabase getReadableDatabase(String databaseName);
+    public abstract DatabaseWrapper getReadableDatabase(String databaseName);
 
-    public abstract SQLiteDatabase getWritableDatabase(String databaseName);
+    public abstract DatabaseWrapper getWritableDatabase(String databaseName);
 
     public abstract AndroidDatabase getAndroidDatabase(String databaseName);
 
@@ -51,6 +51,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
 
     public abstract T newRecord();
 
+    // use static to get ALL tables across ALL managers
+    private static Set<String> transactionChangesTableNames = new HashSet<String>();
+
     /**
      * Otto Event Bus
      * @return instance of Bus or null if disabled
@@ -58,32 +61,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     @Nullable
     public Bus getBus() {
         return null;
-    }
-
-    @Nullable
-    public static SQLiteDatabase getDatabase(@Nonnull AndroidDatabase androidDatabase) {
-        return androidDatabase.getSqLiteDatabase();
-    }
-
-    public static boolean openDatabase(@Nonnull AndroidDatabase androidDatabase) {
-        SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(androidDatabase.getPath(), null);
-        androidDatabase.setSqLiteDatabase(database);
-        return database.isOpen();
-    }
-
-    public static boolean closeDatabase(@Nonnull AndroidDatabase androidDatabase) {
-        SQLiteDatabase sqLiteDatabase = getDatabase(androidDatabase);
-        if (sqLiteDatabase != null && sqLiteDatabase.isOpen() && !sqLiteDatabase.inTransaction()) {
-            sqLiteDatabase.close();
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean isDatabaseAlreadyOpen(@Nonnull AndroidDatabase androidDatabase) {
-        SQLiteDatabase database = getDatabase(androidDatabase);
-        return database != null && database.isOpen();
     }
 
     public void createTable() {
@@ -94,11 +71,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         executeSql(getWritableDatabase(databaseName), getCreateSql());
     }
 
-    public void createTable(@Nonnull SQLiteDatabase db) {
+    public void createTable(@Nonnull DatabaseWrapper db) {
         executeSql(db, getCreateSql());
     }
 
-    public static void createTable(@Nonnull SQLiteDatabase db, String sql) {
+    public static void createTable(@Nonnull DatabaseWrapper db, String sql) {
         executeSql(db, sql);
     }
 
@@ -110,12 +87,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         executeSql(getWritableDatabase(databaseName), getDropSql());
     }
 
-    public void dropTable(@Nonnull SQLiteDatabase db) {
+    public void dropTable(@Nonnull DatabaseWrapper db) {
         executeSql(db, getDropSql());
     }
 
     // for use with enum records
-    public static void dropTable(@Nonnull SQLiteDatabase db, @Nonnull String sql) {
+    public static void dropTable(@Nonnull DatabaseWrapper db, @Nonnull String sql) {
         executeSql(db, sql);
     }
 
@@ -127,7 +104,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         cleanTable(getWritableDatabase(databaseName), getDropSql(), getCreateSql());
     }
 
-    public void cleanTable(@Nonnull SQLiteDatabase db) {
+    public void cleanTable(@Nonnull DatabaseWrapper db) {
         cleanTable(db, getDropSql(), getCreateSql());
     }
 
@@ -139,7 +116,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         cleanTable(getWritableDatabase(databaseName), dropSql, createSql);
     }
 
-    public void cleanTable(@Nonnull SQLiteDatabase db, @Nonnull String dropSql, @Nonnull String createSql) {
+    public void cleanTable(@Nonnull DatabaseWrapper db, @Nonnull String dropSql, @Nonnull String createSql) {
         checkDB(db);
         executeSql(db, dropSql);
         executeSql(db, createSql);
@@ -154,10 +131,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     public static void executeSql(@Nonnull AndroidDatabase androidDatabase, @Nonnull String sql) {
-        executeSql(getDatabase(androidDatabase), sql);
+        executeSql(androidDatabase.getDatabaseWrapper(), sql);
     }
 
-    public static void executeSql(@Nullable SQLiteDatabase db, @Nonnull String sql) {
+    public static void executeSql(@Nullable DatabaseWrapper db, @Nonnull String sql) {
         checkDB(db);
 
         String[] sqlStatements = sql.split(";");
@@ -223,7 +200,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param e  Record to be saved
      * @return true if record was saved
      */
-    public boolean save(@Nonnull SQLiteDatabase db, @Nonnull T e) {
+    public boolean save(@Nonnull DatabaseWrapper db, @Nonnull T e) {
         if (e.isNewRecord()) {
             long newId = insert(db, e);
             return newId != 0;
@@ -272,7 +249,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param e  record to be inserted
      * @return long value of new id
      */
-    public long insert(@Nonnull SQLiteDatabase db, @Nonnull T e) {
+    public long insert(@Nonnull DatabaseWrapper db, @Nonnull T e) {
         checkDB(db);
         long rowId = -1;
 
@@ -299,44 +276,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     public void insertAsync(@Nonnull String databaseName, @Nonnull T e) {
         AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
         androidDatabase.getManagerExecutorServiceInstance().submit(new InsertTask<T>(databaseName, this, e));
-    }
-
-    @Nonnull
-    public SQLiteStatement createCompiledInsert() {
-        return createCompiledInsert(getDatabaseName());
-    }
-
-    @Nonnull
-    public SQLiteStatement createCompiledInsert(@Nonnull String databaseName) {
-        return createCompiledInsert(getWritableDatabase(databaseName));
-    }
-
-    @Nonnull
-    public SQLiteStatement createCompiledInsert(@Nonnull SQLiteDatabase db) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO ").append(getTableName()).append(" (");
-
-        int keyCount = 0;
-        for (String key : getAllKeys()) {
-            if (keyCount > 0) {
-                sql.append(",");
-            }
-            sql.append(key);
-            keyCount++;
-        }
-
-        sql.append(") VALUES (");
-
-        for (int i = 0; i < keyCount; i++) {
-            if (i > 0) {
-                sql.append(",");
-            }
-            sql.append("?");
-        }
-
-        sql.append(")");
-
-        return db.compileStatement(sql.toString());
     }
 
     public long insert(@Nonnull SQLiteStatement statement, @Nonnull T e) {
@@ -377,7 +316,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return update(getWritableDatabase(databaseName), e);
     }
 
-    public int update(@Nonnull SQLiteDatabase db, @Nonnull T e) {
+    public int update(@Nonnull DatabaseWrapper db, @Nonnull T e) {
         checkDB(db);
         long rowId = e.getPrimaryKeyId();
         if (rowId <= 0) {
@@ -399,7 +338,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return update(getWritableDatabase(databaseName), contentValues, where, whereArgs);
     }
 
-    public int update(@Nonnull SQLiteDatabase db, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+    public int update(@Nonnull DatabaseWrapper db, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         int rowsAffected = 0;
 
         checkDB(db);
@@ -448,7 +387,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return delete(getWritableDatabase(databaseName), e);
     }
 
-    public int delete(@Nonnull SQLiteDatabase db, @Nonnull T e) {
+    public int delete(@Nonnull DatabaseWrapper db, @Nonnull T e) {
         checkDB(db);
         long rowId = e.getPrimaryKeyId();
         if (rowId <= 0) {
@@ -470,7 +409,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return delete(getWritableDatabase(databaseName), where, whereArgs);
     }
 
-    public int delete(@Nonnull SQLiteDatabase db, @Nullable String where, @Nullable String[] whereArgs) {
+    public int delete(@Nonnull DatabaseWrapper db, @Nullable String where, @Nullable String[] whereArgs) {
         checkDB(db);
         int rowsAffected = 0;
 
@@ -557,7 +496,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return newArray;
     }
 
-    private static void checkDB(@Nullable SQLiteDatabase db) {
+    private static void checkDB(@Nullable DatabaseWrapper db) {
         if (db == null) {
             throw new IllegalArgumentException("db cannot be null");
         }
@@ -901,14 +840,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     /**
      * Return the first column and first row value as a Date for given rawQuery and selectionArgs.
      *
-     * @param database      SQLiteDatabase Name of database to query
+     * @param database      DatabaseWrapper Name of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
      * @return query results value or null if no data was returned
      */
-    public static <I> I findValueByRawQuery( @Nonnull SQLiteDatabase database, @Nonnull Class<I> valueType,@Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
+    public static <I> I findValueByRawQuery( @Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType,@Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
@@ -1183,10 +1122,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     public static boolean tableExists(@Nonnull AndroidDatabase androidDatabase, @Nonnull String tableName) {
-        return tableExists(getDatabase(androidDatabase), tableName);
+        return tableExists(androidDatabase.getDatabaseWrapper(), tableName);
     }
 
-    public static boolean tableExists(@Nullable SQLiteDatabase db, @Nullable String tableName) {
+    public static boolean tableExists(@Nullable DatabaseWrapper db, @Nullable String tableName) {
         if (tableName == null || db == null || !db.isOpen()) {
             return false;
         }
@@ -1250,10 +1189,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         return mergeCursors(cursor, toMatrixCursor(records));
     }
 
-    // use static to get ALL tables across ALL managers
-    private static Set<String> transactionChangesTableNames = new HashSet<String>();
-
-    private void postInsertEvent(@Nullable SQLiteDatabase db, @Nonnull String tableName, long rowId) {
+    private void postInsertEvent(@Nullable DatabaseWrapper db, @Nonnull String tableName, long rowId) {
         Bus bus = getBus();
         if (bus != null) {
             if (!(db != null && db.inTransaction())) {
@@ -1264,7 +1200,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         }
     }
 
-    private void postUpdateEvent(@Nonnull SQLiteDatabase db, @Nonnull String tableName, int rowsAffected) {
+    private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
         Bus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {
@@ -1275,7 +1211,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         }
     }
 
-    private void postDeleteEvent(@Nonnull SQLiteDatabase db, @Nonnull String tableName, int rowsAffected) {
+    private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
         Bus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {

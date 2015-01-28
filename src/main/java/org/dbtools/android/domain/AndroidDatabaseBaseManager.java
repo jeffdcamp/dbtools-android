@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
+import org.dbtools.android.domain.database.DatabaseWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 @SuppressWarnings("UnusedDeclaration")
-public abstract class AndroidDatabaseBaseManager {
+public abstract class AndroidDatabaseBaseManager<W extends DatabaseWrapper> {
     public static final String TAG = "AndroidDBTools";
 
     private Map<String, AndroidDatabase> databaseMap = new HashMap<String, AndroidDatabase>(); // <Database name, Database Path>
@@ -22,16 +23,23 @@ public abstract class AndroidDatabaseBaseManager {
      * Identify what databases will be used with this app.  This method should call addDatabase(...) for each database
      */
     public abstract void identifyDatabases();
+
     public abstract void onCreate(AndroidDatabase androidDatabase);
+
     public abstract void onCreateViews(AndroidDatabase androidDatabase);
+
     public abstract void onDropViews(AndroidDatabase androidDatabase);
+
     public abstract void onUpgrade(AndroidDatabase androidDatabase, int oldVersion, int newVersion);
+
+    public abstract DatabaseWrapper createNewDatabaseWrapper(AndroidDatabase androidDatabase);
 
     /**
      * Add a standard SQLite database
-     * @param context Android Context (used to get database from context.getDatabasePath(databaseName))
+     *
+     * @param context      Android Context (used to get database from context.getDatabasePath(databaseName))
      * @param databaseName Name of the database (DBTools reference name)
-     * @param version Version of the database
+     * @param version      Version of the database
      * @param viewsVersion Version of the database view
      */
     public void addDatabase(@Nonnull Context context, @Nonnull String databaseName, int version, int viewsVersion) {
@@ -41,10 +49,11 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
-     * @param context Android Context (used to get database from context.getDatabasePath(databaseName))
+     *
+     * @param context      Android Context (used to get database from context.getDatabasePath(databaseName))
      * @param databaseName Name of the database (DBTools reference name)
-     * @param password Database password
-     * @param version Version of the database
+     * @param password     Database password
+     * @param version      Version of the database
      * @param viewsVersion Version of the database view
      */
     public void addDatabase(@Nonnull Context context, @Nonnull String databaseName, @Nullable String password, int version, int viewsVersion) {
@@ -54,9 +63,10 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a SQLCipher SQLite database.
+     *
      * @param databaseName Name of the database (DBTools reference name)
      * @param databasePath Absolute path to database
-     * @param version Version of the database
+     * @param version      Version of the database
      * @param viewsVersion Version of the database view
      */
     public void addDatabase(@Nonnull String databaseName, @Nonnull String databasePath, int version, int viewsVersion) {
@@ -65,10 +75,11 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a SQLCipher SQLite database.  If the password is null, then a standard SQLite database will be used
+     *
      * @param databaseName Name of the database (DBTools reference name)
      * @param databasePath Absolute path to database
-     * @param password Database password
-     * @param version Version of the database
+     * @param password     Database password
+     * @param version      Version of the database
      * @param viewsVersion Version of the database view
      */
     public void addDatabase(@Nonnull String databaseName, @Nonnull String databasePath, @Nullable String password, int version, int viewsVersion) {
@@ -85,8 +96,9 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a standard SQLite database
-     * @param databaseName Name of the attached database (DBTools reference name)
-     * @param primaryDatabaseName Primary Database name
+     *
+     * @param databaseName          Name of the attached database (DBTools reference name)
+     * @param primaryDatabaseName   Primary Database name
      * @param attachedDatabaseNames Database names to be attached to Primary Database
      */
     public void addAttachedDatabase(@Nonnull String databaseName, @Nonnull String primaryDatabaseName, @Nonnull List<String> attachedDatabaseNames) {
@@ -110,8 +122,9 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Add a standard SQLite database
-     * @param databaseName Name of the attached database
-     * @param primaryDatabase Primary Database
+     *
+     * @param databaseName      Name of the attached database
+     * @param primaryDatabase   Primary Database
      * @param attachedDatabases Databases to be attached to Primary Database
      */
     public void addAttachedDatabase(@Nonnull String databaseName, @Nonnull AndroidDatabase primaryDatabase, @Nonnull List<AndroidDatabase> attachedDatabases) {
@@ -158,42 +171,25 @@ public abstract class AndroidDatabaseBaseManager {
         return databaseMap.containsKey(databaseName);
     }
 
-    private boolean isDatabaseAlreadyOpen(@Nonnull AndroidDatabase db) {
-        if (!db.isEncrypted()) {
-            return AndroidBaseManager.isDatabaseAlreadyOpen(db);
-        } else {
-            return org.dbtools.android.domain.secure.AndroidBaseManager.isDatabaseAlreadyOpen(db);
-        }
-    }
-
-    /**
-     * Helper method to load the SQLCipher Libraries
-     * @param context Android Context
-     */
-    public void initSQLCipherLibs(@Nonnull Context context) {
-        net.sqlcipher.database.SQLiteDatabase.loadLibs(context); // Initialize SQLCipher
-    }
-
-    /**
-     * Helper method to load the SQLCipher Libraries
-     * @param context Android Context
-     * @param workingDir Directory to extract SQLCipher files (such as an external storage space)
-     */
-    public void initSQLCipherLibs(@Nonnull Context context, @Nonnull File workingDir) {
-        net.sqlcipher.database.SQLiteDatabase.loadLibs(context, workingDir); // Initialize SQLCipher
+    private boolean isDatabaseAlreadyOpen(@Nonnull AndroidDatabase androidDatabase) {
+        DatabaseWrapper database = androidDatabase.getDatabaseWrapper();
+        return database != null && database.getDatabase() != null && database.isOpen();
     }
 
     public boolean openDatabase(@Nonnull String databaseName) {
-        AndroidDatabase database = getDatabase(databaseName);
-        return database != null && openDatabase(database);
+        AndroidDatabase androidDatabase = getDatabase(databaseName);
+        return androidDatabase != null && openDatabase(androidDatabase);
     }
 
     public boolean openDatabase(@Nonnull AndroidDatabase androidDatabase) {
-        if (!androidDatabase.isEncrypted()) {
-            return AndroidBaseManager.openDatabase(androidDatabase);
-        } else {
-            return org.dbtools.android.domain.secure.AndroidBaseManager.openDatabase(androidDatabase);
+        DatabaseWrapper wrapper = androidDatabase.getDatabaseWrapper();
+
+        if (wrapper == null) {
+            wrapper = createNewDatabaseWrapper(androidDatabase);
+            androidDatabase.setDatabaseWrapper(wrapper);
         }
+
+        return wrapper.isOpen();
     }
 
     public void closeDatabase(@Nonnull String databaseName) {
@@ -204,18 +200,20 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     public boolean closeDatabase(@Nonnull AndroidDatabase androidDatabase) {
-        if (!androidDatabase.isEncrypted()) {
-            return AndroidBaseManager.closeDatabase(androidDatabase);
-        } else {
-            return org.dbtools.android.domain.secure.AndroidBaseManager.closeDatabase(androidDatabase);
+        DatabaseWrapper wrapper = androidDatabase.getDatabaseWrapper();
+        if (wrapper != null && wrapper.isOpen() && !wrapper.inTransaction()) {
+            wrapper.close();
+            androidDatabase.setDatabaseWrapper(null);
+            return true;
         }
+
+        return false;
     }
 
     public void connectAllDatabases() {
         createDatabaseMap();
 
-        Collection<AndroidDatabase> databases = getDatabases();
-        for (AndroidDatabase database : databases) {
+        for (AndroidDatabase database : getDatabases()) {
             connectDatabase(database.getName());
         }
     }
@@ -256,23 +254,13 @@ public abstract class AndroidDatabaseBaseManager {
                     onCreate(androidDatabase);
                     onCreateViews(androidDatabase);
                 } else if (checkForUpgrade) {
-                    if (androidDatabase.isEncrypted()) {
-                        onUpgrade(androidDatabase, androidDatabase.getSecureSqLiteDatabase().getVersion(), androidDatabase.getVersion());
-                    } else {
-                        onUpgrade(androidDatabase, androidDatabase.getSqLiteDatabase().getVersion(), androidDatabase.getVersion());
-                    }
-
+                    onUpgrade(androidDatabase, androidDatabase.getDatabaseWrapper().getVersion(), androidDatabase.getVersion());
                     onUpgradeViews(androidDatabase, findViewVersion(androidDatabase), androidDatabase.getViewsVersion());
                 }
 
                 // update database and views versions
-                if (androidDatabase.isEncrypted()) {
-                    androidDatabase.getSecureSqLiteDatabase().setVersion(androidDatabase.getVersion());
-                    updateDatabaseMetaViewVersion(androidDatabase, androidDatabase.getViewsVersion());
-                } else {
-                    androidDatabase.getSqLiteDatabase().setVersion(androidDatabase.getVersion());
-                    updateDatabaseMetaViewVersion(androidDatabase, androidDatabase.getViewsVersion());
-                }
+                androidDatabase.getDatabaseWrapper().setVersion(androidDatabase.getVersion());
+                updateDatabaseMetaViewVersion(androidDatabase, androidDatabase.getViewsVersion());
             } else {
                 // make sure database being attached are connected/opened
                 for (AndroidDatabase otherDb : androidDatabase.getAttachedDatabases()) {
@@ -290,16 +278,9 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     public void attachDatabases(@Nonnull AndroidDatabase db) {
-        if (!db.isEncrypted()) {
-            for (AndroidDatabase toDb : db.getAttachedDatabases()) {
-                String sql = "ATTACH DATABASE '" + toDb.getPath() + "' AS " + toDb.getName();
-                db.getSqLiteDatabase().execSQL(sql);
-            }
-        } else {
-            for (AndroidDatabase toDb : db.getAttachedDatabases()) {
-                String sql = "ATTACH DATABASE '" + toDb.getPath() + "' AS " + toDb.getName() + " KEY '" + toDb.getPassword() + "'";
-                db.getSqLiteDatabase().execSQL(sql);
-            }
+        for (AndroidDatabase toDb : db.getAttachedDatabases()) {
+            String sql = "ATTACH DATABASE '" + toDb.getPath() + "' AS " + toDb.getName();
+            db.getDatabaseWrapper().attachDatabase(toDb.getPath(), toDb.getName(), toDb.getPassword());
         }
     }
 
@@ -329,11 +310,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     public void detachDatabase(@Nonnull AndroidDatabase db, @Nonnull String databaseToDetach) {
         String sql = "DETACH DATABASE '" + databaseToDetach + "'";
-        if (!db.isEncrypted()) {
-            db.getSqLiteDatabase().execSQL(sql);
-        } else {
-            db.getSecureSqLiteDatabase().execSQL(sql);
-        }
+        db.getDatabaseWrapper().execSQL(sql);
     }
 
     public void cleanDatabase(@Nonnull String databaseName) {
@@ -352,7 +329,7 @@ public abstract class AndroidDatabaseBaseManager {
     /**
      * Get Database File for an Internal Memory Database
      *
-     * @param context Android Context
+     * @param context      Android Context
      * @param databaseName Name of database file
      * @return Database File
      */
@@ -372,9 +349,10 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Get Database File for an Internal Memory Database
-     * @param context Android Context
+     *
+     * @param context        Android Context
      * @param databaseSubDir Name of directory to place database in
-     * @param databaseName Name of database file
+     * @param databaseName   Name of database file
      * @return Database File
      */
     @Nonnull
@@ -404,6 +382,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     /**
      * Delete and then recreate the database
+     *
      * @param androidDatabase database to clean
      */
     public void onCleanDatabase(@Nonnull AndroidDatabase androidDatabase) {
@@ -539,14 +518,8 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     public void createMetaTableIfNotExists(@Nonnull AndroidDatabase androidDatabase) {
-        if (!androidDatabase.isEncrypted()) {
-            if (!AndroidBaseManager.tableExists(androidDatabase, DBToolsMetaData.TABLE)) {
-                AndroidBaseManager.executeSql(androidDatabase, DBToolsMetaData.CREATE_TABLE);
-            }
-        } else {
-            if (!org.dbtools.android.domain.secure.AndroidBaseManager.tableExists(androidDatabase, DBToolsMetaData.TABLE)) {
-                org.dbtools.android.domain.secure.AndroidBaseManager.executeSql(androidDatabase, DBToolsMetaData.CREATE_TABLE);
-            }
+        if (!AndroidBaseManager.tableExists(androidDatabase.getDatabaseWrapper(), DBToolsMetaData.TABLE)) {
+            AndroidBaseManager.executeSql(androidDatabase.getDatabaseWrapper(), DBToolsMetaData.CREATE_TABLE);
         }
     }
 
@@ -566,21 +539,12 @@ public abstract class AndroidDatabaseBaseManager {
         contentValues.put(DBToolsMetaData.C_KEY, keyName);
         contentValues.put(DBToolsMetaData.C_VALUE, version);
 
-        boolean encrypted = androidDatabase.isEncrypted();
         if (currentVersion != -1) {
             String selection = DBToolsMetaData.KEY_SELECTION;
             String[] whereArgs = new String[]{keyName};
-            if (!encrypted) {
-                androidDatabase.getSqLiteDatabase().update(table, contentValues, selection, whereArgs);
-            } else {
-                androidDatabase.getSecureSqLiteDatabase().update(table, contentValues, selection, whereArgs);
-            }
+            androidDatabase.getDatabaseWrapper().update(table, contentValues, selection, whereArgs);
         } else {
-            if (!encrypted) {
-                androidDatabase.getSqLiteDatabase().insert(table, null, contentValues);
-            } else {
-                androidDatabase.getSecureSqLiteDatabase().insert(table, null, contentValues);
-            }
+            androidDatabase.getDatabaseWrapper().insert(table, null, contentValues);
         }
     }
 
@@ -590,16 +554,8 @@ public abstract class AndroidDatabaseBaseManager {
     public int findViewVersion(@Nonnull AndroidDatabase androidDatabase) {
         createMetaTableIfNotExists(androidDatabase);
 
-        int version;
         String[] selectionArgs = new String[]{getViewVersionKey(androidDatabase)};
-
-        if (!androidDatabase.isEncrypted()) {
-            version = AndroidBaseManager.findValueByRawQuery(androidDatabase.getSqLiteDatabase(), Integer.class, FIND_VERSION, selectionArgs, 0);
-        } else {
-            version = org.dbtools.android.domain.secure.AndroidBaseManager.findValueByRawQuery(androidDatabase.getSecureSqLiteDatabase(), Integer.class, FIND_VERSION, selectionArgs, 0);
-        }
-
-        return version;
+        return AndroidBaseManager.findValueByRawQuery(androidDatabase.getDatabaseWrapper(), Integer.class, FIND_VERSION, selectionArgs, 0);
     }
 
     public void shutdownAllManagerExecutorServices() {

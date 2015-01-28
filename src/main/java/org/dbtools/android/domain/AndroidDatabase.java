@@ -1,6 +1,6 @@
 package org.dbtools.android.domain;
 
-import android.database.sqlite.SQLiteDatabase;
+import org.dbtools.android.domain.database.DatabaseWrapper;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 
 @SuppressWarnings("UnusedDeclaration")
 public class AndroidDatabase {
-    private final boolean encrypted;
     private final boolean attached;
     private final String name;
     private final String path;
@@ -18,8 +17,7 @@ public class AndroidDatabase {
 
     private final String password;
 
-    private SQLiteDatabase sqLiteDatabase;
-    private net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase;
+    private DatabaseWrapper databaseWrapper;
 
     // attached Database info
     private final AndroidDatabase attachedMainDatabase;
@@ -33,7 +31,6 @@ public class AndroidDatabase {
         this.version = version;
         this.viewsVersion = viewsVersion;
         this.password = null;
-        this.encrypted = false;
         this.attached = false;
 
         this.attachedMainDatabase = null;
@@ -43,7 +40,6 @@ public class AndroidDatabase {
     public AndroidDatabase(String name, String password, String path, int version, int viewsVersion) {
         this.name = name;
         this.password = password;
-        this.encrypted = password != null;
         this.path = path;
         this.version = version;
         this.viewsVersion = viewsVersion;
@@ -59,15 +55,10 @@ public class AndroidDatabase {
         this.version = attachMainDatabase.getVersion();
         this.viewsVersion = attachMainDatabase.getViewsVersion();
         this.password = null;
-        this.encrypted = false;
         this.attached = true;
 
         this.attachedMainDatabase = attachMainDatabase;
         this.attachedDatabases = attachedDatabases;
-    }
-
-    public boolean isEncrypted() {
-        return encrypted;
     }
 
     public boolean isAttached() {
@@ -94,20 +85,12 @@ public class AndroidDatabase {
         return password;
     }
 
-    public SQLiteDatabase getSqLiteDatabase() {
-        return sqLiteDatabase;
+    public DatabaseWrapper getDatabaseWrapper() {
+        return databaseWrapper;
     }
 
-    public void setSqLiteDatabase(SQLiteDatabase sqLiteDatabase) {
-        this.sqLiteDatabase = sqLiteDatabase;
-    }
-
-    public net.sqlcipher.database.SQLiteDatabase getSecureSqLiteDatabase() {
-        return secureSqLiteDatabase;
-    }
-
-    public void setSecureSqLiteDatabase(net.sqlcipher.database.SQLiteDatabase secureSqLiteDatabase) {
-        this.secureSqLiteDatabase = secureSqLiteDatabase;
+    public void setDatabaseWrapper(DatabaseWrapper databaseWrapper) {
+        this.databaseWrapper = databaseWrapper;
     }
 
     public AndroidDatabase getAttachMainDatabase() {
@@ -119,61 +102,32 @@ public class AndroidDatabase {
     }
 
     public boolean inTransaction() {
-        if (encrypted) {
-            if (secureSqLiteDatabase != null) {
-                return secureSqLiteDatabase.inTransaction();
-            }
-        } else {
-            if (sqLiteDatabase != null) {
-                return sqLiteDatabase.inTransaction();
-            }
+        if (databaseWrapper != null) {
+            return databaseWrapper.inTransaction();
         }
 
         return false;
     }
 
     public void close() {
-        if (encrypted) {
-            if (secureSqLiteDatabase != null) {
-                secureSqLiteDatabase.close();
-                secureSqLiteDatabase = null;
-            }
-        } else {
-            if (sqLiteDatabase != null) {
-                sqLiteDatabase.close();
-                sqLiteDatabase = null;
-
-            }
+        if (databaseWrapper != null) {
+            databaseWrapper.close();
+            databaseWrapper = null;
         }
     }
 
     public void beginTransaction() {
-        if (encrypted) {
-            if (secureSqLiteDatabase != null) {
-                secureSqLiteDatabase.beginTransaction();
-            }
-        } else {
-            if (sqLiteDatabase != null) {
-                sqLiteDatabase.beginTransaction();
-            }
+        if (databaseWrapper != null) {
+            databaseWrapper.beginTransaction();
         }
     }
 
     public void endTransaction(boolean success) {
-        if (encrypted) {
-            if (secureSqLiteDatabase != null) {
-                if (success) {
-                    secureSqLiteDatabase.setTransactionSuccessful();
-                }
-                secureSqLiteDatabase.endTransaction();
+        if (databaseWrapper != null) {
+            if (success) {
+                databaseWrapper.setTransactionSuccessful();
             }
-        } else {
-            if (sqLiteDatabase != null) {
-                if (success) {
-                    sqLiteDatabase.setTransactionSuccessful();
-                }
-                sqLiteDatabase.endTransaction();
-            }
+            databaseWrapper.endTransaction();
         }
     }
 

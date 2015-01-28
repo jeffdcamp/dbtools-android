@@ -1,7 +1,7 @@
 package org.dbtools.android.domain;
 
 
-import android.database.sqlite.SQLiteDatabase;
+import org.dbtools.android.domain.database.DatabaseWrapper;
 
 import javax.annotation.Nonnull;
 
@@ -11,23 +11,23 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidDatabaseManager extends AndroidDatabaseBaseManager {
     @Nonnull
-    public SQLiteDatabase getWritableDatabase(@Nonnull String databaseName) {
+    public DatabaseWrapper getWritableDatabase(@Nonnull String databaseName) {
         connectDatabase(databaseName);
 
         AndroidDatabase db = getDatabase(databaseName);
         if (db != null) {
-            return db.getSqLiteDatabase();
+            return db.getDatabaseWrapper();
         }
 
         throw new IllegalStateException("Unable to get SQLiteDatabase for database [" + databaseName + "]");
     }
 
     @Nonnull
-    public SQLiteDatabase getReadableDatabase(@Nonnull String databaseName) {
+    public DatabaseWrapper getReadableDatabase(@Nonnull String databaseName) {
         connectDatabase(databaseName);
         AndroidDatabase db = getDatabase(databaseName);
         if (db != null) {
-            return db.getSqLiteDatabase();
+            return db.getDatabaseWrapper();
         }
 
         throw new IllegalStateException("Unable to get SQLiteDatabase for database [" + databaseName + "]");
