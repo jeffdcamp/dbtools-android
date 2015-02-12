@@ -901,7 +901,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
-        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, "1");
+        Cursor c = getReadableDatabase(databaseName).query(false, getTableName(), new String[]{column}, selection, selectionArgs, null, null, null, "1");
         if (c != null) {
             if (c.moveToFirst()) {
                 value = databaseValue.getColumnValue(c, 0, defaultValue);
