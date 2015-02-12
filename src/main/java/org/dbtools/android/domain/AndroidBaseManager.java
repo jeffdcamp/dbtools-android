@@ -534,7 +534,17 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
 
     @Nullable
     public Cursor findCursorBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
-        Cursor cursor = getReadableDatabase(databaseName).query(true, getTableName(), getAllKeys(), selection, selectionArgs, null, null, orderBy, null);
+        return findCursorBySelection(databaseName, true, getTableName(), getAllKeys(), selection, selectionArgs, null, null, orderBy, null);
+    }
+
+    @Nullable
+    public Cursor findCursorBySelection(boolean distinct, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+        return findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllKeys(), selection, selectionArgs, groupBy, having, orderBy, limit);
+    }
+
+    @Nullable
+    public Cursor findCursorBySelection(@Nonnull String databaseName, boolean distinct, @Nonnull String table, @Nonnull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+        Cursor cursor = getReadableDatabase(databaseName).query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -817,7 +827,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
-     * @return query results value or null if no data was returned
+     * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueByRawQuery(@Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         return findValueByRawQuery(getDatabaseName(), valueType, rawQuery, selectionArgs, defaultValue);
@@ -831,7 +841,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
-     * @return query results value or null if no data was returned
+     * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueByRawQuery(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         return findValueByRawQuery(getReadableDatabase(databaseName), valueType, rawQuery, selectionArgs, defaultValue);
@@ -845,7 +855,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
-     * @return query results value or null if no data was returned
+     * @return query results value or defaultValue if no data was returned
      */
     public static <I> I findValueByRawQuery( @Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType,@Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
@@ -870,7 +880,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
-     * @return query results value or null if no data was returned
+     * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
         return findValueBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, defaultValue);
@@ -885,13 +895,13 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
-     * @return query results value or null if no data was returned
+     * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
-        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, null);
+        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, "1");
         if (c != null) {
             if (c.moveToFirst()) {
                 value = databaseValue.getColumnValue(c, 0, defaultValue);

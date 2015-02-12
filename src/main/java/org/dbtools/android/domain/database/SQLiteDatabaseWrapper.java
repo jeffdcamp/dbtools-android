@@ -19,11 +19,13 @@ import java.util.Map;
 public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
     private SQLiteDatabase database;
 
+    private static boolean libraryLoaded = false;
+
     /**
      * Create a standard version of the database
      */
     public SQLiteDatabaseWrapper(String path) {
-        System.loadLibrary("sqliteX"); // load the sqlite.org library
+        loadLibrary();
         database = SQLiteDatabase.openOrCreateDatabase(path, null);
     }
 
@@ -31,9 +33,24 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
      * Create a secure/encrypted version of the database
      */
     public SQLiteDatabaseWrapper(String path, String password) {
-        System.loadLibrary("sqliteX"); // load the sqlite.org library
+        loadLibrary();
         database = SQLiteDatabase.openOrCreateDatabase(path, null);
         database.execSQL("PRAGMA key = '" + password + "'");
+    }
+
+    private void loadLibrary() {
+        if (!isLibraryLoaded()) {
+            System.loadLibrary("sqliteX"); // load the sqlite.org library
+            setLibraryLoaded(true);
+        }
+    }
+
+    private static void setLibraryLoaded(boolean b) {
+        libraryLoaded = b;
+    }
+
+    private static boolean isLibraryLoaded() {
+        return libraryLoaded;
     }
 
     public SQLiteDatabase getDatabase() {
