@@ -257,9 +257,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowId = db.insert(e.getTableName(), null, e.getContentValues());
+                rowId = db.insert(getTableName(), null, e.getContentValues());
                 e.setPrimaryKeyId(rowId);
-                postInsertEvent(db, e.getTableName(), rowId);
+                postInsertEvent(db, getTableName(), rowId);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -304,7 +304,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
 
         long rowId = statement.executeInsert();
         e.setPrimaryKeyId(rowId);
-        postInsertEvent(null, e.getTableName(), rowId);
+        postInsertEvent(null, getTableName(), rowId);
         return rowId;
     }
 
