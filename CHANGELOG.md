@@ -4,6 +4,7 @@ Change Log
   Version 3.1.0 *(2015-02)*
 ----------------------------
 
+ * Be sure to use dbtools-gen-3.1.1.jar
  * Improved loading of sqliteX library
  * Improvements to findCursorBySelection(...)
  * Bug fixes and performance improvements
