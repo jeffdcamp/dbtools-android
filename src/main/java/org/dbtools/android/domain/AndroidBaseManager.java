@@ -857,7 +857,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @param defaultValue  Value returned if nothing is found
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueByRawQuery( @Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType,@Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
+    public static <I> I findValueByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType,@Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
