@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-  Version 3.1.0 *(2015-01)*
+  Version 3.1.0 *(2015-02)*
 ----------------------------
 
  * Improved loading of sqliteX library
