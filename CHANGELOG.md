@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+  Version 3.1.0 *(2015-01)*
+----------------------------
+
+ * Improved loading of sqliteX library
+ * Improvements to findCursorBySelection(...)
+ * Bug fixes and performance improvements
+
   Version 3.0.0 *(2015-01)*
 ----------------------------
 
