@@ -161,56 +161,46 @@ Setup
 
 *For a working implementation of DBTools for Android see the Android-Template application (https://github.com/jeffdcamp/android-template)
 
-  1. Add DBTools Generator to your "buildscript" section of the build.gradle file.  (latest version in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-gen%22)
+  1. Add DBTools Gradle Plugin and dbtools-android dependency to build.gradle file
 
         buildscript {
             repositories {
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:1.0.0'
-                classpath 'org.dbtools:dbtools-gen:<latest version>'
+                classpath 'org.dbtools:gradle-dbtools-plugin:<latest-version>'
             }
         }
 
-  2. Be sure that "mavenCental()" is a part of your "repositories" section of the build.gradle file
-
-        repositories {
-            mavenCentral()
-        }
-
-  3. Add dbtools dependency to your "dependencies" section of the build.gradle file.  (latest version in Maven Central Repo: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dbtools-android%22)
+        apply plugin: 'dbtools'
 
         dependencies {
-            compile 'org.dbtools:dbtools-android:<latest version>'
+            compile 'org.dbtools:dbtools-android:<latest dbtools-android version>'
+            compile 'org.dbtools:dbtools-query:<latest dbtools-query version>' // optional
         }
 
-  4. Add dbtools "task" to your build.gradle file.  Be sure to modify the variables/properties in this task (especially "baseOutputDir" and "basePackageName")
+        dbtools {
+            type 'ANDROID'
 
-        task dbtools {
-            description = 'Generate DBTools domain classes'
-            doLast {
-                System.out.println("Generating DBTools Classes...")
+            basePackageName 'org.company.project.domain'
+            outputSrcDir 'src/main/java/org/company/project/domain'
 
-                org.dbtools.gen.android.AndroidObjectsBuilder builder = new org.dbtools.gen.android.AndroidObjectsBuilder();
-
-                builder.setXmlFilename("src/main/database/schema.xml");
-                builder.setOutputBaseDir("src/main/java/org/company/project/domain");
-                builder.setPackageBase("org.company.project.domain");
-
-                org.dbtools.gen.GenConfig genConfig = new org.dbtools.gen.GenConfig();
-                genConfig.setInjectionSupport(true); // support for @Inject (using Dagger or Guice)
-                genConfig.setJsr305Support(true); // support for @Notnull / @Nullable etc
-                genConfig.setDateTimeSupport(true); // support Joda DateTime
-                genConfig.setIncludeDatabaseNameInPackage(true); // place each set of domain objects into a package named after its database
-                genConfig.setOttoSupport(true); // support Event Bus using Otto
-
-                builder.setGenConfig(genConfig);
-                builder.build();
-            }
+            injectionSupport true
+            jsr305Support true
+            includeDatabaseNameInPackage true
+            ottoSupport true
+            dateTimeSupport true
         }
 
-  5. Define your database: Add schema.xml file (after executing the "dbtools" task (from above) an XSD definition file will be created (this may help writing the XML file in some IDE's)), to the /src/main/database directory.  This file contains a list of all of the databases and tables in each database.  The following is a sample of this file:
+  2. For new projects, create initial schema.xml files (Default: new files will be created in src/main/database)
+
+        ./gradlew dbtools-init
+
+        ... or ...
+
+        From Android Studio:  DOUBLE-CLICK on "dbtools-init" task from the "Gradle" Tools Window
+
+  3. Define your database: Add schema.xml file (after executing the "dbtools-init" task (from above) an XSD definition file will be created (this may help writing the XML file in some IDE's)), to the /src/main/database directory.  This file contains a list of all of the databases and tables in each database.  The following is a sample of this file:
 
         <?xml version="1.0" encoding="UTF-8" ?>
         <dbSchema xmlns='https://github.com/jeffdcamp/dbtools-gen'
@@ -233,13 +223,13 @@ Setup
             </database>
         </dbSchema>
 
-  6. Use DBTools Generator to generate DatabaseManager and all domain classes.  Execute gradle task:
+  4. Use DBTools Generator to generate DatabaseManager and all domain classes.  Execute gradle task:
 
-        ./gradlew dbtools
+        ./gradlew dbtools-genclasses
 
         ... or ...
 
-        From Android Studio:  RIGHT-CLICK on the "task dbtools {", in the build.gradle file, and select "Run 'gradle:dbtools'"
+        From Android Studio:  DOUBLE-CLICK on "dbtools-genclasses" task from the "Gradle" Tools Window
 
   DBTools Generator will create the following files to manage all database connections and create/update database tables:
 
