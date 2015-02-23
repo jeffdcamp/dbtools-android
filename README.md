@@ -185,11 +185,11 @@ Setup
             basePackageName 'org.company.project.domain'
             outputSrcDir 'src/main/java/org/company/project/domain'
 
-            injectionSupport true
-            jsr305Support true
-            includeDatabaseNameInPackage true
-            ottoSupport true
-            dateTimeSupport true
+            injectionSupport true // support for @Inject (using JEE, Dagger, Guice, etc)
+            jsr305Support true // support for @Notnull / @Nullable etc
+            includeDatabaseNameInPackage true // place each set of domain objects into a package named after its database
+            ottoSupport true // support Event Bus using Otto
+            dateTimeSupport true // support Joda DateTime
         }
 
   2. For new projects, create initial schema.xml files (Default: new files will be created in src/main/database)
