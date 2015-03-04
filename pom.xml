@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dbtools</groupId>
     <artifactId>dbtools-android</artifactId>
-    <version>3.1.1-SNAPSHOT</version>
+    <version>3.1.1</version>
     <packaging>jar</packaging>
     <name>DBTools Android</name>
     <description>DBTools ORM for Android</description>
