@@ -51,8 +51,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
 
     public abstract T newRecord();
 
-    // use static to get ALL tables across ALL managers
-    private static Set<String> transactionChangesTableNames = new HashSet<String>();
+    // use static to get ALL tables across ALL managers... by Database <DatabaseName, Set of table names>
+    private static final Map<String, Set<String>> transactionChangesTableNamesMap = new HashMap<String, Set<String>>();
 
     /**
      * Otto Event Bus
@@ -162,8 +162,16 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
         if (success) {
             getWritableDatabase(databaseName).setTransactionSuccessful();
         }
+
+        // get list of changed table names
+        Set<String> tableNameChanges = transactionChangesTableNamesMap.get(databaseName);
+        transactionChangesTableNamesMap.remove(databaseName);
+
+        // end transaction
         getWritableDatabase(databaseName).endTransaction();
-        postEndTransactionEvent(success);
+
+        // post end transaction event
+        postEndTransactionEvent(success, getDatabaseName(), tableNameChanges);
     }
 
     /**
@@ -1205,7 +1213,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             if (!(db != null && db.inTransaction())) {
                 bus.post(new DatabaseInsertEvent(tableName, rowId));
             } else {
-                transactionChangesTableNames.add(tableName);
+                addTransactionTableNameChange(tableName);
             }
         }
     }
@@ -1216,7 +1224,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             if (!db.inTransaction()) {
                 bus.post(new DatabaseUpdateEvent(tableName, rowsAffected));
             } else {
-                transactionChangesTableNames.add(tableName);
+                addTransactionTableNameChange(tableName);
             }
         }
     }
@@ -1227,16 +1235,32 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
             if (!db.inTransaction()) {
                 bus.post(new DatabaseDeleteEvent(tableName, rowsAffected));
             } else {
-                transactionChangesTableNames.add(tableName);
+                addTransactionTableNameChange(tableName);
             }
         }
     }
 
-    private void postEndTransactionEvent(boolean success) {
+    private void postEndTransactionEvent(boolean success, String databaseName, Set<String> tableNameChanges) {
         Bus bus = getBus();
-        if (bus != null) {
-            bus.post(new DatabaseEndTransactionEvent(success, transactionChangesTableNames));
-            transactionChangesTableNames.clear();
+        if (bus != null && tableNameChanges != null) {
+            bus.post(new DatabaseEndTransactionEvent(success, databaseName, tableNameChanges));
         }
+    }
+
+    private void addTransactionTableNameChange(String tableName) {
+        String databaseName = getDatabaseName();
+
+        Set<String> transactionChangesTableNames;
+        synchronized (transactionChangesTableNamesMap) {
+            transactionChangesTableNames = transactionChangesTableNamesMap.get(databaseName);
+
+            // if transactionChangesTableNames does not exist... create!
+            if (transactionChangesTableNames == null) {
+                transactionChangesTableNames = new HashSet<String>();
+                transactionChangesTableNamesMap.put(databaseName, transactionChangesTableNames);
+            }
+        }
+
+        transactionChangesTableNames.add(tableName);
     }
 }

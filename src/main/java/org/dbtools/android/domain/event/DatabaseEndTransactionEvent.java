@@ -2,20 +2,25 @@ package org.dbtools.android.domain.event;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class DatabaseEndTransactionEvent extends DatabaseChangeEvent {
-    private Set<String> tablesChanged = new CopyOnWriteArraySet<String>();  // thread safe set
+    private String databaseName;
+    private Set<String> tablesChanged;
     private boolean success;
 
-    public DatabaseEndTransactionEvent(boolean success, @Nonnull Set<String> tablesChanged) {
+    public DatabaseEndTransactionEvent(boolean success, @Nonnull String databaseName, @Nonnull Set<String> tablesChanged) {
         super("");
-        this.tablesChanged.addAll(tablesChanged);
+        this.databaseName = databaseName;
+        this.tablesChanged = tablesChanged;
         this.success = success;
     }
 
     public boolean isSuccess() {
         return success;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     public Set<String> getTablesChanged() {
