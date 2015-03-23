@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 @SuppressWarnings("UnusedDeclaration")
-public abstract class AndroidDatabaseBaseManager<W extends DatabaseWrapper> {
+public abstract class AndroidDatabaseBaseManager {
     public static final String TAG = "AndroidDBTools";
 
     private Map<String, AndroidDatabase> databaseMap = new HashMap<String, AndroidDatabase>(); // <Database name, Database Path>
