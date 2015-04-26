@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+  Version 3.2.0 *(2015-04)*
+----------------------------
+
+ * Support for sqlQueryBuilderSupport flag on dbtools-gen (used when generating template view and query objects)
+ * Allow entitites passed to AndroidBaseManager to be null
+ 
   Version 3.1.0 *(2015-02)*
 ----------------------------
 
