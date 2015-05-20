@@ -198,7 +198,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
 
         if (e.isNewRecord()) {
             long newId = insert(databaseName, e);
-            return newId != 0;
+            return newId > 0;
         } else {
             int count = update(databaseName, e);
             return count != 0;
