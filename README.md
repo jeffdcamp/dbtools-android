@@ -1,6 +1,5 @@
 DBTools for Android
 =================
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android)
 
 DBTools for Android is an Android ORM library that makes it easy to work with SQLite Databases.
 
