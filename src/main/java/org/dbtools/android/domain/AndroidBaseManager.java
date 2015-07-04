@@ -937,6 +937,21 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     /**
      * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
      *
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Order by value(s)
+     * @param defaultValue  Value returned if nothing is found
+     * @return query results value or defaultValue if no data was returned
+     */
+    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
+        return findValueBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+     *
      * @param databaseName  Name of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param column        Column which contains value
@@ -946,6 +961,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
+        return findValueBySelection(databaseName, valueType, column, selection, selectionArgs, null, defaultValue);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Order by value(s)
+     * @param defaultValue  Value returned if nothing is found
+     * @return query results value or defaultValue if no data was returned
+     */
+    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
