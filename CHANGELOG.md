@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+  Version 3.3.0 *(2015-07)*
+----------------------------
+
+ * Added orderBy to findValueBySelection (Issue #6)
+ * Fixed issue with BaseManager.save(...) return true when newId returned is less than 0
+ * dbtools-gen: Added ability to annotate generated domain setters/getters with jsr305 annotations (@Nullable, @Nonnull)
+ 
   Version 3.2.0 *(2015-04)*
 ----------------------------
 
