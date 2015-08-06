@@ -7,7 +7,6 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
-import com.squareup.otto.Bus;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.dbtype.DatabaseValue;
 import org.dbtools.android.domain.dbtype.DatabaseValueUtil;
@@ -55,11 +54,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     private static final Map<String, Set<String>> transactionChangesTableNamesMap = new HashMap<String, Set<String>>();
 
     /**
-     * Otto Event Bus
+     * Event Bus
      * @return instance of Bus or null if disabled
      */
     @Nullable
-    public Bus getBus() {
+    public DBToolsEventBus getBus() {
         return null;
     }
 
@@ -1279,7 +1278,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     private void postInsertEvent(@Nullable DatabaseWrapper db, @Nonnull String tableName, long rowId) {
-        Bus bus = getBus();
+        DBToolsEventBus bus = getBus();
         if (bus != null) {
             if (!(db != null && db.inTransaction())) {
                 bus.post(new DatabaseInsertEvent(tableName, rowId));
@@ -1290,7 +1289,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
-        Bus bus = getBus();
+        DBToolsEventBus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {
                 bus.post(new DatabaseUpdateEvent(tableName, rowsAffected));
@@ -1301,7 +1300,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
-        Bus bus = getBus();
+        DBToolsEventBus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {
                 bus.post(new DatabaseDeleteEvent(tableName, rowsAffected));
@@ -1312,7 +1311,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> implements
     }
 
     private void postEndTransactionEvent(boolean success, String databaseName, Set<String> tableNameChanges) {
-        Bus bus = getBus();
+        DBToolsEventBus bus = getBus();
         if (bus != null && tableNameChanges != null) {
             bus.post(new DatabaseEndTransactionEvent(success, databaseName, tableNameChanges));
         }
