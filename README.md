@@ -188,7 +188,7 @@ Setup
             injectionSupport true // support for @Inject (using JEE, Dagger, Guice, etc)
             jsr305Support true // support for @Notnull / @Nullable etc
             includeDatabaseNameInPackage true // place each set of domain objects into a package named after its database
-            ottoSupport true // support Event Bus using Otto
+            eventBusSupport true // support Event Bus
             dateTimeSupport true // support Joda DateTime
         }
 
