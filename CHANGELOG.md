@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+  Version 3.4.0 *(2015-08)*
+----------------------------
+
+ * Change EventBus support to be generic (implement DBToolsEventBus interface)
+ 
   Version 3.3.0 *(2015-07)*
 ----------------------------
 
