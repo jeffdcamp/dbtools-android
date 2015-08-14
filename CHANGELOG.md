@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+  Version 3.4.1 *(2015-08)*
+----------------------------
+
+ * Fixed issue with view version not being saved correctly
+ * Removed toString() from BaseRecord (dbtools-gen) 
+ 
   Version 3.4.0 *(2015-08)*
 ----------------------------
 

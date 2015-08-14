@@ -509,9 +509,8 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     public void onUpgradeViews(@Nonnull AndroidDatabase androidDatabase, int oldVersion, int newVersion) {
-        Log.i(TAG, "Upgrading database VIEWS [" + androidDatabase.getName() + "] from version " + oldVersion + " to " + newVersion);
-
         if (oldVersion != newVersion) {
+            Log.i(TAG, "Upgrading database VIEWS [" + androidDatabase.getName() + "] from version " + oldVersion + " to " + newVersion);
             onDropViews(androidDatabase);
             onCreateViews(androidDatabase);
         }
@@ -555,7 +554,7 @@ public abstract class AndroidDatabaseBaseManager {
         createMetaTableIfNotExists(androidDatabase);
 
         String[] selectionArgs = new String[]{getViewVersionKey(androidDatabase)};
-        return AndroidBaseManager.findValueByRawQuery(androidDatabase.getDatabaseWrapper(), Integer.class, FIND_VERSION, selectionArgs, 0);
+        return AndroidBaseManager.findValueByRawQuery(androidDatabase.getDatabaseWrapper(), Integer.class, FIND_VERSION, selectionArgs, -1);
     }
 
     public void shutdownAllManagerExecutorServices() {
