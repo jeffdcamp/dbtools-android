@@ -95,7 +95,19 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     /**
-     * Add a standard SQLite database
+     * Close and Remove an identified database from AndroidDatabaseManager
+     * @param databaseName Database to be closed and removed
+     */
+    public void removeDatabase(@Nonnull String databaseName) {
+        AndroidDatabase database = databaseMap.get(databaseName);
+        if (database != null) {
+            closeDatabase(database);
+            databaseMap.remove(databaseName);
+        }
+    }
+
+    /**
+     * Add a attached standard SQLite database
      *
      * @param databaseName          Name of the attached database (DBTools reference name)
      * @param primaryDatabaseName   Primary Database name
@@ -121,7 +133,7 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     /**
-     * Add a standard SQLite database
+     * Add a attached standard SQLite database
      *
      * @param databaseName      Name of the attached database
      * @param primaryDatabase   Primary Database
@@ -131,12 +143,12 @@ public abstract class AndroidDatabaseBaseManager {
         databaseMap.put(databaseName, new AndroidDatabase(databaseName, primaryDatabase, attachedDatabases));
     }
 
+    /**
+     * Close and Remove and attached database from AndroidDatabaseManager
+     * @param databaseName Database to be closed and removed
+     */
     public void removeAttachedDatabase(@Nonnull String databaseName) {
-        AndroidDatabase database = databaseMap.get(databaseName);
-        if (database != null) {
-            closeDatabase(database);
-            databaseMap.remove(databaseName);
-        }
+        removeDatabase(databaseName);
     }
 
     /**
@@ -406,6 +418,15 @@ public abstract class AndroidDatabaseBaseManager {
         identifyDatabases();
     }
 
+    public void deleteDatabase(@Nonnull String databaseName) {
+        AndroidDatabase database = getDatabase(databaseName);
+        if (database != null) {
+            deleteDatabase(database);
+        } else {
+            Log.e(TAG, "FAILED to delete database named [" + databaseName + "]. This database is not added to DatabaseManager");
+        }
+    }
+
     public void deleteDatabase(@Nonnull AndroidDatabase androidDatabase) {
         String databasePath = androidDatabase.getPath();
 
@@ -421,15 +442,11 @@ public abstract class AndroidDatabaseBaseManager {
 
         Log.i(TAG, "Deleting database: [" + databasePath + "]");
         File databaseFile = new File(databasePath);
-        if (databaseFile.exists() && !databaseFile.delete()) {
+        if (databaseFile.exists() && !deleteDatabaseFiles(databaseFile)) {
             String errorMessage = "FAILED to delete database: [" + databasePath + "]";
             Log.e(TAG, errorMessage);
             throw new IllegalStateException(errorMessage);
         }
-    }
-
-    public boolean deleteDatabaseFiles(@Nonnull AndroidDatabase db) {
-        return deleteDatabaseFiles(new File(db.getPath()));
     }
 
     /**
