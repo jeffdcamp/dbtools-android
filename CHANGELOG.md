@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+  Version 3.5.0 *(2015-08)*
+----------------------------
+
+ * Added support for readOnly databases
+ * Added support for readOnly tables
+ * DatabaseManager.deleteDatabase(...) will delete sqlite extra files
+ * Added GreenRobot and Otto EventBus default implementations for DBToolsEventBus interface
+
+
   Version 3.4.1 *(2015-08)*
 ----------------------------
 

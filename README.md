@@ -123,7 +123,7 @@ The following are some examples DBTools can be used:
         individualManager.saveAsync(individual);
 
 
-  Event Bus (via Otto) support.  This allow your app to be notified if the database changed.  Examples:
+  EventBus support.  This allow your app to be notified if the database changed.  Examples:
 
   * Watch for any Insert/Update/Delete event
 
