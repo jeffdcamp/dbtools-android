@@ -252,7 +252,9 @@ Proguard Rules
     -dontwarn org.dbtools.query.**
     -dontwarn org.sqlite.**
     -dontwarn net.sqlcipher.**
-
+    -dontwarn com.squareup.otto.**
+    -dontwarn de.greenrobot.event.**
+    
     # SQLCipher (if using SQLCipher)
     -keep public class net.sqlcipher.** { *; }
     -keep public class net.sqlcipher.database.** { *; }
