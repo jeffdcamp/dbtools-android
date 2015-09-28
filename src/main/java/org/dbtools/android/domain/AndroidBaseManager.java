@@ -288,7 +288,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     /**
      * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
      *
-     * @param rawQuery Custom query
+     * @param rawQuery      Custom query
      * @param selectionArgs query arguments
      * @return List of object T
      */
@@ -432,9 +432,13 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public long findCountBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return findCountBySelection(getReadableDatabase(databaseName), getTableName(), selection, selectionArgs);
+    }
+
+    public static long findCountBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nullable String selection, @Nullable String[] selectionArgs) {
         long count = -1;
 
-        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{"count(1)"}, selection, selectionArgs, null, null, null);
+        Cursor c = database.query(tableName, new String[]{"count(1)"}, selection, selectionArgs, null, null, null);
         if (c != null) {
             if (c.moveToFirst()) {
                 count = c.getLong(0);
@@ -458,7 +462,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * Find count by raw query.  Raw query assumes first SELECT param is count(1).
      *
      * @param databaseName name of database to use
-     * @param rawQuery Query
+     * @param rawQuery     Query
      * @return total count
      */
     public long findCountByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery) {
@@ -477,8 +481,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public long findCountByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findCountByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
+    }
+
+    public static long findCountByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         long count = 0;
-        Cursor c = getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+        Cursor c = database.rawQuery(rawQuery, selectionArgs);
         if (c != null) {
             if (c.moveToFirst()) {
                 count = c.getLong(0);
@@ -519,14 +527,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     /**
      * Return the first column and first row value as a Date for given rawQuery and selectionArgs.
      *
-     * @param database      DatabaseWrapper Name of database to query
+     * @param database      DatabaseWrapper of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType,@Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
+    public static <I> I findValueByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
@@ -598,10 +606,27 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
+        return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+     *
+     * @param database      DatabaseWrapper of database to query
+     * @param tableName     Table to run query against
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Order by value(s)
+     * @param defaultValue  Value returned if nothing is found
+     * @return query results value or defaultValue if no data was returned
+     */
+    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
-        Cursor c = getReadableDatabase(databaseName).query(false, getTableName(), new String[]{column}, selection, selectionArgs, null, null, null, "1");
+        Cursor c = database.query(false, tableName, new String[]{column}, selection, selectionArgs, null, null, null, "1");
         if (c != null) {
             if (c.moveToFirst()) {
                 value = databaseValue.getColumnValue(c, 0, defaultValue);
@@ -649,10 +674,23 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     @Nonnull
     public <I> List<I> findAllValuesByRawQuery(@Nonnull String databaseName, @Nonnull Class<I> valueType, int columnIndex, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+        return findAllValuesByRawQuery(getReadableDatabase(databaseName), valueType, columnIndex, rawQuery, selectionArgs);
+    }
+
+    /**
+     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
+     *
+     * @param database      DatabaseWrapper of database to query
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param rawQuery      Query contain first column contains value
+     * @param selectionArgs Query parameters
+     * @return query results List or empty List returned
+     */
+    public static <I> List<I> findAllValuesByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType, int columnIndex, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         List<I> foundItems;
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
 
-        Cursor cursor = getWritableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+        Cursor cursor = database.rawQuery(rawQuery, selectionArgs);
         if (cursor != null) {
             foundItems = new ArrayList<I>(cursor.getCount());
             if (cursor.moveToFirst()) {
@@ -710,10 +748,27 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     @Nonnull
     public <I> List<I> findAllValuesBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+        return findAllValuesBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy);
+    }
+
+    /**
+     * Return a list of all values for the specified column for given selection and selectionArgs.
+     *
+     * @param database      DatabaseWrapper of database to query
+     * @param tableName     Table to run query against
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Query order by
+     * @return query results List or empty List returned
+     */
+    @Nonnull
+    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         List<I> foundItems;
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
 
-        Cursor c = getReadableDatabase(databaseName).query(getTableName(), new String[]{column}, selection, selectionArgs, null, null, orderBy);
+        Cursor c = database.query(tableName, new String[]{column}, selection, selectionArgs, null, null, orderBy);
         if (c != null) {
             foundItems = new ArrayList<I>(c.getCount());
             if (c.moveToFirst()) {
@@ -741,8 +796,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @param type Type of Class
      * @return List of CustomQueryRecord
+     * @deprecated Use Query tables instead
      */
     @Nonnull
+    @Deprecated
     public <S extends CustomQueryRecord> List<S> findAllCustomRecordByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<S> type) {
         return findAllCustomRecordByRawQuery(getDatabaseName(), rawQuery, selectionArgs, type);
     }
@@ -756,8 +813,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @param type Type of Class
      * @return List of CustomQueryRecord
+     * @deprecated Use Query tables instead
      */
     @Nonnull
+    @Deprecated
     public <S extends CustomQueryRecord> List<S> findAllCustomRecordByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs, @Nonnull Class<S> type) {
         List<S> foundItems;
 

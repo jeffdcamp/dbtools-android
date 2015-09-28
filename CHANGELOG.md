@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+  Version 3.5.0 *(2015-09)*
+----------------------------
+
+ * Improved support for static calls to DatabaseManager and other areas
+ * Added DatabaseManager.mergeDatabase(...)
+ * Added DatabaseManager.findTableNames(...)
+ 
+ 
   Version 3.5.0 *(2015-08)*
 ----------------------------
 
