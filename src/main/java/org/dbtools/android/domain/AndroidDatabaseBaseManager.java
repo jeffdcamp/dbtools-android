@@ -2,6 +2,7 @@ package org.dbtools.android.domain;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Environment;
 import android.util.Log;
 import org.dbtools.android.domain.database.DatabaseWrapper;
@@ -16,6 +17,10 @@ import java.util.concurrent.ExecutorService;
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidDatabaseBaseManager {
     public static final String TAG = "AndroidDBTools";
+
+    private static final String MERGE_SOURCE_DATABASE_NAME = "dbtools_merge_source";
+    private static final String TABLE_NAMES_QUERY = "SELECT name FROM %1$ssqlite_master WHERE type='table' AND name NOT IN ('metadata', 'sqlite_sequence')";
+    private static final String MERGE_INSERT_QUERY = "INSERT OR IGNORE INTO %1$s SELECT * FROM %2$s";
 
     private Map<String, AndroidDatabase> databaseMap = new HashMap<String, AndroidDatabase>(); // <Database name, Database Path>
 
@@ -291,7 +296,6 @@ public abstract class AndroidDatabaseBaseManager {
 
     public void attachDatabases(@Nonnull AndroidDatabase db) {
         for (AndroidDatabase toDb : db.getAttachedDatabases()) {
-            String sql = "ATTACH DATABASE '" + toDb.getPath() + "' AS " + toDb.getName();
             db.getDatabaseWrapper().attachDatabase(toDb.getPath(), toDb.getName(), toDb.getPassword());
         }
     }
@@ -321,8 +325,7 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     public void detachDatabase(@Nonnull AndroidDatabase db, @Nonnull String databaseToDetach) {
-        String sql = "DETACH DATABASE '" + databaseToDetach + "'";
-        db.getDatabaseWrapper().execSQL(sql);
+        db.getDatabaseWrapper().detachDatabase(databaseToDetach);
     }
 
     public void cleanDatabase(@Nonnull String databaseName) {
@@ -593,5 +596,98 @@ public abstract class AndroidDatabaseBaseManager {
         if (!service.isShutdown()) {
             service.shutdown();
         }
+    }
+
+    public boolean mergeDatabase(@Nullable File sourceDatabaseFile, @Nullable AndroidDatabase targetDatabase) {
+        return mergeDatabase(sourceDatabaseFile, null, targetDatabase);
+    }
+
+    public boolean mergeDatabase(@Nullable File sourceDatabaseFile, @Nullable String sourceDatabasePassword, @Nullable AndroidDatabase targetDatabase) {
+        if (targetDatabase == null) {
+            Log.e(TAG, "Failed to merged :: targetDatabase is null");
+            return false;
+        }
+
+        if (sourceDatabaseFile == null) {
+            Log.e(TAG, "Failed to merged :: sourceDatabaseFile is null");
+            return false;
+        }
+
+        if (!sourceDatabaseFile.exists()) {
+            Log.e(TAG, "Failed to merged [" + sourceDatabaseFile.getAbsolutePath() + "] into [" + targetDatabase.getName() + "] :: Source database does not exist");
+            return false;
+        }
+
+        // Attach sourceDatabase with primary
+        targetDatabase.getDatabaseWrapper().attachDatabase(sourceDatabaseFile.getAbsolutePath(), MERGE_SOURCE_DATABASE_NAME, sourceDatabasePassword);
+
+
+
+        // Get a list of tables to merge
+        List<String> sourceTableNames = findTableNames(targetDatabase, MERGE_SOURCE_DATABASE_NAME);
+        List<String> targetTableNames = findTableNames(targetDatabase);
+
+        // Merge table content (insert content from source database)
+        targetDatabase.beginTransaction();
+
+        for (String tableName : sourceTableNames) {
+            if (targetTableNames.contains(tableName)) {
+                copyTableData(targetDatabase, MERGE_SOURCE_DATABASE_NAME + "." + tableName, tableName);
+            }
+        }
+
+        targetDatabase.endTransaction(true);
+
+        // Detach databases
+        targetDatabase.getDatabaseWrapper().detachDatabase(MERGE_SOURCE_DATABASE_NAME);
+
+        return true;
+    }
+
+    public void copyTableData(@Nonnull AndroidDatabase targetDatabase, String sourceTableName, String targetTableName) {
+        targetDatabase.getDatabaseWrapper().execSQL(String.format(MERGE_INSERT_QUERY, targetTableName, sourceTableName));
+    }
+
+    @Nonnull
+    private List<String> findTableNames(@Nonnull String databaseName) {
+        return findTableNames(getDatabase(databaseName));
+    }
+
+    @Nonnull
+    private List<String> findTableNames(@Nullable AndroidDatabase database) {
+        return findTableNames(database, null);
+    }
+
+    @Nonnull
+    private List<String> findTableNames(@Nullable AndroidDatabase database, @Nullable String attachedDatabaseName) {
+        if (database == null) {
+            return new ArrayList<String>();
+        }
+
+        List<String> tableNames;
+
+        // prepare query
+        String attachedDbPrefix;
+        if (attachedDatabaseName != null && !attachedDatabaseName.trim().isEmpty()) {
+            attachedDbPrefix = attachedDatabaseName + ".";
+        } else {
+            attachedDbPrefix = "";
+        }
+        String query = String.format(TABLE_NAMES_QUERY, attachedDbPrefix);
+
+        Cursor tableNamesCursor = database.getDatabaseWrapper().rawQuery(query, null);
+        if (tableNamesCursor != null) {
+            tableNames = new ArrayList<String>(tableNamesCursor.getCount());
+            if (tableNamesCursor.moveToFirst()) {
+                do {
+                    tableNames.add(tableNamesCursor.getString(0));
+                } while (tableNamesCursor.moveToNext());
+            }
+            tableNamesCursor.close();
+        } else {
+            tableNames = new ArrayList<String>();
+        }
+
+        return tableNames;
     }
 }

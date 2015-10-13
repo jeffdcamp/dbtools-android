@@ -62,6 +62,11 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.execSQL(sql);
     }
 
+    public void detachDatabase(String dbName) {
+        String sql = "DETACH DATABASE '" + dbName + "'";
+        database.execSQL(sql);
+    }
+
     // **** following are from SQLiteDatabase.java ****
 
     @Override

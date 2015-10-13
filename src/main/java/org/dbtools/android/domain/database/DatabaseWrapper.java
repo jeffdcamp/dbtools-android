@@ -9,6 +9,8 @@ public interface DatabaseWrapper<T> {
 
     void attachDatabase(String toDbPath, String toDbName, String toDbPassword);
 
+    void detachDatabase(String dbName);
+
     boolean isOpen();
 
     int getVersion();

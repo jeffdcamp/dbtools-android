@@ -33,6 +33,11 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
         database.execSQL(sql);
     }
 
+    public void detachDatabase(String dbName) {
+        String sql = "DETACH DATABASE '" + dbName + "'";
+        database.execSQL(sql);
+    }
+
     /**
      * Helper method to load the SQLCipher Libraries
      * @param context Android Context
