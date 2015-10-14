@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("UnusedDeclaration")
-public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> extends AndroidBaseManager<T> implements AsyncManager<T> {
+public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> implements AsyncManager<T> {
 
     // use static to get ALL tables across ALL managers... by Database <DatabaseName, Set of table names>
     private static final Map<String, Set<String>> transactionChangesTableNamesMap = new HashMap<String, Set<String>>();

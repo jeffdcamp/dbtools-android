@@ -11,7 +11,9 @@ import org.dbtools.android.domain.dbtype.DatabaseValueUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
@@ -381,7 +383,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    private T createRecordFromCursor(@Nullable Cursor cursor) {
+    public T createRecordFromCursor(@Nullable Cursor cursor) {
         if (cursor != null) {
             T record = newRecord();
             record.setContent(cursor);
