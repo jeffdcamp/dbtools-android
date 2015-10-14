@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+  Version 4.0.0 *(2015-10)*
+----------------------------
+
+ * RxJava support (added Observable AndroidBaseManager.xxxRx() methods)
+ * Added support for merging similar databases
+
+
   Version 3.5.0 *(2015-09)*
 ----------------------------
 
