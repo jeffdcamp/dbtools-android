@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+  Version 4.0.1 *(2015-10)*
+----------------------------
+
+ * Added rxJavaSupport to plugin (generator will use a RxJava BaseManager) (Currently Android ONLY)
+ * Removed generated setters for readonly tables / queries / views
+ * Made RxJava dependency optional
+ 
+   
   Version 4.0.0 *(2015-10)*
 ----------------------------
 

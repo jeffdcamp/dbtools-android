@@ -74,6 +74,7 @@
             <groupId>io.reactivex</groupId>
             <artifactId>rxjava</artifactId>
             <version>1.0.14</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>

@@ -1,5 +1,5 @@
 package org.dbtools.android.domain;
 
-public abstract class AndroidBaseManagerReadOnly<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> {
+public abstract class AndroidBaseManagerReadOnly<T extends AndroidBaseRecord> extends AndroidBaseManager<T> {
 
 }
