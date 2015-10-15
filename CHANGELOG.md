@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-  Version 4.0.1 *(2015-10)*
+  Version 4.0.2 *(2015-10)*
 ----------------------------
 
  * Added rxJavaSupport to plugin (generator will use a RxJava BaseManager) (Currently Android ONLY)
