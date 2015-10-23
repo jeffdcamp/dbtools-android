@@ -628,7 +628,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
-        Cursor c = database.query(false, tableName, new String[]{column}, selection, selectionArgs, null, null, null, "1");
+        Cursor c = database.query(false, tableName, new String[]{column}, selection, selectionArgs, null, null, orderBy, "1");
         if (c != null) {
             if (c.moveToFirst()) {
                 value = databaseValue.getColumnValue(c, 0, defaultValue);
