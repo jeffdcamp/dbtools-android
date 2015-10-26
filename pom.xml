@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.dbtools</groupId>
     <artifactId>dbtools-android</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.1.0</version>
     <packaging>jar</packaging>
     <name>DBTools Android</name>
     <description>DBTools ORM for Android</description>
@@ -47,6 +47,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
         <source.jdk>1.6</source.jdk>
         <target.jdk>1.6</target.jdk>
