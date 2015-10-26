@@ -155,6 +155,71 @@ The following are some examples DBTools can be used:
             Log.i(TAG, "Database changed, transaction end.  Tables changed: " + event.getAllTableName());
             boolean myTableUpdated = event.containsTable(Individual.TABLE);
         }
+        
+RxJava
+======
+
+  * Setup
+  
+  Tell DBTools to support RxJava:
+  
+       dbtools {
+           rxJavaSupport true // support RxJava
+       }
+       
+  Include the RxJava dependecy:
+  
+      // RxJava
+      compile 'io.reactivex:rxandroid:<latest version>'
+      compile 'io.reactivex:rxjava:<latest version>'
+      
+  * Usage
+  
+  Managers
+  
+  Use xxxRx(...) method calls on the manager classes to return an Observable
+  
+        individualManager.findAllRx()
+              .subscribe(individual -> Log.i(TAG, "Individual: " + individual.getFirstName()));
+
+  Subscribe to table and/or row changes (following example will output 2 table changes and 2 row changes)
+  
+        public void changeNames() {
+            // Subscribe to TABLE changes
+            Subscription tableChangeSubscription = individualManager.tableChanges()
+                    .subscribe(changeType -> handleTableChange(changeType));
+            
+            // Subscribe to ROW changes
+            Subscription rowChangeSubscription = individualManager.rowChanges()
+                    .subscribe(databaseRowChange -> handleRowChange(databaseRowChange));
+            
+            
+            // Make some changes
+            Individual individual = individualManager.findAll().get(0);
+            if (individual != null) {
+                // change name
+                individual.setFirstName("Bobby");
+                individualManager.save(individual);
+            
+                // change name (again)
+                individual.setFirstName("John");
+                individualManager.save(individual);
+            }
+        
+            // Unsubscribe
+            tableChangeSubscription.unsubscribe();
+            rowChangeSubscription.unsubscribe();
+        }
+        
+        public void handleTableChange(DatabaseChangeType changeType) {
+            Log.e(TAG, "Individual Table Changed: [" + changeType + "]");
+        }
+    
+        public void handleRowChange(DatabaseRowChange change) {
+            Individual individual = individualManager.findByRowId(change.getRowId());
+            Log.e(TAG, "Individual Row Changed: NAME = " + individual.getFirstName());
+        }
+
 
 Setup
 =====
@@ -190,6 +255,7 @@ Setup
             includeDatabaseNameInPackage true // place each set of domain objects into a package named after its database
             eventBusSupport true // support Event Bus
             dateTimeSupport true // support Joda DateTime
+            rxJavaSupport false // support RxJava
         }
 
   2. For new projects, create initial schema.xml files (Default: new files will be created in src/main/database)
