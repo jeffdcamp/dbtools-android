@@ -168,7 +168,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
      *
      * @param rawQuery Custom query
-     * @return Observable<T>
+     * @return Observable
      */
     @Nonnull
     public Observable<T> findAllByRawQueryRx(@Nonnull final String rawQuery) {
@@ -180,7 +180,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      *
      * @param rawQuery      Custom query
      * @param selectionArgs query arguments
-     * @return Observable<T>
+     * @return Observable
      */
     @Nonnull
     public Observable<T> findAllByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
@@ -193,7 +193,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param databaseName  Name of database
      * @param rawQuery      Custom query
      * @param selectionArgs query arguments
-     * @return Observable<T>
+     * @return Observable
      */
     @Nonnull
     public Observable<T> findAllByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
@@ -434,6 +434,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> Observable<I> findValueByRawQueryRx(@Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
@@ -448,6 +449,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> Observable<I> findValueByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
@@ -462,6 +464,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public static <I> Observable<I> findValueByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
@@ -494,6 +497,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
@@ -509,6 +513,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selectionArgs Query parameters
      * @param orderBy       Order by value(s)
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
@@ -524,6 +529,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
@@ -540,6 +546,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selectionArgs Query parameters
      * @param orderBy       Order by value(s)
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
@@ -557,6 +564,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selectionArgs Query parameters
      * @param orderBy       Order by value(s)
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public static <I> Observable<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
@@ -586,6 +594,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     @Nonnull
@@ -600,6 +609,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     @Nonnull
@@ -612,8 +622,10 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      *
      * @param databaseName  Name of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param columnIndex   Column Index for value
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     @Nonnull
@@ -626,8 +638,10 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      *
      * @param database      DatabaseWrapper of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param columnIndex   Column Index for value
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     public static <I> Observable<I> findAllValuesByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final Class<I> valueType, final int columnIndex, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
@@ -656,6 +670,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param column        Column which contains value
      * @param selection     Query selection
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     @Nonnull
@@ -671,6 +686,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param orderBy       Query order by
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     @Nonnull
@@ -687,6 +703,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param orderBy       Query order by
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     @Nonnull
@@ -704,6 +721,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param orderBy       Query order by
+     * @param <I>           Type of value
      * @return Observable of all values
      */
     @Nonnull

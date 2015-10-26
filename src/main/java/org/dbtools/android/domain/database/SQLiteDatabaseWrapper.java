@@ -23,6 +23,7 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
 
     /**
      * Create a standard version of the database
+     * @param path Path to database
      */
     public SQLiteDatabaseWrapper(String path) {
         loadLibrary();
@@ -31,6 +32,8 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
 
     /**
      * Create a secure/encrypted version of the database
+     * @param path Path to database
+     * @param password Database password
      */
     public SQLiteDatabaseWrapper(String path, String password) {
         loadLibrary();

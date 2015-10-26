@@ -506,6 +506,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueByRawQuery(@Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
@@ -520,6 +521,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueByRawQuery(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
@@ -534,6 +536,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public static <I> I findValueByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
@@ -559,6 +562,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
@@ -574,6 +578,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @param orderBy       Order by value(s)
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
@@ -589,6 +594,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
@@ -605,6 +611,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @param orderBy       Order by value(s)
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
@@ -622,6 +629,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Query parameters
      * @param orderBy       Order by value(s)
      * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
@@ -644,6 +652,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     @Nonnull
@@ -658,6 +667,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     @Nonnull
@@ -670,8 +680,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      *
      * @param databaseName  Name of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param columnIndex   Index of column with value
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     @Nonnull
@@ -684,8 +696,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      *
      * @param database      DatabaseWrapper of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param columnIndex   Index of column with value
      * @param rawQuery      Query contain first column contains value
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     public static <I> List<I> findAllValuesByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType, int columnIndex, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
@@ -715,6 +729,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param column        Column which contains value
      * @param selection     Query selection
      * @param selectionArgs Query parameters
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     @Nonnull
@@ -730,6 +745,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param orderBy       Query order by
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     @Nonnull
@@ -746,6 +762,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param orderBy       Query order by
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     @Nonnull
@@ -763,6 +780,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param orderBy       Query order by
+     * @param <I>           Type of value
      * @return query results List or empty List returned
      */
     @Nonnull
