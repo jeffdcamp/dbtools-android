@@ -3,11 +3,10 @@ package org.dbtools.android.domain;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteStatement;
 import org.dbtools.android.domain.database.DatabaseWrapper;
-import org.dbtools.android.domain.event.DatabaseDeleteEvent;
-import org.dbtools.android.domain.event.DatabaseEndTransactionEvent;
-import org.dbtools.android.domain.event.DatabaseInsertEvent;
-import org.dbtools.android.domain.event.DatabaseUpdateEvent;
+import org.dbtools.android.domain.event.*;
 import org.dbtools.android.domain.task.*;
+import rx.Observable;
+import rx.subjects.PublishSubject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,6 +17,9 @@ import java.util.Set;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> implements AsyncManager<T> {
+
+    private final PublishSubject<DatabaseRowChange> rowChanges = PublishSubject.create();
+    private final PublishSubject<DatabaseChangeType> tableChanges = PublishSubject.create();
 
     // use static to get ALL tables across ALL managers... by Database <DatabaseName, Set of table names>
     private static final Map<String, Set<String>> transactionChangesTableNamesMap = new HashMap<String, Set<String>>();
@@ -161,6 +163,10 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
                 rowId = db.insert(getTableName(), null, e.getContentValues());
                 e.setPrimaryKeyId(rowId);
                 postInsertEvent(db, getTableName(), rowId);
+
+                tableChanges.onNext(DatabaseChangeType.INSERT);
+                rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.INSERT, rowId));
+
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -214,6 +220,10 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         long rowId = statement.executeInsert();
         e.setPrimaryKeyId(rowId);
         postInsertEvent(null, getTableName(), rowId);
+
+        tableChanges.onNext(DatabaseChangeType.INSERT);
+        rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.INSERT, rowId));
+
         return rowId;
     }
 
@@ -236,11 +246,23 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
-        return update(db, e.getContentValues(), e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+        int rowsAffectedCount =  update(db, e.getContentValues(), e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+
+        if (rowsAffectedCount > 0) {
+            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.UPDATE, rowId));
+        }
+
+        return rowsAffectedCount;
     }
 
     public int update(@Nonnull ContentValues values, long rowId) {
-        return update(getDatabaseName(), values, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
+        int rowsAffectedCount = update(getDatabaseName(), values, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
+
+        if (rowsAffectedCount > 0) {
+            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.UPDATE, rowId));
+        }
+
+        return rowsAffectedCount;
     }
 
     public int update(@Nonnull ContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
@@ -252,22 +274,26 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     }
 
     public int update(@Nonnull DatabaseWrapper db, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        int rowsAffected = 0;
+        int rowsAffectedCount = 0;
 
         checkDB(db);
         // Make sure that if there is an error (LockedException), that we try again.
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowsAffected = db.update(getTableName(), contentValues, where, whereArgs);
-                postUpdateEvent(db, getTableName(), rowsAffected);
+                rowsAffectedCount = db.update(getTableName(), contentValues, where, whereArgs);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
 
-        return rowsAffected;
+        if (success && rowsAffectedCount > 0) {
+            postUpdateEvent(db, getTableName(), rowsAffectedCount);
+            tableChanges.onNext(DatabaseChangeType.UPDATE);
+        }
+
+        return rowsAffectedCount;
     }
 
     public void updateAsync(@Nullable T e) {
@@ -315,11 +341,23 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "]");
         }
 
-        return delete(db, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+        int rowCountAffected = delete(db, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+
+        if (rowCountAffected > 0) {
+            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.DELETE, rowId));
+        }
+
+        return rowCountAffected;
     }
 
     public int delete(long rowId) {
-        return delete(getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
+        int rowCountAffected = delete(getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
+
+        if (rowCountAffected > 0) {
+            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.DELETE, rowId));
+        }
+
+        return rowCountAffected;
     }
 
     public int delete(@Nullable String where, @Nullable String[] whereArgs) {
@@ -332,21 +370,25 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
     public int delete(@Nonnull DatabaseWrapper db, @Nullable String where, @Nullable String[] whereArgs) {
         checkDB(db);
-        int rowsAffected = 0;
+        int rowCountAffected = 0;
 
         // Make sure that if there is an error (LockedException), that we try again.
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowsAffected = db.delete(getTableName(), where, whereArgs);
-                postDeleteEvent(db, getTableName(), rowsAffected);
+                rowCountAffected = db.delete(getTableName(), where, whereArgs);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
 
-        return rowsAffected;
+        if (success && rowCountAffected > 0) {
+            postDeleteEvent(db, getTableName(), rowCountAffected);
+            tableChanges.onNext(DatabaseChangeType.DELETE);
+        }
+
+        return rowCountAffected;
     }
 
     public void deleteAsync(@Nullable T e) {
@@ -399,22 +441,22 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
     }
 
-    private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
+    private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
         DBToolsEventBus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {
-                bus.post(new DatabaseUpdateEvent(tableName, rowsAffected));
+                bus.post(new DatabaseUpdateEvent(tableName, rowCountAffected));
             } else {
                 addTransactionTableNameChange(tableName);
             }
         }
     }
 
-    private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
+    private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
         DBToolsEventBus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {
-                bus.post(new DatabaseDeleteEvent(tableName, rowsAffected));
+                bus.post(new DatabaseDeleteEvent(tableName, rowCountAffected));
             } else {
                 addTransactionTableNameChange(tableName);
             }
@@ -443,5 +485,13 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         transactionChangesTableNames.add(tableName);
+    }
+
+    public Observable<DatabaseChangeType> tableChanges() {
+        return tableChanges;
+    }
+
+    public Observable<DatabaseRowChange> rowChanges() {
+        return rowChanges;
     }
 }

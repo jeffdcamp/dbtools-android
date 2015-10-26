@@ -786,7 +786,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return foundItems;
     }
 
-    private static <I> DatabaseValue<I> getDatabaseValue(Class<I> type) {
+    protected static <I> DatabaseValue<I> getDatabaseValue(Class<I> type) {
         return DatabaseValueUtil.getDatabaseValue(type);
     }
 

@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+  Version 4.1.0 *(2015-10)*
+----------------------------
+
+ * Improved RxJava Support in BaseManager (Instead of returning Observable<List<T>>... return Observable<T>)
+ * Added RxJava Observables to BaseManager for rowChanges and tableChanges
+ 
+ 
   Version 4.0.2 *(2015-10)*
 ----------------------------
 

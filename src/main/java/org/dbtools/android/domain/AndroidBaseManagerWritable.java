@@ -252,22 +252,22 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     }
 
     public int update(@Nonnull DatabaseWrapper db, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        int rowsAffected = 0;
+        int rowCountAffected = 0;
 
         checkDB(db);
         // Make sure that if there is an error (LockedException), that we try again.
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowsAffected = db.update(getTableName(), contentValues, where, whereArgs);
-                postUpdateEvent(db, getTableName(), rowsAffected);
+                rowCountAffected = db.update(getTableName(), contentValues, where, whereArgs);
+                postUpdateEvent(db, getTableName(), rowCountAffected);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
 
-        return rowsAffected;
+        return rowCountAffected;
     }
 
     public void updateAsync(@Nullable T e) {
@@ -332,21 +332,21 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
 
     public int delete(@Nonnull DatabaseWrapper db, @Nullable String where, @Nullable String[] whereArgs) {
         checkDB(db);
-        int rowsAffected = 0;
+        int rowCountAffected = 0;
 
         // Make sure that if there is an error (LockedException), that we try again.
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowsAffected = db.delete(getTableName(), where, whereArgs);
-                postDeleteEvent(db, getTableName(), rowsAffected);
+                rowCountAffected = db.delete(getTableName(), where, whereArgs);
+                postDeleteEvent(db, getTableName(), rowCountAffected);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
 
-        return rowsAffected;
+        return rowCountAffected;
     }
 
     public void deleteAsync(@Nullable T e) {
@@ -399,22 +399,22 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         }
     }
 
-    private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
+    private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
         DBToolsEventBus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {
-                bus.post(new DatabaseUpdateEvent(tableName, rowsAffected));
+                bus.post(new DatabaseUpdateEvent(tableName, rowCountAffected));
             } else {
                 addTransactionTableNameChange(tableName);
             }
         }
     }
 
-    private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowsAffected) {
+    private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
         DBToolsEventBus bus = getBus();
         if (bus != null) {
             if (!db.inTransaction()) {
-                bus.post(new DatabaseDeleteEvent(tableName, rowsAffected));
+                bus.post(new DatabaseDeleteEvent(tableName, rowCountAffected));
             } else {
                 addTransactionTableNameChange(tableName);
             }
