@@ -27,7 +27,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -37,7 +37,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -47,7 +47,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -57,7 +57,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -67,7 +67,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -77,7 +77,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -87,7 +87,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(final boolean distinct, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -97,7 +97,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -107,7 +107,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorByRowIdRx(final long rowId) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -117,7 +117,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<Cursor> findCursorByRowIdRx(@Nonnull final String databaseName, final long rowId) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -220,7 +220,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<T> findByRowIdRx(final long rowId) {
         return DBToolsRxUtil.just(new Func0<T>() {
             @Override
@@ -230,7 +230,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<T> findByRowIdRx(@Nonnull final String databaseName, final long rowId) {
         return DBToolsRxUtil.just(new Func0<T>() {
             @Override
@@ -241,7 +241,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
 
     }
 
-    @Nullable
+    @Nonnull
     public Observable<T> findBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<T>() {
             @Override
@@ -251,7 +251,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<T> findBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<T>() {
             @Override
@@ -262,7 +262,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<T> findByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<T>() {
             @Override
@@ -272,7 +272,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<T> findByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<T>() {
             @Override
@@ -282,7 +282,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     private Observable<T> createRecordFromCursorRx(@Nullable final Cursor cursor) {
         return DBToolsRxUtil.just(new Func0<T>() {
             @Override
@@ -315,6 +315,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         return findAllBySelectionRx(databaseName, sb.toString(), null, orderBy);
     }
 
+    @Nonnull
     public Observable<Long> findCountRx() {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -324,6 +325,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Long> findCountRx(@Nonnull final String databaseName) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -333,6 +335,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Long> findCountBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -342,6 +345,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Long> findCountBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -352,6 +356,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
 
     }
 
+    @Nonnull
     public static Observable<Long> findCountBySelectionRx(@Nonnull final DatabaseWrapper database, @Nonnull final String tableName, @Nullable final String selection, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -367,6 +372,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param rawQuery Query
      * @return total count
      */
+    @Nonnull
     public Observable<Long> findCountByRawQueryRx(@Nonnull final String rawQuery) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -383,6 +389,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param rawQuery     Query
      * @return total count
      */
+    @Nonnull
     public Observable<Long> findCountByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -399,6 +406,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param selectionArgs Selection args
      * @return total count
      */
+    @Nonnull
     public Observable<Long> findCountByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -408,6 +416,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Long> findCountByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
 
         return DBToolsRxUtil.just(new Func0<Long>() {
@@ -418,6 +427,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public static Observable<Long> findCountByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Long>() {
             @Override
@@ -437,6 +447,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public <I> Observable<I> findValueByRawQueryRx(@Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
         return findValueByRawQueryRx(getDatabaseName(), valueType, rawQuery, selectionArgs, defaultValue);
     }
@@ -452,6 +463,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public <I> Observable<I> findValueByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
         return findValueByRawQueryRx(getReadableDatabase(databaseName), valueType, rawQuery, selectionArgs, defaultValue);
     }
@@ -467,6 +479,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public static <I> Observable<I> findValueByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
         return Observable.create(new Observable.OnSubscribe<I>() {
             @Override
@@ -500,6 +513,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
         return findValueBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, defaultValue);
     }
@@ -516,6 +530,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
         return findValueBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
     }
@@ -532,6 +547,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
         return findValueBySelectionRx(databaseName, valueType, column, selection, selectionArgs, null, defaultValue);
     }
@@ -549,6 +565,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
         return findValueBySelectionRx(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
     }
@@ -567,6 +584,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    @Nonnull
     public static <I> Observable<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
         return Observable.create(new Observable.OnSubscribe<I>() {
             @Override
@@ -644,6 +662,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param <I>           Type of value
      * @return Observable of all values
      */
+    @Nonnull
     public static <I> Observable<I> findAllValuesByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final Class<I> valueType, final int columnIndex, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return Observable.create(new Observable.OnSubscribe<I>() {
             @Override
@@ -746,6 +765,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     }
 
 
+    @Nonnull
     private static <I> Observable<DatabaseValue<I>> getDatabaseValueRx(final Class<I> type) {
         return DBToolsRxUtil.just(new Func0<DatabaseValue<I>>() {
             @Override
@@ -755,6 +775,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Boolean> tableExistsRx(@Nonnull final String tableName) {
         return DBToolsRxUtil.just(new Func0<Boolean>() {
             @Override
@@ -764,6 +785,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Boolean> tableExistsRx(@Nonnull final String databaseName, @Nonnull final String tableName) {
         return DBToolsRxUtil.just(new Func0<Boolean>() {
             @Override
@@ -773,6 +795,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public static Observable<Boolean> tableExistsRx(@Nonnull final AndroidDatabase androidDatabase, @Nonnull final String tableName) {
         return DBToolsRxUtil.just(new Func0<Boolean>() {
             @Override
@@ -782,6 +805,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public static Observable<Boolean> tableExistsRx(@Nullable final DatabaseWrapper db, @Nullable final String tableName) {
         return DBToolsRxUtil.just(new Func0<Boolean>() {
             @Override
@@ -791,7 +815,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final T record) {
         return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
             @Override
@@ -801,7 +825,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final T... records) {
         return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
             @Override
@@ -811,7 +835,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
-    @Nullable
+    @Nonnull
     public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final List<T> records) {
         return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
             @Override
@@ -821,6 +845,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<MatrixCursor> toMatrixCursorRx(final String[] columns, final List<T> records) {
         return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
             @Override
@@ -830,6 +855,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Cursor> mergeCursorsRx(final Cursor... cursors) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -839,6 +865,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Cursor> addAllToCursorTopRx(final Cursor cursor, final List<T> records) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -848,6 +875,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Cursor> addAllToCursorTopRx(final Cursor cursor, final T... records) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -857,6 +885,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Cursor> addAllToCursorBottomRx(final Cursor cursor, final List<T> records) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
@@ -866,6 +895,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         });
     }
 
+    @Nonnull
     public Observable<Cursor> addAllToCursorBottomRx(final Cursor cursor, final T... records) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
