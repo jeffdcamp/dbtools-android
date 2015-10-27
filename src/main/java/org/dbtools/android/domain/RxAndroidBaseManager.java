@@ -5,7 +5,6 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.dbtype.DatabaseValue;
-import org.dbtools.android.domain.dbtype.DatabaseValueUtil;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func0;
@@ -222,72 +221,65 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
 
     @Nonnull
     public Observable<T> findByRowIdRx(final long rowId) {
-        return DBToolsRxUtil.just(new Func0<T>() {
-            @Override
-            public T call() {
-                return findBySelection(getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
-            }
-        });
+        return findBySelectionRx(getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
     }
 
     @Nonnull
     public Observable<T> findByRowIdRx(@Nonnull final String databaseName, final long rowId) {
-        return DBToolsRxUtil.just(new Func0<T>() {
-            @Override
-            public T call() {
-                return findBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
-            }
-        });
-
+        return findBySelectionRx(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
     }
 
     @Nonnull
     public Observable<T> findBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        return DBToolsRxUtil.just(new Func0<T>() {
-            @Override
-            public T call() {
-                return findBySelection(selection, selectionArgs, orderBy);
-            }
-        });
+        return findBySelectionRx(getDatabaseName(), selection, selectionArgs, orderBy);
     }
 
     @Nonnull
     public Observable<T> findBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        return DBToolsRxUtil.just(new Func0<T>() {
-            @Override
-            public T call() {
-                Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
-                return createRecordFromCursor(cursor);
-            }
-        });
+        Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
+        return createRecordFromCursorRx(cursor);
     }
 
     @Nonnull
     public Observable<T> findByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<T>() {
-            @Override
-            public T call() {
-                return findByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
-            }
-        });
+        return findByRawQueryRx(getDatabaseName(), rawQuery, selectionArgs);
     }
 
     @Nonnull
     public Observable<T> findByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<T>() {
+        return Observable.create(new Observable.OnSubscribe<T>() {
             @Override
-            public T call() {
-                return findByRawQuery(databaseName, rawQuery, selectionArgs);
+            public void call(Subscriber<? super T> subscriber) {
+                Cursor cursor = findCursorByRawQuery(databaseName, rawQuery, selectionArgs);
+
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        T record = newRecord();
+                        record.setContent(cursor);
+                        cursor.close();
+                        subscriber.onNext(record);
+                    }
+
+                    cursor.close();
+                    subscriber.onCompleted();
+                }
             }
         });
     }
 
     @Nonnull
     private Observable<T> createRecordFromCursorRx(@Nullable final Cursor cursor) {
-        return DBToolsRxUtil.just(new Func0<T>() {
+        return Observable.create(new Observable.OnSubscribe<T>() {
             @Override
-            public T call() {
-                return createRecordFromCursor(cursor);
+            public void call(Subscriber<? super T> subscriber) {
+                if (cursor != null) {
+                    T record = newRecord();
+                    record.setContent(cursor);
+                    cursor.close();
+                    subscriber.onNext(record);
+                }
+
+                subscriber.onCompleted();
             }
         });
     }
@@ -760,17 +752,6 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
                     c.close();
                     subscriber.onCompleted();
                 }
-            }
-        });
-    }
-
-
-    @Nonnull
-    private static <I> Observable<DatabaseValue<I>> getDatabaseValueRx(final Class<I> type) {
-        return DBToolsRxUtil.just(new Func0<DatabaseValue<I>>() {
-            @Override
-            public DatabaseValue<I> call() {
-                return DatabaseValueUtil.getDatabaseValue(type);
             }
         });
     }
