@@ -196,7 +196,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
         ContentValues contentValues = e.getContentValues();
         int bindItemCount = 1;
-        for (String key : e.getAllKeys()) {
+        for (String key : e.getAllColumns()) {
             Object objKey = contentValues.get(key);
             if (objKey instanceof Long) {
                 statement.bindLong(bindItemCount, (Long) objKey);

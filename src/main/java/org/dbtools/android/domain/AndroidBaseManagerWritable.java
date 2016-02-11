@@ -190,7 +190,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
 
         ContentValues contentValues = e.getContentValues();
         int bindItemCount = 1;
-        for (String key : e.getAllKeys()) {
+        for (String key : e.getAllColumns()) {
             Object objKey = contentValues.get(key);
             if (objKey instanceof Long) {
                 statement.bindLong(bindItemCount, (Long) objKey);

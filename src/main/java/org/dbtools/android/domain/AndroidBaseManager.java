@@ -34,7 +34,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public abstract String getPrimaryKey();
 
-    public abstract String[] getAllKeys();
+    public abstract String[] getAllColumns();
 
     public abstract String getDropSql();
 
@@ -205,12 +205,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     @Nullable
     public Cursor findCursorBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
-        return findCursorBySelection(databaseName, true, getTableName(), getAllKeys(), selection, selectionArgs, null, null, orderBy, null);
+        return findCursorBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
     }
 
     @Nullable
     public Cursor findCursorBySelection(boolean distinct, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
-        return findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllKeys(), selection, selectionArgs, groupBy, having, orderBy, limit);
+        return findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
     @Nullable
@@ -931,7 +931,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public MatrixCursor toMatrixCursor(@Nonnull T record) {
         List<T> list = new ArrayList<T>(1);
         list.add(record);
-        return toMatrixCursor(record.getAllKeys(), list);
+        return toMatrixCursor(record.getAllColumns(), list);
     }
 
     @Nullable
@@ -947,7 +947,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
         T record = records.get(0);
 
-        return toMatrixCursor(record.getAllKeys(), records);
+        return toMatrixCursor(record.getAllColumns(), records);
     }
 
     public MatrixCursor toMatrixCursor(String[] columns, List<T> records) {

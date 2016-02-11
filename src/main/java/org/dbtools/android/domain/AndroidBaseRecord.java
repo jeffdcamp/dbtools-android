@@ -37,7 +37,7 @@ public abstract class AndroidBaseRecord implements Serializable {
     public abstract long getPrimaryKeyId();
     public abstract String getIdColumnName();
 
-    public abstract String[] getAllKeys();
+    public abstract String[] getAllColumns();
 
     static {
         try {

@@ -81,7 +81,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
             public Cursor call() {
-                return findCursorBySelection(databaseName, true, getTableName(), getAllKeys(), selection, selectionArgs, null, null, orderBy, null);
+                return findCursorBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
             }
         });
     }
@@ -91,7 +91,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Override
             public Cursor call() {
-                return findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllKeys(), selection, selectionArgs, groupBy, having, orderBy, limit);
+                return findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
             }
         });
     }
