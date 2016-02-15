@@ -2,6 +2,7 @@ package org.dbtools.android.domain.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import org.jetbrains.annotations.Nullable;
 
 public interface DatabaseWrapper<T> {
 
@@ -25,11 +26,11 @@ public interface DatabaseWrapper<T> {
 
     void execSQL(String sqlStatement);
 
-    Cursor query(boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit);
+    Cursor query(boolean distinct, String table, String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit);
 
-    Cursor query(String tableName, String[] strings, String selection, String[] selectionArgs, String groupBy, String having, String orderBy);
+    Cursor query(String tableName, String[] strings, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy);
 
-    Cursor rawQuery(String rawQuery, String[] selectionArgs);
+    Cursor rawQuery(String rawQuery, @Nullable String[] selectionArgs);
 
     boolean inTransaction();
 

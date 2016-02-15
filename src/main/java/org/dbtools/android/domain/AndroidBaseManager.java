@@ -1,10 +1,8 @@
 package org.dbtools.android.domain;
 
-import android.app.SearchManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
-import android.provider.BaseColumns;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.dbtype.DatabaseValue;
 import org.dbtools.android.domain.dbtype.DatabaseValueUtil;
@@ -132,39 +130,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
                 db.execSQL(sqlStatement);
             }
         }
-    }
-
-    private static final String DEFAULT_SEARCH_SUG_INTENT = BaseColumns._ID + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID;
-
-    @Nonnull
-    public static String[] addSearchSuggestionIntentCol(@Nonnull String[] currentCols, @Nonnull String resultColName) {
-        String sugCol1 = resultColName + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1;
-        return addToArray(currentCols, new String[]{DEFAULT_SEARCH_SUG_INTENT, sugCol1});
-    }
-
-    @Nonnull
-    public static String createSearchSuggestionColumnsSQL(@Nonnull String idColumn, @Nonnull String resultTextColumn) {
-        return createSearchSuggestionIdColumn(idColumn) + ", " + createSearchSuggestionResult1Column(resultTextColumn);
-    }
-
-    @Nonnull
-    public static String createSearchSuggestionIdColumn(@Nonnull String idColumn) {
-        return idColumn + " AS " + SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID;
-    }
-
-    @Nonnull
-    public static String createSearchSuggestionResult1Column(@Nonnull String resultTextColumn) {
-        return resultTextColumn + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1;
-    }
-
-    @Nonnull
-    public static String[] addToArray(@Nonnull String[] array, @Nonnull String[] strings) {
-        String[] newArray = new String[array.length + strings.length];
-        System.arraycopy(array, 0, newArray, 0, array.length);
-        for (int i = array.length, j = 0; j < strings.length; i++, j++) { // NOPMD
-            newArray[i] = strings[j];
-        }
-        return newArray;
     }
 
     protected static void checkDB(@Nullable DatabaseWrapper db) {
@@ -614,7 +579,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
+    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @org.jetbrains.annotations.Nullable String orderBy, I defaultValue) {
         return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
     }
 
@@ -632,7 +597,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
+    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @org.jetbrains.annotations.Nullable String orderBy, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
