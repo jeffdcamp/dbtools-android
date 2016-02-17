@@ -6,7 +6,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.threeten.bp.*;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -75,11 +74,21 @@ public class DBToolsDateFormatter {
 
     // Java Date - long
 
-    public static long dateToLong(@Nonnull Date d) {
+    @Nullable
+    public static Long dateToLong(@Nullable Date d) {
+        if (d == null) {
+            return null;
+        }
+
         return d.getTime();
     }
 
-    public static Date longToDate(long l) {
+    @Nullable
+    public static Date longToDate(@Nullable Long l) {
+        if (l == null) {
+            return null;
+        }
+
         return new Date(l);
     }
 
@@ -87,19 +96,39 @@ public class DBToolsDateFormatter {
     // ========== JODA ==========
     // DateTime - long
 
-    public static long dateTimeToLong(@Nonnull DateTime d) {
+    @Nullable
+    public static Long dateTimeToLong(@Nullable DateTime d) {
+        if (d == null) {
+            return null;
+        }
+
         return d.getMillis();
     }
 
-    public static DateTime longToDateTime(long l) {
+    @Nullable
+    public static DateTime longToDateTime(@Nullable Long l) {
+        if (l == null) {
+            return null;
+        }
+
         return new org.joda.time.DateTime(l);
     }
 
-    public static long dateTimeToLongUtc(@Nonnull DateTime d) {
+    @Nullable
+    public static Long dateTimeToLongUtc(@Nullable DateTime d) {
+        if (d == null) {
+            return null;
+        }
+
         return d.withZone(DateTimeZone.UTC).getMillis();
     }
 
-    public static DateTime longToDateTimeUtc(long l) {
+    @Nullable
+    public static DateTime longToDateTimeUtc(@Nullable Long l) {
+        if (l == null) {
+            return null;
+        }
+
         return new org.joda.time.DateTime(l, DateTimeZone.UTC);
     }
 
@@ -132,19 +161,39 @@ public class DBToolsDateFormatter {
     // ========== JSR 310 ==========
     // JSR 310 LocalDateTime - long
 
-    public static long localDateTimeToLong(@Nonnull LocalDateTime d) {
+    @Nullable
+    public static Long localDateTimeToLong(@Nullable LocalDateTime d) {
+        if (d == null) {
+            return null;
+        }
+
         return d.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-    public static LocalDateTime longToLocalDateTime(long l) {
+    @Nullable
+    public static LocalDateTime longToLocalDateTime(@Nullable Long l) {
+        if (l == null) {
+            return null;
+        }
+
         return Instant.ofEpochMilli(l).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public static long localDateTimeToLongUtc(@Nonnull LocalDateTime d) {
+    @Nullable
+    public static Long localDateTimeToLongUtc(@Nullable LocalDateTime d) {
+        if (d == null) {
+            return null;
+        }
+
         return d.toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 
-    public static LocalDateTime longToLocalDateTimeUtc(long l) {
+    @Nullable
+    public static LocalDateTime longToLocalDateTimeUtc(@Nullable Long l) {
+        if (l == null) {
+            return null;
+        }
+
         return Instant.ofEpochMilli(l).atZone(ZoneOffset.UTC).toLocalDateTime();
     }
 
