@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+  Version 5.0.1 *(2016-03)*
+----------------------------
+* Added Support for Kotlin
+* Added Support for JSR-310 (use dateType 'JSR-310' in the dbtools-gen plugin)
+* dbtools-gen will now create RecordConst file that contains all the static fields and methods from the BaseRecord
+
   Version 4.1.2 *(2015-10)*
 ----------------------------
 

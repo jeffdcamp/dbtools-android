@@ -22,14 +22,11 @@ The following are some examples DBTools can be used:
         ... or ...
 
         // NO INJECTION
+        IndividualManager individualManager = new IndividualManager(myDatabaseManager); // supply your DatabaseManager
+        
         public void onSaveClicked() {
-            // get your database (can be pulled from shared location)
-            DatabaseManager databaseManager = new DatabaseManager();
-            databaseManager.setContext(this);
-            SQLiteDatabase db = databaseManager.getWritableDatabase(DatabaseManager.MAIN_DATABASE_NAME);
-
             // save
-            IndividualManager.save(db, individual); // static method call to manager
+            individualManager.save(individual);
         }
 
   * Add data to the database
@@ -71,7 +68,7 @@ The following are some examples DBTools can be used:
         individualManager.delete(1); // delete by primary key id
         
         // delete all individuals who has "555" in their phone number
-        individualManager.delete(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+        individualManager.delete(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
 
   DBTools Manager classes have a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
 
@@ -80,22 +77,22 @@ The following are some examples DBTools can be used:
         Individual individual = individualManager.findByRowId(1);
         
         // find FIRST individual who has "555" in their phone number
-        Individual individual = individualManager.findBySelection(Individual.C_PHONE + " LIKE ?", new String[]{"555"}); 
+        Individual individual = individualManager.findBySelection(IndividualConst.C_PHONE + " LIKE ?", new String[]{"555"}); 
 
 
         List<Individual> allIndividuals = individualManager.findAll();
-        List<Individual> allOrderedIndividuals = individualManager.findAllOrderBy(Individual.C_NAME);
+        List<Individual> allOrderedIndividuals = individualManager.findAllOrderBy(IndividualConst.C_NAME);
         
         // find all those who have "555" in their phone number
-        List<Individual> specificIndividuals = individualManager.findAllBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+        List<Individual> specificIndividuals = individualManager.findAllBySelection(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
 
   * Using cursors
 
         // find all, order by NAME column
-        Cursor cursor = individualManager.findCursorBySelection(null, null, Individual.C_NAME); 
+        Cursor cursor = individualManager.findCursorBySelection(null, null, IndividualConst.C_NAME); 
         
         // find cursor of those who have "555" in their phone number
-        Cursor cursor = individualManager.findCursorBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+        Cursor cursor = individualManager.findCursorBySelection(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
         
   * Access data from Cursor
 
@@ -112,7 +109,7 @@ The following are some examples DBTools can be used:
 
         int count = individualManager.findCount();
         // find count of those who have "555" in their phone number
-        int count = individualManager.findCountBySelection(Individual.C_PHONE + " LIKE ?, new String[]{"555"}); 
+        int count = individualManager.findCountBySelection(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
 
   Support for ASync writes (guarantees single write per database)
 
@@ -245,7 +242,7 @@ Setup
         }
 
         dbtools {
-            type 'ANDROID'
+            type 'ANDROID' // or 'ANDROID-KOTLIN'
 
             basePackageName 'org.company.project.domain'
             outputSrcDir 'src/main/java/org/company/project/domain'
@@ -254,7 +251,7 @@ Setup
             jsr305Support true // support for @Notnull / @Nullable etc
             includeDatabaseNameInPackage true // place each set of domain objects into a package named after its database
             eventBusSupport true // support Event Bus
-            dateTimeSupport true // support Joda DateTime
+            dateType 'JSR-310' // DATE, JSR-310, JODA
             rxJavaSupport false // support RxJava
         }
 
@@ -306,6 +303,7 @@ Setup
 
         individual/
                Individual.java (extends IndividualBaseRecord and is used for developer customizations) (NEVER overwritten by generator)
+               IndividualConst.java (static fields/methods for table and columns) (this file is ALWAYS overwritten by generator)
                IndividualBaseRecord.java (contains boiler-plate code for doing CRUD operations and contains CONST names of the table and all columns (used to help writing queries)) (this file is ALWAYS overwritten by generator)
 
                IndividualManager.java (extends IndividualBaseManager and is used for developer customizations (such as adding new findByXXX(...) methods) (NEVER overwritten by generator)
