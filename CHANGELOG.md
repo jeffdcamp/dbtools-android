@@ -1,7 +1,13 @@
 Change Log
 ==========
 
-  Version 5.0.1 *(2016-03)*
+  Version 5.0.2 *(2016-02)*
+----------------------------
+* Kotlin base managers now extend KotlinBaseManager (allowing for managers that use Kotlin rich calls)
+* Fixed dependency issues with JODA
+* Fixed issue with extra unused imports on Cont classes
+
+  Version 5.0.1 *(2016-02)*
 ----------------------------
 * Added Support for Kotlin
 * Added Support for JSR-310 (use dateType 'JSR-310' in the dbtools-gen plugin)
