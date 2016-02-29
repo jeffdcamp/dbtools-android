@@ -1,7 +1,5 @@
 package org.dbtools.android.domain.dbtype;
 
-import org.joda.time.DateTime;
-
 import java.util.Date;
 
 public final class DatabaseValueUtil {
@@ -19,8 +17,6 @@ public final class DatabaseValueUtil {
             return new DatabaseBoolean();
         } else if (type == Date.class) {
             return new DatabaseDate();
-        } else if (type == DateTime.class) {
-            return new DatabaseDateTime();
         } else if (type == Float.class) {
             return new DatabaseFloat();
         } else if (type == Double.class) {
@@ -28,6 +24,9 @@ public final class DatabaseValueUtil {
         } else if (type == byte[].class) {
             return new DatabaseBlob();
         }
+
+        // for DateTime, LocalDateTime, etc.... force the user to use Long / String... so there is no
+        // hard dependency on 3rd party libraries
 
         throw new IllegalArgumentException("Unsupported type: " + type);
     }
