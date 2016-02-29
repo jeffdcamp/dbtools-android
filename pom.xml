@@ -51,24 +51,14 @@
         <source.jdk>1.6</source.jdk>
         <target.jdk>1.6</target.jdk>
         <android.version>4.1.1.4</android.version> <!-- for use Maven dependency -->
-        <kotlin.version>1.0.0-rc-1036</kotlin.version>
+        <kotlin.version>1.0.0</kotlin.version>
     </properties>
 
     <prerequisites>
         <maven>3.2.3</maven>
     </prerequisites>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>kotlin</id>
-            <url>https://dl.bintray.com/kotlin/kotlin-eap/</url>
-        </pluginRepository>
-    </pluginRepositories>
     <repositories>
-        <repository>
-            <id>kotlin</id>
-            <url>https://dl.bintray.com/kotlin/kotlin-eap/</url>
-        </repository>
         <repository>
             <id>soupbowl</id>
             <url>http://www.soupbowl.net/nexus/content/groups/public/</url>
