@@ -327,6 +327,8 @@ Proguard Rules
     -keep public class org.sqlite.** { *; }
     -keep public class org.sqlite.database.** { *; }
 
+    # Threetenbp
+    -dontwarn org.threeten.**
 
 Upgrade
 =======
