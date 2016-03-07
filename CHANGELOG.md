@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+  Version 5.0.3 *(2016-02)*
+----------------------------
+* Fix for dbtools-gen Kotlin generated files (better handling of nullable fields)
+
   Version 5.0.2 *(2016-02)*
 ----------------------------
 * Kotlin base managers now extend KotlinBaseManager (allowing for managers that use Kotlin rich calls)
