@@ -364,15 +364,15 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
 
     // ===== Listeners =====
 
-    public void addTableListener(DBToolsTableChangeListener listener) {
+    public void addChangeTableListener(DBToolsTableChangeListener listener) {
         tableChangeListeners.add(listener);
     }
 
-    public void removeTableListener(DBToolsTableChangeListener listener) {
+    public void removeChangeTableListener(DBToolsTableChangeListener listener) {
         tableChangeListeners.remove(listener);
     }
 
-    public void clearTableListeners() {
+    public void clearChangeTableListeners() {
         tableChangeListeners.clear();
     }
 
