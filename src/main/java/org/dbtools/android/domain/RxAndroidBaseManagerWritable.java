@@ -1,29 +1,25 @@
 package org.dbtools.android.domain;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteStatement;
 import org.dbtools.android.domain.database.DatabaseWrapper;
-import org.dbtools.android.domain.event.*;
 import org.dbtools.android.domain.task.*;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> implements AsyncManager<T> {
 
-    private final PublishSubject<DatabaseRowChange> rowChanges = PublishSubject.create();
-    private final PublishSubject<DatabaseChangeType> tableChanges = PublishSubject.create();
+    private final AtomicBoolean transactionInsertOccurred = new AtomicBoolean(false);
+    private final AtomicBoolean transactionUpdateOccurred = new AtomicBoolean(false);
+    private final AtomicBoolean transactionDeleteOccurred = new AtomicBoolean(false);
 
-    // use static to get ALL tables across ALL managers... by Database <DatabaseName, Set of table names>
-    private static final Map<String, Set<String>> transactionChangesTableNamesMap = new HashMap<String, Set<String>>();
-
+    private final List<DBToolsTableChangeListener> tableChangeListeners = new ArrayList<DBToolsTableChangeListener>();
+    private final PublishSubject<DatabaseTableChange> tableChanges = PublishSubject.create();
 
     public void beginTransaction() {
         beginTransaction(getDatabaseName());
@@ -38,19 +34,24 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     }
 
     public void endTransaction(@Nonnull String databaseName, boolean success) {
+        DatabaseWrapper db = getWritableDatabase(databaseName);
         if (success) {
-            getWritableDatabase(databaseName).setTransactionSuccessful();
+            db.setTransactionSuccessful();
         }
 
-        // get list of changed table names
-        Set<String> tableNameChanges = transactionChangesTableNamesMap.get(databaseName);
-        transactionChangesTableNamesMap.remove(databaseName);
+        // determine if there are changes
+        DatabaseTableChange tableChange = new DatabaseTableChange(transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get());
+        transactionInsertOccurred.set(false);
+        transactionUpdateOccurred.set(false);
+        transactionDeleteOccurred.set(false);
 
         // end transaction
-        getWritableDatabase(databaseName).endTransaction();
+        db.endTransaction();
 
         // post end transaction event
-        postEndTransactionEvent(success, getDatabaseName(), tableNameChanges);
+        if (tableChange.hasChange()) {
+            notifyTableListeners(db, tableChange);
+        }
     }
 
     /**
@@ -162,10 +163,8 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             try {
                 rowId = db.insert(getTableName(), null, e.getContentValues());
                 e.setPrimaryKeyId(rowId);
-                postInsertEvent(db, getTableName(), rowId);
 
-                tableChanges.onNext(DatabaseChangeType.INSERT);
-                rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.INSERT, rowId));
+                notifyTableListeners(db, new DatabaseTableChange(true, false, false));
 
                 success = true;
             } catch (Exception ex) {
@@ -189,44 +188,6 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         androidDatabase.getManagerExecutorServiceInstance().submit(new InsertTask<T>(databaseName, this, e));
     }
 
-    public long insert(@Nonnull SQLiteStatement statement, @Nullable T e) {
-        if (e == null) {
-            return 0;
-        }
-
-        ContentValues contentValues = e.getContentValues();
-        int bindItemCount = 1;
-        for (String key : e.getAllColumns()) {
-            Object objKey = contentValues.get(key);
-            if (objKey instanceof Long) {
-                statement.bindLong(bindItemCount, (Long) objKey);
-            } else if (objKey instanceof Integer) {
-                statement.bindLong(bindItemCount, (Integer) objKey);
-            } else if (objKey instanceof String) {
-                statement.bindString(bindItemCount, (String) objKey);
-            } else if (objKey instanceof Double) {
-                statement.bindDouble(bindItemCount, (Double) objKey);
-            } else if (objKey instanceof Float) {
-                statement.bindDouble(bindItemCount, (Float) objKey);
-            } else if (objKey == null) {
-                statement.bindNull(bindItemCount);
-            } else {
-                throw new IllegalStateException("Cannot bind [" + key + "] to statement");
-            }
-
-            bindItemCount++;
-        }
-
-        long rowId = statement.executeInsert();
-        e.setPrimaryKeyId(rowId);
-        postInsertEvent(null, getTableName(), rowId);
-
-        tableChanges.onNext(DatabaseChangeType.INSERT);
-        rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.INSERT, rowId));
-
-        return rowId;
-    }
-
     public int update(@Nullable T e) {
         return update(getDatabaseName(), e);
     }
@@ -246,23 +207,11 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
-        int rowsAffectedCount =  update(db, e.getContentValues(), e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
-
-        if (rowsAffectedCount > 0) {
-            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.UPDATE, rowId));
-        }
-
-        return rowsAffectedCount;
+        return update(db, e.getContentValues(), e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
     public int update(@Nonnull ContentValues values, long rowId) {
-        int rowsAffectedCount = update(getDatabaseName(), values, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
-
-        if (rowsAffectedCount > 0) {
-            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.UPDATE, rowId));
-        }
-
-        return rowsAffectedCount;
+        return update(getDatabaseName(), values, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
     public int update(@Nonnull ContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
@@ -289,8 +238,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         if (success && rowsAffectedCount > 0) {
-            postUpdateEvent(db, getTableName(), rowsAffectedCount);
-            tableChanges.onNext(DatabaseChangeType.UPDATE);
+            notifyTableListeners(db, new DatabaseTableChange(false, true, false));
         }
 
         return rowsAffectedCount;
@@ -341,23 +289,11 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "]");
         }
 
-        int rowCountAffected = delete(db, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
-
-        if (rowCountAffected > 0) {
-            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.DELETE, rowId));
-        }
-
-        return rowCountAffected;
+        return delete(db, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
     public int delete(long rowId) {
-        int rowCountAffected = delete(getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
-
-        if (rowCountAffected > 0) {
-            rowChanges.onNext(new DatabaseRowChange(DatabaseChangeType.DELETE, rowId));
-        }
-
-        return rowCountAffected;
+        return delete(getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
     public int delete(@Nullable String where, @Nullable String[] whereArgs) {
@@ -384,8 +320,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         if (success && rowCountAffected > 0) {
-            postDeleteEvent(db, getTableName(), rowCountAffected);
-            tableChanges.onNext(DatabaseChangeType.DELETE);
+            notifyTableListeners(db, new DatabaseTableChange(false, false, true));
         }
 
         return rowCountAffected;
@@ -430,68 +365,41 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteWhereTask<T>(databaseName, this, null, null));
     }
 
-    private void postInsertEvent(@Nullable DatabaseWrapper db, @Nonnull String tableName, long rowId) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null) {
-            if (!(db != null && db.inTransaction())) {
-                bus.post(new DatabaseInsertEvent(tableName, rowId));
-            } else {
-                addTransactionTableNameChange(tableName);
+    // ===== Listeners =====
+
+    public void addTableListener(DBToolsTableChangeListener listener) {
+        tableChangeListeners.add(listener);
+    }
+
+    public void removeTableListener(DBToolsTableChangeListener listener) {
+        tableChangeListeners.remove(listener);
+    }
+
+    public void clearTableListeners() {
+        tableChangeListeners.clear();
+    }
+
+    private void notifyTableListeners(@Nullable DatabaseWrapper db, @Nonnull DatabaseTableChange changeType) {
+        if (!(db != null && db.inTransaction())) {
+            tableChanges.onNext(changeType);
+
+            for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
+                tableChangeListener.onTableChange(changeType);
+            }
+        } else {
+            if (changeType.isInsert()) {
+                transactionInsertOccurred.set(true);
+            } else if (changeType.isUpdate()) {
+                transactionUpdateOccurred.set(true);
+            } else if (changeType.isInsert()) {
+                transactionDeleteOccurred.set(true);
             }
         }
     }
 
-    private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null) {
-            if (!db.inTransaction()) {
-                bus.post(new DatabaseUpdateEvent(tableName, rowCountAffected));
-            } else {
-                addTransactionTableNameChange(tableName);
-            }
-        }
-    }
+    // ===== Observables =====
 
-    private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null) {
-            if (!db.inTransaction()) {
-                bus.post(new DatabaseDeleteEvent(tableName, rowCountAffected));
-            } else {
-                addTransactionTableNameChange(tableName);
-            }
-        }
-    }
-
-    private void postEndTransactionEvent(boolean success, String databaseName, Set<String> tableNameChanges) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null && tableNameChanges != null) {
-            bus.post(new DatabaseEndTransactionEvent(success, databaseName, tableNameChanges));
-        }
-    }
-
-    private void addTransactionTableNameChange(String tableName) {
-        String databaseName = getDatabaseName();
-
-        Set<String> transactionChangesTableNames;
-        synchronized (transactionChangesTableNamesMap) {
-            transactionChangesTableNames = transactionChangesTableNamesMap.get(databaseName);
-
-            // if transactionChangesTableNames does not exist... create!
-            if (transactionChangesTableNames == null) {
-                transactionChangesTableNames = new HashSet<String>();
-                transactionChangesTableNamesMap.put(databaseName, transactionChangesTableNames);
-            }
-        }
-
-        transactionChangesTableNames.add(tableName);
-    }
-
-    public Observable<DatabaseChangeType> tableChanges() {
+    public Observable<DatabaseTableChange> tableChanges() {
         return tableChanges.asObservable();
-    }
-
-    public Observable<DatabaseRowChange> rowChanges() {
-        return rowChanges.asObservable();
     }
 }

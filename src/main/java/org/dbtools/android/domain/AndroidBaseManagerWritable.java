@@ -1,27 +1,22 @@
 package org.dbtools.android.domain;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteStatement;
 import org.dbtools.android.domain.database.DatabaseWrapper;
-import org.dbtools.android.domain.event.DatabaseDeleteEvent;
-import org.dbtools.android.domain.event.DatabaseEndTransactionEvent;
-import org.dbtools.android.domain.event.DatabaseInsertEvent;
-import org.dbtools.android.domain.event.DatabaseUpdateEvent;
 import org.dbtools.android.domain.task.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> extends AndroidBaseManager<T> implements AsyncManager<T> {
 
-    // use static to get ALL tables across ALL managers... by Database <DatabaseName, Set of table names>
-    private static final Map<String, Set<String>> transactionChangesTableNamesMap = new HashMap<String, Set<String>>();
+    private final AtomicBoolean transactionInsertOccurred = new AtomicBoolean(false);
+    private final AtomicBoolean transactionUpdateOccurred = new AtomicBoolean(false);
+    private final AtomicBoolean transactionDeleteOccurred = new AtomicBoolean(false);
 
+    private final List<DBToolsTableChangeListener> tableChangeListeners = new ArrayList<DBToolsTableChangeListener>();
 
     public void beginTransaction() {
         beginTransaction(getDatabaseName());
@@ -36,19 +31,24 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     }
 
     public void endTransaction(@Nonnull String databaseName, boolean success) {
+        DatabaseWrapper db = getWritableDatabase(databaseName);
         if (success) {
-            getWritableDatabase(databaseName).setTransactionSuccessful();
+            db.setTransactionSuccessful();
         }
 
-        // get list of changed table names
-        Set<String> tableNameChanges = transactionChangesTableNamesMap.get(databaseName);
-        transactionChangesTableNamesMap.remove(databaseName);
+        // determine if there are changes
+        DatabaseTableChange tableChange = new DatabaseTableChange(transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get());
+        transactionInsertOccurred.set(false);
+        transactionUpdateOccurred.set(false);
+        transactionDeleteOccurred.set(false);
 
         // end transaction
-        getWritableDatabase(databaseName).endTransaction();
+        db.endTransaction();
 
         // post end transaction event
-        postEndTransactionEvent(success, getDatabaseName(), tableNameChanges);
+        if (tableChange.hasChange()) {
+            notifyTableListeners(db, tableChange);
+        }
     }
 
     /**
@@ -160,7 +160,9 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
             try {
                 rowId = db.insert(getTableName(), null, e.getContentValues());
                 e.setPrimaryKeyId(rowId);
-                postInsertEvent(db, getTableName(), rowId);
+
+                notifyTableListeners(db, new DatabaseTableChange(true, false, false));
+
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -181,40 +183,6 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
 
         AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
         androidDatabase.getManagerExecutorServiceInstance().submit(new InsertTask<T>(databaseName, this, e));
-    }
-
-    public long insert(@Nonnull SQLiteStatement statement, @Nullable T e) {
-        if (e == null) {
-            return 0;
-        }
-
-        ContentValues contentValues = e.getContentValues();
-        int bindItemCount = 1;
-        for (String key : e.getAllColumns()) {
-            Object objKey = contentValues.get(key);
-            if (objKey instanceof Long) {
-                statement.bindLong(bindItemCount, (Long) objKey);
-            } else if (objKey instanceof Integer) {
-                statement.bindLong(bindItemCount, (Integer) objKey);
-            } else if (objKey instanceof String) {
-                statement.bindString(bindItemCount, (String) objKey);
-            } else if (objKey instanceof Double) {
-                statement.bindDouble(bindItemCount, (Double) objKey);
-            } else if (objKey instanceof Float) {
-                statement.bindDouble(bindItemCount, (Float) objKey);
-            } else if (objKey == null) {
-                statement.bindNull(bindItemCount);
-            } else {
-                throw new IllegalStateException("Cannot bind [" + key + "] to statement");
-            }
-
-            bindItemCount++;
-        }
-
-        long rowId = statement.executeInsert();
-        e.setPrimaryKeyId(rowId);
-        postInsertEvent(null, getTableName(), rowId);
-        return rowId;
     }
 
     public int update(@Nullable T e) {
@@ -252,22 +220,25 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     }
 
     public int update(@Nonnull DatabaseWrapper db, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        int rowCountAffected = 0;
+        int rowsAffectedCount = 0;
 
         checkDB(db);
         // Make sure that if there is an error (LockedException), that we try again.
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowCountAffected = db.update(getTableName(), contentValues, where, whereArgs);
-                postUpdateEvent(db, getTableName(), rowCountAffected);
+                rowsAffectedCount = db.update(getTableName(), contentValues, where, whereArgs);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
 
-        return rowCountAffected;
+        if (success && rowsAffectedCount > 0) {
+            notifyTableListeners(db, new DatabaseTableChange(false, true, false));
+        }
+
+        return rowsAffectedCount;
     }
 
     public void updateAsync(@Nullable T e) {
@@ -339,11 +310,14 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
                 rowCountAffected = db.delete(getTableName(), where, whereArgs);
-                postDeleteEvent(db, getTableName(), rowCountAffected);
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+        }
+
+        if (success && rowCountAffected > 0) {
+            notifyTableListeners(db, new DatabaseTableChange(false, false, true));
         }
 
         return rowCountAffected;
@@ -388,60 +362,33 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteWhereTask<T>(databaseName, this, null, null));
     }
 
-    private void postInsertEvent(@Nullable DatabaseWrapper db, @Nonnull String tableName, long rowId) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null) {
-            if (!(db != null && db.inTransaction())) {
-                bus.post(new DatabaseInsertEvent(tableName, rowId));
-            } else {
-                addTransactionTableNameChange(tableName);
-            }
-        }
+    // ===== Listeners =====
+
+    public void addTableListener(DBToolsTableChangeListener listener) {
+        tableChangeListeners.add(listener);
     }
 
-    private void postUpdateEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null) {
-            if (!db.inTransaction()) {
-                bus.post(new DatabaseUpdateEvent(tableName, rowCountAffected));
-            } else {
-                addTransactionTableNameChange(tableName);
-            }
-        }
+    public void removeTableListener(DBToolsTableChangeListener listener) {
+        tableChangeListeners.remove(listener);
     }
 
-    private void postDeleteEvent(@Nonnull DatabaseWrapper db, @Nonnull String tableName, int rowCountAffected) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null) {
-            if (!db.inTransaction()) {
-                bus.post(new DatabaseDeleteEvent(tableName, rowCountAffected));
-            } else {
-                addTransactionTableNameChange(tableName);
-            }
-        }
+    public void clearTableListeners() {
+        tableChangeListeners.clear();
     }
 
-    private void postEndTransactionEvent(boolean success, String databaseName, Set<String> tableNameChanges) {
-        DBToolsEventBus bus = getBus();
-        if (bus != null && tableNameChanges != null) {
-            bus.post(new DatabaseEndTransactionEvent(success, databaseName, tableNameChanges));
-        }
-    }
-
-    private void addTransactionTableNameChange(String tableName) {
-        String databaseName = getDatabaseName();
-
-        Set<String> transactionChangesTableNames;
-        synchronized (transactionChangesTableNamesMap) {
-            transactionChangesTableNames = transactionChangesTableNamesMap.get(databaseName);
-
-            // if transactionChangesTableNames does not exist... create!
-            if (transactionChangesTableNames == null) {
-                transactionChangesTableNames = new HashSet<String>();
-                transactionChangesTableNamesMap.put(databaseName, transactionChangesTableNames);
+    private void notifyTableListeners(@Nullable DatabaseWrapper db, @Nonnull DatabaseTableChange changeType) {
+        if (!(db != null && db.inTransaction())) {
+            for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
+                tableChangeListener.onTableChange(changeType);
+            }
+        } else {
+            if (changeType.isInsert()) {
+                transactionInsertOccurred.set(true);
+            } else if (changeType.isUpdate()) {
+                transactionUpdateOccurred.set(true);
+            } else if (changeType.isInsert()) {
+                transactionDeleteOccurred.set(true);
             }
         }
-
-        transactionChangesTableNames.add(tableName);
     }
 }

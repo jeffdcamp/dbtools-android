@@ -99,15 +99,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(db, createSql);
     }
 
-    /**
-     * Event Bus
-     * @return instance of Bus or null if disabled
-     */
-    @Nullable
-    public DBToolsEventBus getBus() {
-        return null;
-    }
-
     public void executeSql(@Nonnull String sql) {
         executeSql(getDatabaseName(), sql);
     }
