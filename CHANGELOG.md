@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+  Version 6.0.0 *(2016-04)*
+----------------------------
+* Improved RxJava and queries with DatabaseManager to prevent back pressure
+* Replaced DBToolsEventBus with DatabaseTableChange listeners
+* Improved RxJava Published changed listener to only notify when of changes after endTransaction or when NOT in a transaction
+
+
   Version 5.0.3 *(2016-02)*
 ----------------------------
 * Fix for dbtools-gen Kotlin generated files (better handling of nullable fields)

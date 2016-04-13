@@ -120,39 +120,26 @@ The following are some examples DBTools can be used:
         individualManager.saveAsync(individual);
 
 
-  EventBus support.  This allow your app to be notified if the database changed.  Examples:
+  Table Change Listeners / Table Change Rx Observable.  This allow your app to be notified if the database changed.  Examples:
 
-  * Watch for any Insert/Update/Delete event
+  * Add Listener / Subscribe
+        // Listener
+        individualManager.addChangeTableListener(new DBToolsTableChangeListener() {
+            @Override
+            public void onTableChange(DatabaseTableChange event) {
+                onTableChanged(event);
+            }
+        });
 
-        @Subscribe
-        public void onDatabaseChanged(DatabaseChangeEvent event) {
-            Log.i(TAG, "Database changed on table " + event.getTableName());
+        // RxJava Subscribe
+        individualManager.tableChanges().subscribe(event -> onTableChanged(event));
+
+  * Watch for any Insert/Update/Delete changes
+        public void onTableChanged(DatabaseTableChange event) {
+            Log.i(TAG, "Database changed on table");
         }
 
-  * Watch for any Insert event
 
-        @Subscribe
-        public void onInsert(DatabaseInsertEvent event) {
-            Log.i(TAG, "Item inserted on table " + event.getTableName());
-            Log.i(TAG, "Item ID inserted " + event.getNewId());
-        }
-
-  * Watch for any Update event
-
-        @Subscribe
-        public void onUpdate(DatabaseUpdateEvent event) {
-            Log.i(TAG, "Item inserted on table " + event.getTableName());
-            Log.i(TAG, "RowsAffected " + event.getRowsAffected());
-        }
-
-  * Transactions.  Events will NOT be posted if in a transaction.  You can subscribe to watch for the end of a transaction:
-
-        @Subscribe
-        public void onDatabaseChangedTransaction(DatabaseEndTransactionEvent event) {
-            Log.i(TAG, "Database changed, transaction end.  Tables changed: " + event.getAllTableName());
-            boolean myTableUpdated = event.containsTable(Individual.TABLE);
-        }
-        
 RxJava
 ======
 
@@ -250,7 +237,6 @@ Setup
             injectionSupport true // support for @Inject (using JEE, Dagger, Guice, etc)
             jsr305Support true // support for @Notnull / @Nullable etc
             includeDatabaseNameInPackage true // place each set of domain objects into a package named after its database
-            eventBusSupport true // support Event Bus
             dateType 'JSR-310' // DATE, JSR-310, JODA
             rxJavaSupport false // support RxJava
         }
@@ -317,8 +303,7 @@ Proguard Rules
     -dontwarn org.sqlite.**
     -dontwarn net.sqlcipher.**
     -dontwarn com.squareup.otto.**
-    -dontwarn de.greenrobot.event.**
-    
+
     # SQLCipher (if using SQLCipher)
     -keep public class net.sqlcipher.** { *; }
     -keep public class net.sqlcipher.database.** { *; }
