@@ -19,6 +19,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
 
     public Observable<Cursor> findCursorAllRx() {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorAll();
@@ -29,6 +30,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
@@ -49,6 +51,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(selection, new String[]{}, orderBy);
@@ -59,6 +62,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(databaseName, selection, null, orderBy);
@@ -69,6 +73,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(getDatabaseName(), selection, selectionArgs, orderBy);
@@ -79,6 +84,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
@@ -89,6 +95,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(final boolean distinct, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
@@ -99,6 +106,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
@@ -109,6 +117,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorByRowIdRx(final long rowId) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
@@ -119,6 +128,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<Cursor> findCursorByRowIdRx(@Nonnull final String databaseName, final long rowId) {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
+            @Nullable
             @Override
             public Cursor call() {
                 return findCursorBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
@@ -128,95 +138,22 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
 
     @Nonnull
     public Observable<T> findAllRx() {
-        return findAllBySelectionRx(null, null, null);
+        return findBySelectionRx(null, null, null);
     }
 
     @Nonnull
     public Observable<T> findAllRx(@Nonnull final String databaseName) {
-        return findAllBySelectionRx(databaseName, null, null, null);
+        return findBySelectionRx(databaseName, null, null, null);
     }
 
     @Nonnull
     public Observable<T> findAllOrderByRx(@Nullable final String orderBy) {
-        return findAllBySelectionRx(null, null, orderBy);
+        return findBySelectionRx(null, null, orderBy);
     }
 
     @Nonnull
     public Observable<T> findAllOrderByRx(@Nonnull final String databaseName, @Nullable final String orderBy) {
-        return findAllBySelectionRx(databaseName, null, null, orderBy);
-    }
-
-    @Nonnull
-    public Observable<T> findAllBySelectionRx(@Nullable final String selection, @Nonnull final String[] selectionArgs) {
-        return findAllBySelectionRx(selection, selectionArgs, null);
-    }
-
-    @Nonnull
-    public Observable<T> findAllBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        Cursor cursor = findCursorBySelection(selection, selectionArgs, orderBy);
-        return getAllItemsFromCursorRx(cursor);
-    }
-
-    @Nonnull
-    public Observable<T> findAllBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
-        return getAllItemsFromCursorRx(cursor);
-    }
-
-    /**
-     * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
-     *
-     * @param rawQuery Custom query
-     * @return Observable
-     */
-    @Nonnull
-    public Observable<T> findAllByRawQueryRx(@Nonnull final String rawQuery) {
-        return getAllItemsFromCursorRx(findCursorByRawQuery(getDatabaseName(), rawQuery, null));
-    }
-
-    /**
-     * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
-     *
-     * @param rawQuery      Custom query
-     * @param selectionArgs query arguments
-     * @return Observable
-     */
-    @Nonnull
-    public Observable<T> findAllByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return getAllItemsFromCursorRx(findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs));
-    }
-
-    /**
-     * Populate of List from a rawQuery.  The raw query must contain all of the columns names for the object
-     *
-     * @param databaseName  Name of database
-     * @param rawQuery      Custom query
-     * @param selectionArgs query arguments
-     * @return Observable
-     */
-    @Nonnull
-    public Observable<T> findAllByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return getAllItemsFromCursorRx(findCursorByRawQuery(databaseName, rawQuery, selectionArgs));
-    }
-
-    @Nonnull
-    public Observable<T> getAllItemsFromCursorRx(@Nullable final Cursor cursor) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(Subscriber<? super T> subscriber) {
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        do {
-                            T record = newRecord();
-                            record.setContent(cursor);
-                            subscriber.onNext(record);
-                        } while (cursor.moveToNext());
-                    }
-                    cursor.close();
-                    subscriber.onCompleted();
-                }
-            }
-        });
+        return findBySelectionRx(databaseName, null, null, orderBy);
     }
 
     @Nonnull
@@ -236,8 +173,12 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
 
     @Nonnull
     public Observable<T> findBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
-        return createRecordFromCursorRx(cursor);
+        return DBToolsRxUtil.from(new Func0<Iterable<T>>() {
+            @Override
+            public Iterable<T> call() {
+                return findAllBySelection(databaseName, selection, selectionArgs, orderBy);
+            }
+        });
     }
 
     @Nonnull
@@ -247,39 +188,10 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
 
     @Nonnull
     public Observable<T> findByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
+        return DBToolsRxUtil.from(new Func0<Iterable<T>>() {
             @Override
-            public void call(Subscriber<? super T> subscriber) {
-                Cursor cursor = findCursorByRawQuery(databaseName, rawQuery, selectionArgs);
-
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        T record = newRecord();
-                        record.setContent(cursor);
-                        cursor.close();
-                        subscriber.onNext(record);
-                    }
-
-                    cursor.close();
-                    subscriber.onCompleted();
-                }
-            }
-        });
-    }
-
-    @Nonnull
-    private Observable<T> createRecordFromCursorRx(@Nullable final Cursor cursor) {
-        return Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(Subscriber<? super T> subscriber) {
-                if (cursor != null) {
-                    T record = newRecord();
-                    record.setContent(cursor);
-                    cursor.close();
-                    subscriber.onNext(record);
-                }
-
-                subscriber.onCompleted();
+            public Iterable<T> call() {
+                return findAllByRawQuery(databaseName, rawQuery, selectionArgs);
             }
         });
     }
@@ -304,7 +216,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
             sb.append(getPrimaryKey()).append(" = ").append(rowId);
         }
 
-        return findAllBySelectionRx(databaseName, sb.toString(), null, orderBy);
+        return findBySelectionRx(databaseName, sb.toString(), null, orderBy);
     }
 
     @Nonnull
@@ -435,13 +347,12 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
-     * @param defaultValue  Value returned if nothing is found
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueByRawQueryRx(@Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
-        return findValueByRawQueryRx(getDatabaseName(), valueType, rawQuery, selectionArgs, defaultValue);
+    public <I> Observable<I> findValueByRawQueryRx(@Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return findValueByRawQueryRx(getDatabaseName(), valueType, rawQuery, selectionArgs);
     }
 
     /**
@@ -451,13 +362,12 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
-     * @param defaultValue  Value returned if nothing is found
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
-        return findValueByRawQueryRx(getReadableDatabase(databaseName), valueType, rawQuery, selectionArgs, defaultValue);
+    public <I> Observable<I> findValueByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return findValueByRawQueryRx(getReadableDatabase(databaseName), valueType, 0, rawQuery, selectionArgs);
     }
 
     /**
@@ -465,31 +375,18 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      *
      * @param database      DatabaseWrapper of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param columnIndex   Index of column with value
      * @param rawQuery      Query contain first column which is the needed value
      * @param selectionArgs Query parameters
-     * @param defaultValue  Value returned if nothing is found
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public static <I> Observable<I> findValueByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
-        return Observable.create(new Observable.OnSubscribe<I>() {
+    public static <I> Observable<I> findValueByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final Class<I> valueType, final int columnIndex, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return DBToolsRxUtil.from(new Func0<Iterable<I>>() {
             @Override
-            public void call(Subscriber<? super I> subscriber) {
-
-                DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
-                I value = defaultValue;
-
-                Cursor c = database.rawQuery(rawQuery, selectionArgs);
-                if (c != null) {
-                    if (c.moveToFirst()) {
-                        value = databaseValue.getColumnValue(c, 0, defaultValue);
-                    }
-                    c.close();
-                }
-
-                subscriber.onNext(value);
-                subscriber.onCompleted();
+            public Iterable<I> call() {
+                return findAllValuesByRawQuery(database, valueType, columnIndex, rawQuery, selectionArgs);
             }
         });
     }
@@ -558,7 +455,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
+    public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy, @Nullable final I defaultValue) {
         return findValueBySelectionRx(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
     }
 
@@ -577,181 +474,11 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public static <I> Observable<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
-        return Observable.create(new Observable.OnSubscribe<I>() {
+    public static <I> Observable<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy, @Nullable final I defaultValue) {
+        return DBToolsRxUtil.from(new Func0<Iterable<I>>() {
             @Override
-            public void call(Subscriber<? super I> subscriber) {
-                DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
-                I value = defaultValue;
-
-                Cursor c = database.query(false, tableName, new String[]{column}, selection, selectionArgs, null, null, orderBy, "1");
-                if (c != null) {
-                    if (c.moveToFirst()) {
-                        value = databaseValue.getColumnValue(c, 0, defaultValue);
-                    }
-                    c.close();
-                }
-
-                subscriber.onNext(value);
-                subscriber.onCompleted();
-            }
-        });
-    }
-
-    /**
-     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
-     *
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param rawQuery      Query contain first column contains value
-     * @param selectionArgs Query parameters
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public <I> Observable<I> findAllValuesByRawQueryRx(@Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return findAllValuesByRawQueryRx(getDatabaseName(), valueType, rawQuery, selectionArgs);
-    }
-
-    /**
-     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
-     *
-     * @param databaseName  Name of database to query
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param rawQuery      Query contain first column contains value
-     * @param selectionArgs Query parameters
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public <I> Observable<I> findAllValuesByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return findAllValuesByRawQueryRx(databaseName, valueType, 0, rawQuery, selectionArgs);
-    }
-
-    /**
-     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
-     *
-     * @param databaseName  Name of database to query
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param columnIndex   Column Index for value
-     * @param rawQuery      Query contain first column contains value
-     * @param selectionArgs Query parameters
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public <I> Observable<I> findAllValuesByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, final int columnIndex, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return findAllValuesByRawQueryRx(getReadableDatabase(databaseName), valueType, columnIndex, rawQuery, selectionArgs);
-    }
-
-    /**
-     * Return a list of all of the first column values as a List for given rawQuery and selectionArgs.
-     *
-     * @param database      DatabaseWrapper of database to query
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param columnIndex   Column Index for value
-     * @param rawQuery      Query contain first column contains value
-     * @param selectionArgs Query parameters
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public static <I> Observable<I> findAllValuesByRawQueryRx(@Nonnull final DatabaseWrapper database, @Nonnull final Class<I> valueType, final int columnIndex, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return Observable.create(new Observable.OnSubscribe<I>() {
-            @Override
-            public void call(Subscriber<? super I> subscriber) {
-                DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
-
-                Cursor cursor = database.rawQuery(rawQuery, selectionArgs);
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        do {
-                            subscriber.onNext(databaseValue.getColumnValue(cursor, columnIndex, null));
-                        } while (cursor.moveToNext());
-                    }
-                    cursor.close();
-                }
-            }
-        });
-    }
-
-    /**
-     * Return a list of all values for the specified column for given selection and selectionArgs.
-     *
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param column        Column which contains value
-     * @param selection     Query selection
-     * @param selectionArgs Query parameters
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public <I> Observable<I> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs) {
-        return findAllValuesBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, null);
-    }
-
-    /**
-     * Return a list of all values for the specified column for given selection and selectionArgs.
-     *
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param column        Column which contains value
-     * @param selection     Query selection
-     * @param selectionArgs Query parameters
-     * @param orderBy       Query order by
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public <I> Observable<I> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        return findAllValuesBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, orderBy);
-    }
-
-    /**
-     * Return a list of all values for the specified column for given selection and selectionArgs.
-     *
-     * @param databaseName  Name of database to query
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param column        Column which contains value
-     * @param selection     Query selection
-     * @param selectionArgs Query parameters
-     * @param orderBy       Query order by
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public <I> Observable<I> findAllValuesBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        return findAllValuesBySelectionRx(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy);
-    }
-
-    /**
-     * Return a list of all values for the specified column for given selection and selectionArgs.
-     *
-     * @param database      DatabaseWrapper of database to query
-     * @param tableName     Table to run query against
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param column        Column which contains value
-     * @param selection     Query selection
-     * @param selectionArgs Query parameters
-     * @param orderBy       Query order by
-     * @param <I>           Type of value
-     * @return Observable of all values
-     */
-    @Nonnull
-    public static <I> Observable<I> findAllValuesBySelectionRx(@Nonnull final DatabaseWrapper database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        return Observable.create(new Observable.OnSubscribe<I>() {
-            @Override
-            public void call(Subscriber<? super I> subscriber) {
-                DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
-
-                Cursor c = database.query(tableName, new String[]{column}, selection, selectionArgs, null, null, orderBy);
-                if (c != null) {
-                    if (c.moveToFirst()) {
-                        do {
-                            subscriber.onNext(databaseValue.getColumnValue(c, 0, null));
-                        } while (c.moveToNext());
-                    }
-                    c.close();
-                    subscriber.onCompleted();
-                }
+            public Iterable<I> call() {
+                return findAllValuesBySelection(database, tableName, valueType, column, selection, selectionArgs, orderBy);
             }
         });
     }
@@ -799,6 +526,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final T record) {
         return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
+            @Nullable
             @Override
             public MatrixCursor call() {
                 return toMatrixCursor(record);
@@ -809,6 +537,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final T... records) {
         return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
+            @Nullable
             @Override
             public MatrixCursor call() {
                 return toMatrixCursor(Arrays.asList(records));
@@ -819,6 +548,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     @Nonnull
     public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final List<T> records) {
         return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
+            @Nullable
             @Override
             public MatrixCursor call() {
                 return toMatrixCursor(records);

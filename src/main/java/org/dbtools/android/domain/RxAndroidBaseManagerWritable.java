@@ -488,10 +488,10 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     }
 
     public Observable<DatabaseChangeType> tableChanges() {
-        return tableChanges;
+        return tableChanges.asObservable();
     }
 
     public Observable<DatabaseRowChange> rowChanges() {
-        return rowChanges;
+        return rowChanges.asObservable();
     }
 }

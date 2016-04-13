@@ -18,11 +18,11 @@ public interface DatabaseWrapper<T> {
 
     void setVersion(int version);
 
-    long insert(String tableName, String o, ContentValues contentValues);
+    long insert(String tableName, @Nullable String o, ContentValues contentValues);
 
-    int update(String tableName, ContentValues contentValues, String where, String[] whereArgs);
+    int update(String tableName, ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs);
 
-    int delete(String tableName, String where, String[] whereArgs);
+    int delete(String tableName, @Nullable String where, @Nullable String[] whereArgs);
 
     void execSQL(String sqlStatement);
 
