@@ -1,0 +1,5 @@
+org.dbtools.android.domain
+org.dbtools.android.domain.columntype
+org.dbtools.android.domain.database
+org.dbtools.android.domain.dbtype
+org.dbtools.android.domain.task
