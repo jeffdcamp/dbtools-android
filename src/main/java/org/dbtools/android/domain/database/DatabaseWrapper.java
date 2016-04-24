@@ -2,7 +2,8 @@ package org.dbtools.android.domain.database;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public interface DatabaseWrapper<T> {
 

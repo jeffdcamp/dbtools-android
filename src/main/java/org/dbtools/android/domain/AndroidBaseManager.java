@@ -570,7 +570,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @org.jetbrains.annotations.Nullable String orderBy, I defaultValue) {
+    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
         return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
     }
 
@@ -588,7 +588,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @org.jetbrains.annotations.Nullable String orderBy, I defaultValue) {
+    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
