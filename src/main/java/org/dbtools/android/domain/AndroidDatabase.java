@@ -3,6 +3,7 @@ package org.dbtools.android.domain;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -89,7 +90,7 @@ public class AndroidDatabase {
         return databaseWrapper;
     }
 
-    public void setDatabaseWrapper(DatabaseWrapper databaseWrapper) {
+    public void setDatabaseWrapper(@Nullable DatabaseWrapper databaseWrapper) {
         this.databaseWrapper = databaseWrapper;
     }
 

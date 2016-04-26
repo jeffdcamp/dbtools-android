@@ -1,7 +1,7 @@
 package org.dbtools.android.domain;
 
-import android.content.ContentValues;
 import org.dbtools.android.domain.database.DatabaseWrapper;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.task.*;
 import rx.Observable;
 import rx.subjects.PublishSubject;
@@ -161,7 +161,9 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                rowId = db.insert(getTableName(), null, e.getContentValues());
+                DBToolsContentValues contentValues = db.newContentValues();
+                e.getContentValues(contentValues);
+                rowId = db.insert(getTableName(), null, contentValues);
                 e.setPrimaryKeyId(rowId);
 
                 notifyTableListeners(db, new DatabaseTableChange(true, false, false));
@@ -207,22 +209,24 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
-        return update(db, e.getContentValues(), e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+        DBToolsContentValues contentValues = db.newContentValues();
+        e.getContentValues(contentValues);
+        return update(db, contentValues, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
-    public int update(@Nonnull ContentValues values, long rowId) {
+    public int update(@Nonnull DBToolsContentValues values, long rowId) {
         return update(getDatabaseName(), values, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
-    public int update(@Nonnull ContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
+    public int update(@Nonnull DBToolsContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
         return update(getDatabaseName(), values, where, whereArgs);
     }
 
-    public int update(@Nonnull String databaseName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+    public int update(@Nonnull String databaseName, @Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         return update(getWritableDatabase(databaseName), contentValues, where, whereArgs);
     }
 
-    public int update(@Nonnull DatabaseWrapper db, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+    public int update(@Nonnull DatabaseWrapper db, @Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         int rowsAffectedCount = 0;
 
         checkDB(db);
@@ -257,15 +261,15 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateTask<T>(databaseName, this, e));
     }
 
-    public void updateAsync(@Nonnull ContentValues contentValues, long rowId) {
+    public void updateAsync(@Nonnull DBToolsContentValues contentValues, long rowId) {
         updateAsync(getDatabaseName(), contentValues, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)});
     }
 
-    public void updateAsync(@Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+    public void updateAsync(@Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         updateAsync(getDatabaseName(),  contentValues, where, whereArgs);
     }
 
-    public void updateAsync(@Nonnull String databaseName, @Nonnull ContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+    public void updateAsync(@Nonnull String databaseName, @Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
         androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateWhereTask<T>(databaseName, this, contentValues, where, whereArgs));
     }

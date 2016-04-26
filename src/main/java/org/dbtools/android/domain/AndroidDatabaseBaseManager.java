@@ -1,11 +1,12 @@
 package org.dbtools.android.domain;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Environment;
-import android.util.Log;
+import org.dbtools.android.domain.config.DatabaseConfig;
 import org.dbtools.android.domain.database.DatabaseWrapper;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
+import org.dbtools.android.domain.log.DBToolsLogger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,11 +24,9 @@ public abstract class AndroidDatabaseBaseManager {
     private static final String MERGE_INSERT_QUERY = "INSERT OR IGNORE INTO %1$s SELECT * FROM %2$s";
 
     private Map<String, AndroidDatabase> databaseMap = new HashMap<String, AndroidDatabase>(); // <Database name, Database Path>
+    private DatabaseConfig databaseConfig;
+    private DBToolsLogger log;
 
-    /**
-     * Identify what databases will be used with this app.  This method should call addDatabase(...) for each database
-     */
-    public abstract void identifyDatabases();
 
     public abstract void onCreate(AndroidDatabase androidDatabase);
 
@@ -37,7 +36,14 @@ public abstract class AndroidDatabaseBaseManager {
 
     public abstract void onUpgrade(AndroidDatabase androidDatabase, int oldVersion, int newVersion);
 
-    public abstract DatabaseWrapper createNewDatabaseWrapper(AndroidDatabase androidDatabase);
+    public DatabaseWrapper createNewDatabaseWrapper(AndroidDatabase androidDatabase) {
+        return databaseConfig.createNewDatabaseWrapper(androidDatabase);
+    }
+
+    public AndroidDatabaseBaseManager(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
+        this.log = databaseConfig.createNewDBToolsLogger();
+    }
 
     /**
      * Add a standard SQLite database
@@ -170,7 +176,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     private void createDatabaseMap() {
         if (databaseMap == null || databaseMap.size() == 0) {
-            identifyDatabases();
+            databaseConfig.identifyDatabases(this);
         }
     }
 
@@ -253,8 +259,8 @@ public abstract class AndroidDatabaseBaseManager {
             String databasePath = androidDatabase.getPath();
             File databaseFile = new File(databasePath);
             boolean databaseExists = databaseFile.exists();
-            Log.i(TAG, "Connecting to database");
-            Log.i(TAG, "Database exists: " + databaseExists + "(path: " + databasePath + ")");
+            log.i(TAG, "Connecting to database");
+            log.i(TAG, "Database exists: " + databaseExists + "(path: " + databasePath + ")");
 
             // if this is an attached database, make sure the main database is open first
             AndroidDatabase attachMainDatabase = androidDatabase.getAttachMainDatabase();
@@ -401,7 +407,7 @@ public abstract class AndroidDatabaseBaseManager {
      * @param androidDatabase database to clean
      */
     public void onCleanDatabase(@Nonnull AndroidDatabase androidDatabase) {
-        Log.i(TAG, "Cleaning Database");
+        log.i(TAG, "Cleaning Database");
         deleteDatabase(androidDatabase);
         connectDatabase(androidDatabase.getName(), false);  // do not update here, because it will cause a recursive call
     }
@@ -410,7 +416,7 @@ public abstract class AndroidDatabaseBaseManager {
      * Delete databases and reset references from AndroidDatabaseManager
      */
     public void wipeDatabases() {
-        Log.e(TAG, "Wiping databases");
+        log.e(TAG, "Wiping databases");
         for (AndroidDatabase database : getDatabases()) {
             deleteDatabase(database);
         }
@@ -418,7 +424,7 @@ public abstract class AndroidDatabaseBaseManager {
         // remove existing references
         // this should be done after clearing the preferences (to be sure not to use the old password)
         reset();
-        identifyDatabases();
+        databaseConfig.identifyDatabases(this);
     }
 
     public void deleteDatabase(@Nonnull String databaseName) {
@@ -426,7 +432,7 @@ public abstract class AndroidDatabaseBaseManager {
         if (database != null) {
             deleteDatabase(database);
         } else {
-            Log.e(TAG, "FAILED to delete database named [" + databaseName + "]. This database is not added to DatabaseManager");
+            log.e(TAG, "FAILED to delete database named [" + databaseName + "]. This database is not added to DatabaseManager");
         }
     }
 
@@ -440,14 +446,14 @@ public abstract class AndroidDatabaseBaseManager {
         } catch (Exception e) {
             // inTransaction can throw "IllegalStateException: attempt to re-open an already-closed object"
             // This should not keep LDS Tools from performing a SYNC
-            Log.w(TAG, "deleteDatabase().inTransaction() Error: [" + e.getMessage() + "]");
+            log.w(TAG, "deleteDatabase().inTransaction() Error: [" + e.getMessage() + "]");
         }
 
-        Log.i(TAG, "Deleting database: [" + databasePath + "]");
+        log.i(TAG, "Deleting database: [" + databasePath + "]");
         File databaseFile = new File(databasePath);
         if (databaseFile.exists() && !deleteDatabaseFiles(databaseFile)) {
             String errorMessage = "FAILED to delete database: [" + databasePath + "]";
-            Log.e(TAG, errorMessage);
+            log.e(TAG, errorMessage);
             throw new IllegalStateException(errorMessage);
         }
     }
@@ -530,7 +536,7 @@ public abstract class AndroidDatabaseBaseManager {
 
     public void onUpgradeViews(@Nonnull AndroidDatabase androidDatabase, int oldVersion, int newVersion) {
         if (oldVersion != newVersion) {
-            Log.i(TAG, "Upgrading database VIEWS [" + androidDatabase.getName() + "] from version " + oldVersion + " to " + newVersion);
+            log.i(TAG, "Upgrading database VIEWS [" + androidDatabase.getName() + "] from version " + oldVersion + " to " + newVersion);
             onDropViews(androidDatabase);
             onCreateViews(androidDatabase);
         }
@@ -554,7 +560,7 @@ public abstract class AndroidDatabaseBaseManager {
 
         String table = DBToolsMetaData.TABLE;
 
-        ContentValues contentValues = new ContentValues();
+        DBToolsContentValues contentValues = androidDatabase.getDatabaseWrapper().newContentValues();
         contentValues.put(DBToolsMetaData.C_KEY, keyName);
         contentValues.put(DBToolsMetaData.C_VALUE, version);
 
@@ -604,17 +610,17 @@ public abstract class AndroidDatabaseBaseManager {
 
     public boolean mergeDatabase(@Nullable File sourceDatabaseFile, @Nullable String sourceDatabasePassword, @Nullable AndroidDatabase targetDatabase) {
         if (targetDatabase == null) {
-            Log.e(TAG, "Failed to merged :: targetDatabase is null");
+            log.e(TAG, "Failed to merged :: targetDatabase is null");
             return false;
         }
 
         if (sourceDatabaseFile == null) {
-            Log.e(TAG, "Failed to merged :: sourceDatabaseFile is null");
+            log.e(TAG, "Failed to merged :: sourceDatabaseFile is null");
             return false;
         }
 
         if (!sourceDatabaseFile.exists()) {
-            Log.e(TAG, "Failed to merged [" + sourceDatabaseFile.getAbsolutePath() + "] into [" + targetDatabase.getName() + "] :: Source database does not exist");
+            log.e(TAG, "Failed to merged [" + sourceDatabaseFile.getAbsolutePath() + "] into [" + targetDatabase.getName() + "] :: Source database does not exist");
             return false;
         }
 
@@ -689,5 +695,13 @@ public abstract class AndroidDatabaseBaseManager {
         }
 
         return tableNames;
+    }
+
+    public DBToolsLogger getLogger() {
+        return log;
+    }
+
+    public DatabaseConfig getDatabaseConfig() {
+        return databaseConfig;
     }
 }

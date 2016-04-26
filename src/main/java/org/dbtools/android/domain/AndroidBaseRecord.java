@@ -1,7 +1,7 @@
 package org.dbtools.android.domain;
 
-import android.content.ContentValues;
 import android.database.Cursor;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 
 import java.io.Serializable;
 
@@ -25,8 +25,9 @@ public abstract class AndroidBaseRecord implements Serializable {
      * getContentValues.
      * @return values for database (DO NOT INCLUDE THE ID COLUMN)
      */
-    public abstract ContentValues getContentValues();
+    public abstract void getContentValues(DBToolsContentValues contentValues);
     public abstract Object[] getValues();
+    public abstract void setContent(DBToolsContentValues content);
     public abstract void setContent(Cursor cursor);
     public abstract boolean isNewRecord();
 

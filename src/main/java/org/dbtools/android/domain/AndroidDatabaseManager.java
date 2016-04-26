@@ -1,6 +1,7 @@
 package org.dbtools.android.domain;
 
 
+import org.dbtools.android.domain.config.DatabaseConfig;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 
 import javax.annotation.Nonnull;
@@ -10,6 +11,10 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidDatabaseManager extends AndroidDatabaseBaseManager {
+    public AndroidDatabaseManager(DatabaseConfig databaseConfig) {
+        super(databaseConfig);
+    }
+
     @Nonnull
     public DatabaseWrapper getWritableDatabase(@Nonnull String databaseName) {
         connectDatabase(databaseName);

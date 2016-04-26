@@ -399,7 +399,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         Cursor c = database.query(tableName, new String[]{"count(1)"}, selection, selectionArgs, null, null, null);
         if (c != null) {
             if (c.moveToFirst()) {
-                count = c.getLong(0);
+                count = c.getInt(0); // sqlite reads/writes this value as an int
             }
             c.close();
         }

@@ -9,28 +9,37 @@ import android.database.sqlite.SQLiteStatement;
 import android.database.sqlite.SQLiteTransactionListener;
 import android.os.CancellationSignal;
 import android.util.Pair;
+import org.dbtools.android.domain.database.contentvalues.AndroidDBToolsContentValues;
 
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
+public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, AndroidDBToolsContentValues> {
     private SQLiteDatabase database;
 
     public AndroidDatabaseWrapper(String path) {
         database = SQLiteDatabase.openOrCreateDatabase(path, null);
     }
 
+    @Override
     public SQLiteDatabase getDatabase() {
         return database;
     }
 
+    @Override
+    public AndroidDBToolsContentValues newContentValues() {
+        return new AndroidDBToolsContentValues();
+    }
+
+    @Override
     public void attachDatabase(String toDbPath, String toDbName, String toDbPassword) {
         String sql = "ATTACH DATABASE '" + toDbPath + "' AS " + toDbName;
         database.execSQL(sql);
     }
 
+    @Override
     public void detachDatabase(String dbName) {
         String sql = "DETACH DATABASE '" + dbName + "'";
         database.execSQL(sql);
@@ -38,6 +47,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
 
     // **** following are from SQLiteDatabase.java ****
 
+    @Override
     public void close() {
         database.close();
     }
@@ -54,6 +64,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.disableWriteAheadLogging();
     }
 
+    @Override
     public void setTransactionSuccessful() {
         database.setTransactionSuccessful();
     }
@@ -74,6 +85,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.getPageSize();
     }
 
+    @Override
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
         return database.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
     }
@@ -82,6 +94,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.enableWriteAheadLogging();
     }
 
+    @Override
     public int delete(String table, String whereClause, String[] whereArgs) {
         return database.delete(table, whereClause, whereArgs);
     }
@@ -91,6 +104,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
     }
 
 
+    @Override
     public boolean isOpen() {
         return database.isOpen();
     }
@@ -108,10 +122,12 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.isDbLockedByCurrentThread();
     }
 
+    @Override
     public void execSQL(String sql, Object[] bindArgs) throws SQLException {
         database.execSQL(sql, bindArgs);
     }
 
+    @Override
     public void beginTransaction() {
         database.beginTransaction();
     }
@@ -136,6 +152,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.releaseReference();
     }
 
+    @Override
     public Cursor query(boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
         return database.query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
     }
@@ -145,6 +162,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.markTableSyncable(table, deletedTable);
     }
 
+    @Override
     public Cursor rawQuery(String sql, String[] selectionArgs) {
         return database.rawQuery(sql, selectionArgs);
     }
@@ -161,6 +179,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.yieldIfContendedSafely(sleepAfterYieldDelay);
     }
 
+    @Override
     public int getVersion() {
         return database.getVersion();
     }
@@ -169,6 +188,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.insertWithOnConflict(table, nullColumnHack, initialValues, conflictAlgorithm);
     }
 
+    @Override
     public void setVersion(int version) {
         database.setVersion(version);
     }
@@ -194,8 +214,9 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.setMaxSqlCacheSize(cacheSize);
     }
 
-    public long insert(String table, String nullColumnHack, ContentValues values) {
-        return database.insert(table, nullColumnHack, values);
+    @Override
+    public long insert(String table, String nullColumnHack, AndroidDBToolsContentValues values) {
+        return database.insert(table, nullColumnHack, values.getContentValues());
     }
 
     public Cursor query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
@@ -219,6 +240,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.isWriteAheadLoggingEnabled();
     }
 
+    @Override
     public boolean inTransaction() {
         return database.inTransaction();
     }
@@ -227,10 +249,12 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.queryWithFactory(cursorFactory, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
-    public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
-        return database.update(table, values, whereClause, whereArgs);
+    @Override
+    public int update(String table, AndroidDBToolsContentValues values, String whereClause, String[] whereArgs) {
+        return database.update(table, values.getContentValues(), whereClause, whereArgs);
     }
 
+    @Override
     public void endTransaction() {
         database.endTransaction();
     }
@@ -314,6 +338,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.setLockingEnabled(lockingEnabled);
     }
 
+    @Override
     public void execSQL(String sql) throws SQLException {
         database.execSQL(sql);
     }

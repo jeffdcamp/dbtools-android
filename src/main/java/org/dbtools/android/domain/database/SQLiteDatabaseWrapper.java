@@ -1,9 +1,9 @@
 package org.dbtools.android.domain.database;
 
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.util.Pair;
+import org.dbtools.android.domain.database.contentvalues.AndroidDBToolsContentValues;
 import org.sqlite.database.DatabaseErrorHandler;
 import org.sqlite.database.SQLException;
 import org.sqlite.database.sqlite.SQLiteDatabase;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
+public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, AndroidDBToolsContentValues> {
     private SQLiteDatabase database;
 
     private static boolean libraryLoaded = false;
@@ -60,6 +60,11 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database;
     }
 
+    @Override
+    public AndroidDBToolsContentValues newContentValues() {
+        return new AndroidDBToolsContentValues();
+    }
+
     public void attachDatabase(String toDbPath, String toDbName, String toDbPassword) {
         String sql = "ATTACH DATABASE '" + toDbPath + "' AS " + toDbName;
         database.execSQL(sql);
@@ -101,8 +106,8 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal);
     }
 
-    public long insertWithOnConflict(String table, String nullColumnHack, ContentValues initialValues, int conflictAlgorithm) {
-        return database.insertWithOnConflict(table, nullColumnHack, initialValues, conflictAlgorithm);
+    public long insertWithOnConflict(String table, String nullColumnHack, AndroidDBToolsContentValues initialValues, int conflictAlgorithm) {
+        return database.insertWithOnConflict(table, nullColumnHack, initialValues.getContentValues(), conflictAlgorithm);
     }
 
     public String getPath() {
@@ -196,16 +201,16 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.markTableSyncable(table, foreignKey, updateTable);
     }
 
-    public long insertOrThrow(String table, String nullColumnHack, ContentValues values) throws SQLException {
-        return database.insertOrThrow(table, nullColumnHack, values);
+    public long insertOrThrow(String table, String nullColumnHack, AndroidDBToolsContentValues values) throws SQLException {
+        return database.insertOrThrow(table, nullColumnHack, values.getContentValues());
     }
 
     public boolean needUpgrade(int newVersion) {
         return database.needUpgrade(newVersion);
     }
 
-    public int updateWithOnConflict(String table, ContentValues values, String whereClause, String[] whereArgs, int conflictAlgorithm) {
-        return database.updateWithOnConflict(table, values, whereClause, whereArgs, conflictAlgorithm);
+    public int updateWithOnConflict(String table, AndroidDBToolsContentValues values, String whereClause, String[] whereArgs, int conflictAlgorithm) {
+        return database.updateWithOnConflict(table, values.getContentValues(), whereClause, whereArgs, conflictAlgorithm);
     }
 
     public void releaseReference() {
@@ -216,8 +221,8 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         return database.isDatabaseIntegrityOk();
     }
 
-    public long replace(String table, String nullColumnHack, ContentValues initialValues) {
-        return database.replace(table, nullColumnHack, initialValues);
+    public long replace(String table, String nullColumnHack, AndroidDBToolsContentValues initialValues) {
+        return database.replace(table, nullColumnHack, initialValues.getContentValues());
     }
 
     public void setPageSize(long numBytes) {
@@ -257,8 +262,8 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
         database.setLockingEnabled(lockingEnabled);
     }
 
-    public long replaceOrThrow(String table, String nullColumnHack, ContentValues initialValues) throws SQLException {
-        return database.replaceOrThrow(table, nullColumnHack, initialValues);
+    public long replaceOrThrow(String table, String nullColumnHack, AndroidDBToolsContentValues initialValues) throws SQLException {
+        return database.replaceOrThrow(table, nullColumnHack, initialValues.getContentValues());
     }
 
     public List<Pair<String, String>> getAttachedDbs() {
@@ -362,8 +367,8 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
     }
 
     @Override
-    public long insert(String table, String nullColumnHack, ContentValues values) {
-        return database.insert(table, nullColumnHack, values);
+    public long insert(String table, String nullColumnHack, AndroidDBToolsContentValues values) {
+        return database.insert(table, nullColumnHack, values.getContentValues());
     }
 
     @Override
@@ -372,8 +377,8 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
     }
 
     @Override
-    public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
-        return database.update(table, values, whereClause, whereArgs);
+    public int update(String table, AndroidDBToolsContentValues values, String whereClause, String[] whereArgs) {
+        return database.update(table, values.getContentValues(), whereClause, whereArgs);
     }
 
     @Override

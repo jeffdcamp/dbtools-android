@@ -1,17 +1,17 @@
 package org.dbtools.android.domain.database;
 
-import android.content.ContentValues;
 import android.content.Context;
 import net.sqlcipher.Cursor;
 import net.sqlcipher.SQLException;
 import net.sqlcipher.database.*;
+import org.dbtools.android.domain.database.contentvalues.AndroidDBToolsContentValues;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.Locale;
 import java.util.Map;
 
-public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase> {
+public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, AndroidDBToolsContentValues> {
 
     private SQLiteDatabase database;
 
@@ -27,7 +27,12 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
     public SQLiteDatabase getDatabase() {
         return database;
     }
-    
+
+    @Override
+    public AndroidDBToolsContentValues newContentValues() {
+        return new AndroidDBToolsContentValues();
+    }
+
     public void attachDatabase(String toDbPath, String toDbName, String toDbPassword) {
         String sql = "ATTACH DATABASE '" + toDbPath + "' AS " + toDbName + " KEY '" + toDbPassword + "'";
         database.execSQL(sql);
@@ -73,8 +78,8 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
         return SQLiteDatabase.openDatabase(path, password, factory, flags);
     }
 
-    public long replace(String table, String nullColumnHack, ContentValues initialValues) {
-        return database.replace(table, nullColumnHack, initialValues);
+    public long replace(String table, String nullColumnHack, AndroidDBToolsContentValues initialValues) {
+        return database.replace(table, nullColumnHack, initialValues.getContentValues());
     }
 
     public long getMaximumSize() {
@@ -105,16 +110,16 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
         database.changePassword(password);
     }
 
-    public int updateWithOnConflict(String table, ContentValues values, String whereClause, String[] whereArgs, int conflictAlgorithm) {
-        return database.updateWithOnConflict(table, values, whereClause, whereArgs, conflictAlgorithm);
+    public int updateWithOnConflict(String table, AndroidDBToolsContentValues values, String whereClause, String[] whereArgs, int conflictAlgorithm) {
+        return database.updateWithOnConflict(table, values.getContentValues(), whereClause, whereArgs, conflictAlgorithm);
     }
 
     public static SQLiteDatabase openOrCreateDatabase(String path, char[] password, SQLiteDatabase.CursorFactory factory) {
         return SQLiteDatabase.openOrCreateDatabase(path, password, factory);
     }
 
-    public long insertOrThrow(String table, String nullColumnHack, ContentValues values) throws SQLException {
-        return database.insertOrThrow(table, nullColumnHack, values);
+    public long insertOrThrow(String table, String nullColumnHack, AndroidDBToolsContentValues values) throws SQLException {
+        return database.insertOrThrow(table, nullColumnHack, values.getContentValues());
     }
 
     public Cursor rawQuery(String sql, String[] selectionArgs, int initialRead, int maxRead) {
@@ -238,8 +243,8 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
         database.markTableSyncable(table, deletedTable);
     }
 
-    public long insertWithOnConflict(String table, String nullColumnHack, ContentValues initialValues, int conflictAlgorithm) {
-        return database.insertWithOnConflict(table, nullColumnHack, initialValues, conflictAlgorithm);
+    public long insertWithOnConflict(String table, String nullColumnHack, AndroidDBToolsContentValues initialValues, int conflictAlgorithm) {
+        return database.insertWithOnConflict(table, nullColumnHack, initialValues.getContentValues(), conflictAlgorithm);
     }
 
     public void setVersion(int version) {
@@ -282,8 +287,8 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
         return database.setMaximumSize(numBytes);
     }
 
-    public long replaceOrThrow(String table, String nullColumnHack, ContentValues initialValues) throws SQLException {
-        return database.replaceOrThrow(table, nullColumnHack, initialValues);
+    public long replaceOrThrow(String table, String nullColumnHack, AndroidDBToolsContentValues initialValues) throws SQLException {
+        return database.replaceOrThrow(table, nullColumnHack, initialValues.getContentValues());
     }
 
     public Cursor queryWithFactory(SQLiteDatabase.CursorFactory cursorFactory, boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
@@ -325,8 +330,8 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
     }
 
     @Override
-    public long insert(String table, String nullColumnHack, ContentValues values) {
-        return database.insert(table, nullColumnHack, values);
+    public long insert(String table, String nullColumnHack, AndroidDBToolsContentValues values) {
+        return database.insert(table, nullColumnHack, values.getContentValues());
     }
 
     @Override
@@ -335,8 +340,8 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase>
     }
 
     @Override
-    public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
-        return database.update(table, values, whereClause, whereArgs);
+    public int update(String table, AndroidDBToolsContentValues values, String whereClause, String[] whereArgs) {
+        return database.update(table, values.getContentValues(), whereClause, whereArgs);
     }
 
     @Override
