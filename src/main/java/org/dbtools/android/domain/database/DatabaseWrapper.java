@@ -2,6 +2,8 @@ package org.dbtools.android.domain.database;
 
 import android.database.Cursor;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
+import org.sqlite.database.SQLException;
 
 import javax.annotation.Nullable;
 
@@ -26,6 +28,8 @@ public interface DatabaseWrapper<T, U extends DBToolsContentValues> {
     int update(String tableName, U contentValues, @Nullable String where, @Nullable String[] whereArgs);
 
     int delete(String tableName, @Nullable String where, @Nullable String[] whereArgs);
+
+    StatementWrapper compileStatement(String sql) throws SQLException;
 
     void execSQL(String sqlStatement);
 

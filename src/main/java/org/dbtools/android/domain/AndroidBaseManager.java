@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import org.dbtools.android.domain.database.DatabaseWrapper;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
 import org.dbtools.android.domain.dbtype.DatabaseValue;
 import org.dbtools.android.domain.dbtype.DatabaseValueUtil;
 
@@ -17,8 +18,10 @@ import java.util.List;
 public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static final int MAX_TRY_COUNT = 3;
-
     public static final String DEFAULT_COLLATE_LOCALIZED = " COLLATE LOCALIZED";
+
+    private StatementWrapper insertStatement;
+    private StatementWrapper updateStatement;
 
     public abstract DatabaseWrapper getReadableDatabase(String databaseName);
 
@@ -37,6 +40,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public abstract String getDropSql();
 
     public abstract String getCreateSql();
+
+    public abstract String getInsertSql();
+
+    public abstract String getUpdateSql();
 
     public abstract T newRecord();
 
@@ -97,6 +104,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         checkDB(db);
         executeSql(db, dropSql);
         executeSql(db, createSql);
+    }
+
+    public StatementWrapper getInsertStatement(@Nonnull DatabaseWrapper db) {
+        if (insertStatement == null) {
+            insertStatement = db.compileStatement(getInsertSql());
+        }
+
+        return insertStatement;
+    }
+
+    public StatementWrapper getUpdateStatement(@Nonnull DatabaseWrapper db) {
+        if (updateStatement == null) {
+            updateStatement = db.compileStatement(getUpdateSql());
+        }
+
+        return updateStatement;
     }
 
     public void executeSql(@Nonnull String sql) {

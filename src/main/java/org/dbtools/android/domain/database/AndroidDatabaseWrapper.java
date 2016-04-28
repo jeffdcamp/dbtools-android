@@ -5,11 +5,12 @@ import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
 import android.database.sqlite.SQLiteTransactionListener;
 import android.os.CancellationSignal;
 import android.util.Pair;
 import org.dbtools.android.domain.database.contentvalues.AndroidDBToolsContentValues;
+import org.dbtools.android.domain.database.statement.AndroidStatementWrapper;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
 
 import java.io.File;
 import java.util.List;
@@ -73,8 +74,8 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         database.beginTransactionWithListener(transactionListener);
     }
 
-    public SQLiteStatement compileStatement(String sql) throws SQLException {
-        return database.compileStatement(sql);
+    public StatementWrapper compileStatement(String sql) throws SQLException {
+        return new AndroidStatementWrapper(database.compileStatement(sql));
     }
 
     public static SQLiteDatabase openDatabase(String path, SQLiteDatabase.CursorFactory factory, int flags) {

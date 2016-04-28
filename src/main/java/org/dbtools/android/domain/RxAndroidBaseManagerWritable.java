@@ -2,13 +2,15 @@ package org.dbtools.android.domain;
 
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
 import org.dbtools.android.domain.task.*;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("UnusedDeclaration")
@@ -161,19 +163,22 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         boolean success = false;
         for (int tryCount = 0; tryCount < MAX_TRY_COUNT && !success; tryCount++) {
             try {
-                DBToolsContentValues contentValues = db.newContentValues();
-                e.getContentValues(contentValues);
-                rowId = db.insert(getTableName(), null, contentValues);
+                // statement
+                StatementWrapper statement = getInsertStatement(db);
+                e.bindInsertStatement(statement);
+                rowId = statement.executeInsert();
+
                 e.setPrimaryKeyId(rowId);
 
-                notifyTableListeners(db, new DatabaseTableChange(true, false, false));
+                if (tableChangeListeners.size() > 0) {
+                    notifyTableListeners(db, new DatabaseTableChange(true, false, false));
+                }
 
                 success = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        }
-
+        } // retry
         return rowId;
     }
 
@@ -198,6 +203,12 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         return update(getWritableDatabase(databaseName), e);
     }
 
+    /**
+     * Update a record
+     * @param db database
+     * @param e record
+     * @return number of rows effected
+     */
     public int update(@Nonnull DatabaseWrapper db, @Nullable T e) {
         if (e == null) {
             return 0;
@@ -209,9 +220,10 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
-        DBToolsContentValues contentValues = db.newContentValues();
-        e.getContentValues(contentValues);
-        return update(db, contentValues, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+        // Statement
+        StatementWrapper statement = getUpdateStatement(db);
+        e.bindUpdateStatement(statement);
+        return statement.executeUpdateDelete();
     }
 
     public int update(@Nonnull DBToolsContentValues values, long rowId) {

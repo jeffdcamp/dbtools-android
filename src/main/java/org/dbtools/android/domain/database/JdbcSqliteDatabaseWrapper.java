@@ -3,6 +3,8 @@ package org.dbtools.android.domain.database;
 import android.database.Cursor;
 import org.dbtools.android.domain.database.contentvalues.JdbcDBToolsContentValues;
 import org.dbtools.android.domain.database.cursor.JdbcMemoryCursor;
+import org.dbtools.android.domain.database.statement.JdbcSqliteStatementWrapper;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
 import org.dbtools.query.shared.filter.RawFilter;
 import org.dbtools.query.sql.SQLQueryBuilder;
 
@@ -93,30 +95,6 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
 
     }
 
-    private void bindArgs(PreparedStatement statement, @Nullable Object[] bindArgs) throws SQLException {
-        if (bindArgs != null && bindArgs.length > 0) {
-            for (int i = 0; i < bindArgs.length; i++) {
-                Object arg = bindArgs[i];
-
-                int index = i + 1; // 1 based
-
-                if (arg instanceof Integer) {
-                    statement.setInt(index, (Integer) arg);
-                } else if (arg instanceof String) {
-                    statement.setString(index, (String) arg);
-                } else if (arg instanceof Long) {
-                    statement.setLong(index, (Long) arg);
-                } else if (arg instanceof Float) {
-                    statement.setFloat(index, (Float) arg);
-                } else if (arg instanceof Double) {
-                    statement.setDouble(index, (Double) arg);
-                } else if (arg instanceof Boolean) {
-                    statement.setBoolean(index, (Boolean) arg);
-                }
-            }
-        }
-    }
-
     @Override
     public long insert(String table, @Nullable String o, JdbcDBToolsContentValues initialValues) {
         try {
@@ -145,7 +123,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
             sql.append(')');
 
             PreparedStatement statement = conn.prepareStatement(sql.toString());
-            bindArgs(statement, bindArgs);
+            JdbcSqliteStatementWrapper.bindArgs(statement, bindArgs);
 
             try {
                 return statement.executeUpdate();
@@ -193,7 +171,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
             }
 
             PreparedStatement statement = conn.prepareStatement(sql.toString());
-            bindArgs(statement, bindArgs);
+            JdbcSqliteStatementWrapper.bindArgs(statement, bindArgs);
 
             try {
                 return statement.executeUpdate();
@@ -218,7 +196,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
             }
 
             PreparedStatement statement = conn.prepareStatement(sql);
-            bindArgs(statement, whereArgs);
+            JdbcSqliteStatementWrapper.bindArgs(statement, whereArgs);
 
             try {
                 return statement.executeUpdate();
@@ -233,6 +211,11 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     }
 
     @Override
+    public StatementWrapper compileStatement(String sql) {
+        return new JdbcSqliteStatementWrapper(conn, sql);
+    }
+
+    @Override
     public void execSQL(String sql) {
         execSQL(sql, null);
     }
@@ -241,7 +224,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     public void execSQL(String sql, @Nullable  Object[] bindArgs) {
         try {
             PreparedStatement statement = conn.prepareStatement(sql);
-            bindArgs(statement, bindArgs);
+            JdbcSqliteStatementWrapper.bindArgs(statement, bindArgs);
 
             try {
                 statement.executeUpdate();
@@ -274,7 +257,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
         try {
 //            PreparedStatement statement = conn.prepareStatement(builder.buildQuery(), ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
             PreparedStatement statement = conn.prepareStatement(builder.buildQuery());
-            bindArgs(statement, selectionArgs);
+            JdbcSqliteStatementWrapper.bindArgs(statement, selectionArgs);
 
             ResultSet resultSet = statement.executeQuery();
             return new JdbcMemoryCursor(resultSet);
@@ -291,14 +274,12 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     @Nullable
     public Cursor rawQuery(String rawQuery, @Nullable String[] selectionArgs) {
         try {
-//            PreparedStatement statement = conn.prepareStatement(rawQuery, ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE); // unsupported by sqlite
-//            PreparedStatement statement = conn.prepareStatement(rawQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY); //ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
             PreparedStatement statement = conn.prepareStatement(rawQuery);
-            bindArgs(statement, selectionArgs);
+            JdbcSqliteStatementWrapper.bindArgs(statement, selectionArgs);
 
             ResultSet resultSet = statement.executeQuery();
             return new JdbcMemoryCursor(resultSet);
-//            return new JdbcCursor(resultSet);
+//            return new JdbcCursor(resultSet); // not supported because cursors need to go bidirectional on the ResultSet
         } catch (SQLException e) {
             e.printStackTrace();
         }

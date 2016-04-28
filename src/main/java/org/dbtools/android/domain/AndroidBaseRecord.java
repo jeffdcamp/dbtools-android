@@ -2,6 +2,7 @@ package org.dbtools.android.domain;
 
 import android.database.Cursor;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
 
 import java.io.Serializable;
 
@@ -27,6 +28,8 @@ public abstract class AndroidBaseRecord implements Serializable {
      */
     public abstract void getContentValues(DBToolsContentValues contentValues);
     public abstract Object[] getValues();
+    public abstract void bindInsertStatement(StatementWrapper statement);
+    public abstract void bindUpdateStatement(StatementWrapper statement);
     public abstract void setContent(DBToolsContentValues content);
     public abstract void setContent(Cursor cursor);
     public abstract boolean isNewRecord();

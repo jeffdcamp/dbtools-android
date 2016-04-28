@@ -3,8 +3,13 @@ package org.dbtools.android.domain.database;
 import android.content.Context;
 import net.sqlcipher.Cursor;
 import net.sqlcipher.SQLException;
-import net.sqlcipher.database.*;
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabaseHook;
+import net.sqlcipher.database.SQLiteException;
+import net.sqlcipher.database.SQLiteTransactionListener;
 import org.dbtools.android.domain.database.contentvalues.AndroidDBToolsContentValues;
+import org.dbtools.android.domain.database.statement.SQLCipherStatementWrapper;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -337,6 +342,11 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase,
     @Override
     public int delete(String table, String whereClause, String[] whereArgs) {
         return database.delete(table, whereClause, whereArgs);
+    }
+
+    @Override
+    public StatementWrapper compileStatement(String sql) throws org.sqlite.database.SQLException {
+        return new SQLCipherStatementWrapper(database.compileStatement(sql));
     }
 
     @Override
