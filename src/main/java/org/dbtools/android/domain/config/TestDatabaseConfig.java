@@ -4,6 +4,8 @@ import org.dbtools.android.domain.AndroidDatabase;
 import org.dbtools.android.domain.AndroidDatabaseBaseManager;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.database.JdbcSqliteDatabaseWrapper;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
+import org.dbtools.android.domain.database.contentvalues.JdbcDBToolsContentValues;
 import org.dbtools.android.domain.log.DBToolsJavaLogger;
 import org.dbtools.android.domain.log.DBToolsLogger;
 
@@ -40,6 +42,11 @@ public class TestDatabaseConfig implements DatabaseConfig {
     @Override
     public DBToolsLogger createNewDBToolsLogger() {
         return new DBToolsJavaLogger();
+    }
+
+    @Override
+    public DBToolsContentValues createNewDBToolsContentValues() {
+        return new JdbcDBToolsContentValues();
     }
 
     public void deleteDatabaseFile() {

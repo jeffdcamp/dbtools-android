@@ -3,6 +3,7 @@ package org.dbtools.android.domain.config;
 import org.dbtools.android.domain.AndroidDatabase;
 import org.dbtools.android.domain.AndroidDatabaseBaseManager;
 import org.dbtools.android.domain.database.DatabaseWrapper;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.log.DBToolsLogger;
 
 public interface DatabaseConfig {
@@ -12,4 +13,5 @@ public interface DatabaseConfig {
      */
     void identifyDatabases(AndroidDatabaseBaseManager databaseManager);
     DBToolsLogger createNewDBToolsLogger();
+    DBToolsContentValues createNewDBToolsContentValues();
 }

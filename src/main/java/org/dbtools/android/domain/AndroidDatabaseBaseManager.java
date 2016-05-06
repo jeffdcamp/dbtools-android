@@ -41,8 +41,23 @@ public abstract class AndroidDatabaseBaseManager {
     }
 
     public AndroidDatabaseBaseManager(DatabaseConfig databaseConfig) {
+        if (databaseConfig == null) {
+            throw new IllegalArgumentException("databaseConfig cannot be null");
+        }
         this.databaseConfig = databaseConfig;
         this.log = databaseConfig.createNewDBToolsLogger();
+    }
+
+    /**
+     * Return a database/platform specific version of DBToolsContentValues
+     * Example:
+     * - For Android platform, AndroidDBToolsContentValues
+     * - For JDBC, JdbcDBToolsContentValues
+     *
+     * @return new instance of DBToolsContentValues
+     */
+    public DBToolsContentValues createNewDBToolsContentValues() {
+        return databaseConfig.createNewDBToolsContentValues();
     }
 
     /**

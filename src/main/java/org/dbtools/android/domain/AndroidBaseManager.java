@@ -3,7 +3,9 @@ package org.dbtools.android.domain;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
+import org.dbtools.android.domain.config.DatabaseConfig;
 import org.dbtools.android.domain.database.DatabaseWrapper;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
 import org.dbtools.android.domain.dbtype.DatabaseValue;
 import org.dbtools.android.domain.dbtype.DatabaseValueUtil;
@@ -46,6 +48,20 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public abstract String getUpdateSql();
 
     public abstract T newRecord();
+
+    public abstract DatabaseConfig getDatabaseConfig();
+
+    /**
+     * Return a database/platform specific version of DBToolsContentValues
+     * Example:
+     * - For Android platform, AndroidDBToolsContentValues
+     * - For JDBC, JdbcDBToolsContentValues
+     *
+     * @return new instance of DBToolsContentValues
+     */
+    public DBToolsContentValues createNewDBToolsContentValues() {
+        return getDatabaseConfig().createNewDBToolsContentValues();
+    }
 
     public void createTable() {
         executeSql(getDatabaseName(), getCreateSql());
