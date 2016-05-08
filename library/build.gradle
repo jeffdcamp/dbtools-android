@@ -114,10 +114,10 @@ task installLocal(type: Upload) {
     repositories {
         mavenDeployer {
             repository (url: "file://${System.env.HOME}/.m2/repository/")
-            pom.groupId = libraryGroupId
-            pom.artifactId = libraryArtifactId
-            pom.version = libraryVersion
-            pom.packaging = 'aar'
+            pom.groupId = GROUP
+            pom.artifactId = POM_ARTIFACT_ID
+            pom.version = VERSION_NAME
+            pom.packaging = POM_PACKAGING
             uniqueVersion = false // don't put in a timestamp on the filename (other project will not be able to depend on it)
 
             // mark optional dependencies
@@ -139,64 +139,6 @@ task installLocal(type: Upload) {
     }
 }
 
-// ./gradlew clean check deploy
-task deploy(type: Upload) {
-    description "Deploys the artifacts to the Nexus repository."
-    configuration = configurations['archives']
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                groupId = libraryGroupId
-                pom.artifactId = libraryArtifactId
-                pom.version = libraryVersion
-                packaging 'aar'
-
-                name 'DBTools Android'
-                description 'DBTools ORM for Android'
-                url 'https://github.com/jeffdcamp/dbtools-android'
-
-                scm {
-                    connection 'scm:git:git://github.com/jeffdcamp/dbtools-android.git'
-                    developerConnection 'scm:git:git@github.com:jeffdcamp/dbtools-android.git'
-                    url 'https://github.com/jeffdcamp/dbtools-android'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'jcampbell'
-                        name 'Jeff Campbell'
-                        email 'jeffdcamp@gmail.com'
-                    }
-                }
-            }
-
-            // mark optional dependencies
-            pom.withXml {
-                asNode().dependencies.dependency.findAll { xmlDep ->
-                    if (project.configurations.optional.allDependencies.findAll { dep ->
-                        xmlDep.groupId.text() == dep.group && xmlDep.artifactId.text() == dep.name
-                    }) {
-                        def xmlOptional = xmlDep.optional[0];
-                        if (!xmlOptional) {
-                            xmlOptional = xmlDep.appendNode('optional')
-                        }
-                        xmlOptional.value = 'true';
-                    }
-                }
-            }
-        }
-    }
-}
+// DEPLOY to Maven Central (this must be the last line of this file)
+// ./gradlew clean check uploadArchives
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
