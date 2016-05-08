@@ -1,0 +1,40 @@
+buildscript {
+    ext.kotlin_version = '1.0.1-2'
+
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0' // version plugin support
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+        classpath 'org.dbtools:gradle-dbtools-plugin:7.0.0'
+    }
+}
+
+def majorVersion = 7
+def minorVersion = 0
+def patchVersion = 0
+def versionCode = majorVersion * 10000 + minorVersion * 100 + patchVersion
+def versionName = "$majorVersion.$minorVersion.$patchVersion"
+
+allprojects {
+    repositories {
+        mavenLocal()
+        maven { url "http://www.soupbowl.net/nexus/content/groups/public/" }
+        jcenter()
+    }
+    apply plugin: 'com.github.ben-manes.versions' // ./gradlew dependencyUpdates -Drevision=release
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    supportLibVersion = "23.1.1"
+    libraryVersion = "$versionName"
+}

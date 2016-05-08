@@ -1,0 +1,202 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'jacoco'
+apply plugin: 'maven'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode versionCode
+        versionName libraryVersion
+    }
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+//        unitTests.all { Gradle 2.13
+//            jacoco {
+//                includeNoLocationClasses = true
+//            }
+//        }
+
+    }
+
+    // be sure to support straight Java 6
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_7
+//        targetCompatibility JavaVersion.VERSION_1_7
+//    }
+}
+
+configurations {
+    optional
+    compile.extendsFrom optional
+}
+
+dependencies {
+    compile 'org.dbtools:dbtools-query:3.0.0-SNAPSHOT'
+    compile 'com.google.code.findbugs:jsr305:3.0.1'
+
+    // optional
+    optional 'io.reactivex:rxjava:1.1.5'
+    optional "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    optional 'joda-time:joda-time:2.9.3'
+    optional 'org.threeten:threetenbp:1.3.1'
+
+    optional 'org.sqlite:sqlite-android-base:3.8.8.1-20150126'
+    optional 'net.sqlcipher:sqlcipher:3.1.0.20140823'
+    optional 'org.xerial:sqlite-jdbc:3.8.11.2'
+
+//    compile project(path: ':core')
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.0.52-beta'
+}
+
+
+def libraryGroupId = 'org.dbtools'
+def libraryArtifactId = 'dbtools-android'
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+    }
+}
+
+def coverageSourceDirs = [
+        'src/main/java',
+]
+
+jacoco {
+    toolVersion "0.7.2.201409121644"
+    //    toolVersion "0.7.6.201602180812" Gradle 2.13
+}
+
+task testDebugJacoco(type: JacocoReport, dependsOn: "testDebugUnitTest") {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports after running tests."
+    classDirectories = fileTree(
+            dir: "$buildDir/intermediates/classes/debug",
+            excludes: ['**/R.class',
+                       '**/R$*.class',
+                       '**/*$ViewInjector*.*',
+                       '**/BuildConfig.*',
+                       '**/Manifest*.*']
+    )
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+    additionalSourceDirs = files(coverageSourceDirs)
+    sourceDirectories = files(coverageSourceDirs)
+    executionData = files("$buildDir/jacoco/testDebugUnitTest.exec")
+}
+
+// =============== Maven Deployment ===============
+// ./gradlew clean check installLocal
+task installLocal(type: Upload) {
+    description "Installs the artifacts to the local Maven repository."
+    configuration = configurations['archives']
+    repositories {
+        mavenDeployer {
+            repository (url: "file://${System.env.HOME}/.m2/repository/")
+            pom.groupId = libraryGroupId
+            pom.artifactId = libraryArtifactId
+            pom.version = libraryVersion
+            pom.packaging = 'aar'
+            uniqueVersion = false // don't put in a timestamp on the filename (other project will not be able to depend on it)
+
+            // mark optional dependencies
+            pom.withXml {
+                asNode().dependencies.dependency.findAll { xmlDep ->
+                    if (project.configurations.optional.allDependencies.findAll { dep ->
+                        xmlDep.groupId.text() == dep.group && xmlDep.artifactId.text() == dep.name
+                    }) {
+                        def xmlOptional = xmlDep.optional[0];
+                        if (!xmlOptional) {
+                            xmlOptional = xmlDep.appendNode('optional')
+                        }
+                        xmlOptional.value = 'true';
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+// ./gradlew clean check deploy
+task deploy(type: Upload) {
+    description "Deploys the artifacts to the Nexus repository."
+    configuration = configurations['archives']
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                groupId = libraryGroupId
+                pom.artifactId = libraryArtifactId
+                pom.version = libraryVersion
+                packaging 'aar'
+
+                name 'DBTools Android'
+                description 'DBTools ORM for Android'
+                url 'https://github.com/jeffdcamp/dbtools-android'
+
+                scm {
+                    connection 'scm:git:git://github.com/jeffdcamp/dbtools-android.git'
+                    developerConnection 'scm:git:git@github.com:jeffdcamp/dbtools-android.git'
+                    url 'https://github.com/jeffdcamp/dbtools-android'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'jcampbell'
+                        name 'Jeff Campbell'
+                        email 'jeffdcamp@gmail.com'
+                    }
+                }
+            }
+
+            // mark optional dependencies
+            pom.withXml {
+                asNode().dependencies.dependency.findAll { xmlDep ->
+                    if (project.configurations.optional.allDependencies.findAll { dep ->
+                        xmlDep.groupId.text() == dep.group && xmlDep.artifactId.text() == dep.name
+                    }) {
+                        def xmlOptional = xmlDep.optional[0];
+                        if (!xmlOptional) {
+                            xmlOptional = xmlDep.appendNode('optional')
+                        }
+                        xmlOptional.value = 'true';
+                    }
+                }
+            }
+        }
+    }
+}
