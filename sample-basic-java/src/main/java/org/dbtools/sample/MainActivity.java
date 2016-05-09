@@ -9,6 +9,9 @@ import org.dbtools.sample.model.database.main.MainDatabaseManagers;
 import org.dbtools.sample.model.database.main.individual.Individual;
 import org.dbtools.sample.model.database.main.individual.IndividualManager;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 public class MainActivity extends AppCompatActivity {
 
     private IndividualManager individualManager;
@@ -24,6 +27,15 @@ public class MainActivity extends AppCompatActivity {
         Individual individual = new Individual();
         individual.setFirstName("Jeff");
         individual.setLastName("Campbell");
+        individual.setSampleDateTime(new Date());
+        individual.setBirthDate(new GregorianCalendar(1970,1,1).getTime());
+        individual.setLastModified(new Date());
+        individual.setNumber(1234);
+        individual.setPhone("555-555-1234");
+        individual.setEmail("test@test.com");
+        individual.setAmount1(19.95F);
+        individual.setAmount2(1000000000.25D);
+        individual.setEnabled(true);
 
         individualManager.save(individual);
 

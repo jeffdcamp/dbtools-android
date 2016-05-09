@@ -8,13 +8,15 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class JdbcMemoryCursor implements Cursor {
     private int currentPosition = 0;
@@ -124,7 +126,7 @@ public class JdbcMemoryCursor implements Cursor {
     @Override
     public int getColumnIndex(String columnName) {
         for (int i = 0; i < columnCount; i++) {
-            if (columnName.equalsIgnoreCase(columnName)) {
+            if (columnNames[i].equalsIgnoreCase(columnName)) {
                 return i;
             }
         }
@@ -188,12 +190,23 @@ public class JdbcMemoryCursor implements Cursor {
 
     @Override
     public long getLong(int i) {
-        return (Long) getRowData().get(i);
+        Object data = getRowData().get(i);
+        if (data instanceof Integer) {
+            return (Integer) getRowData().get(i);
+        } else {
+            return (Long) getRowData().get(i);
+        }
     }
 
     @Override
     public float getFloat(int i) {
-        return (Float) getRowData().get(i);
+        Object data = getRowData().get(i);
+
+        if (data instanceof Double) {
+            return new BigDecimal((Double) getRowData().get(i)).floatValue();
+        } else {
+            return (Float) getRowData().get(i);
+        }
     }
 
     @Override

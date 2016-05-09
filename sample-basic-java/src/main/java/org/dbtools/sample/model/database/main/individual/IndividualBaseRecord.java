@@ -31,6 +31,9 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     private String phone = "";
     private String email = "";
     private byte[] data = null;
+    private Float amount1 = null;
+    private Double amount2 = null;
+    private Boolean enabled = false;
     private Long spouseIndividualId = null;
 
     public IndividualBaseRecord() {
@@ -72,6 +75,9 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         values.put(IndividualConst.C_PHONE, phone);
         values.put(IndividualConst.C_EMAIL, email);
         values.put(IndividualConst.C_DATA, data);
+        values.put(IndividualConst.C_AMOUNT1, amount1);
+        values.put(IndividualConst.C_AMOUNT2, amount2);
+        values.put(IndividualConst.C_ENABLED, enabled != null ? (enabled ? 1 : 0) : 0);
         values.put(IndividualConst.C_SPOUSE_INDIVIDUAL_ID, spouseIndividualId);
     }
 
@@ -89,6 +95,9 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
             phone,
             email,
             data,
+            amount1,
+            amount2,
+            enabled != null ? (enabled ? 1 : 0) : 0,
             spouseIndividualId,
         };
         return values;
@@ -107,6 +116,9 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         copy.setPhone(phone);
         copy.setEmail(email);
         copy.setData(data);
+        copy.setAmount1(amount1);
+        copy.setAmount2(amount2);
+        copy.setEnabled(enabled);
         copy.setSpouseIndividualId(spouseIndividualId);
         return copy;
     }
@@ -151,10 +163,25 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         } else {
             statement.bindNull(10);
         }
-        if (spouseIndividualId != null) {
-            statement.bindLong(11, spouseIndividualId);
+        if (amount1 != null) {
+            statement.bindDouble(11, amount1);
         } else {
             statement.bindNull(11);
+        }
+        if (amount2 != null) {
+            statement.bindDouble(12, amount2);
+        } else {
+            statement.bindNull(12);
+        }
+        if (enabled != null) {
+            statement.bindLong(13, enabled != null ? (enabled ? 1 : 0) : 0);
+        } else {
+            statement.bindNull(13);
+        }
+        if (spouseIndividualId != null) {
+            statement.bindLong(14, spouseIndividualId);
+        } else {
+            statement.bindNull(14);
         }
     }
 
@@ -198,12 +225,27 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         } else {
             statement.bindNull(10);
         }
-        if (spouseIndividualId != null) {
-            statement.bindLong(11, spouseIndividualId);
+        if (amount1 != null) {
+            statement.bindDouble(11, amount1);
         } else {
             statement.bindNull(11);
         }
-        statement.bindLong(12, id);
+        if (amount2 != null) {
+            statement.bindDouble(12, amount2);
+        } else {
+            statement.bindNull(12);
+        }
+        if (enabled != null) {
+            statement.bindLong(13, enabled != null ? (enabled ? 1 : 0) : 0);
+        } else {
+            statement.bindNull(13);
+        }
+        if (spouseIndividualId != null) {
+            statement.bindLong(14, spouseIndividualId);
+        } else {
+            statement.bindNull(14);
+        }
+        statement.bindLong(15, id);
     }
 
     public void setContent(DBToolsContentValues values) {
@@ -217,6 +259,9 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         phone = values.getAsString(IndividualConst.C_PHONE);
         email = values.getAsString(IndividualConst.C_EMAIL);
         data = values.getAsByteArray(IndividualConst.C_DATA);
+        amount1 = values.getAsFloat(IndividualConst.C_AMOUNT1);
+        amount2 = values.getAsDouble(IndividualConst.C_AMOUNT2);
+        enabled = values.getAsBoolean(IndividualConst.C_ENABLED);
         spouseIndividualId = values.getAsLong(IndividualConst.C_SPOUSE_INDIVIDUAL_ID);
     }
 
@@ -233,6 +278,9 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         phone = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE)) ? cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE)) : null;
         email = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_EMAIL)) ? cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_EMAIL)) : null;
         data = cursor.getBlob(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA));
+        amount1 = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1)) ? cursor.getFloat(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1)) : null;
+        amount2 = cursor.getDouble(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2));
+        enabled = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED)) ? cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED)) != 0 ? true : false : null;
         spouseIndividualId = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_SPOUSE_INDIVIDUAL_ID)) ? cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_SPOUSE_INDIVIDUAL_ID)) : null;
     }
 
@@ -360,6 +408,33 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
 
     public void setData(@javax.annotation.Nullable byte[] data) {
         this.data = data;
+    }
+
+    @javax.annotation.Nullable
+    public Float getAmount1() {
+        return amount1;
+    }
+
+    public void setAmount1(@javax.annotation.Nullable Float amount1) {
+        this.amount1 = amount1;
+    }
+
+    @javax.annotation.Nullable
+    public Double getAmount2() {
+        return amount2;
+    }
+
+    public void setAmount2(@javax.annotation.Nullable Double amount2) {
+        this.amount2 = amount2;
+    }
+
+    @javax.annotation.Nullable
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(@javax.annotation.Nullable Boolean enabled) {
+        this.enabled = enabled;
     }
 
     @javax.annotation.Nullable

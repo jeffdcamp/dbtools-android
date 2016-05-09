@@ -41,35 +41,24 @@ android {
 //    }
 }
 
-configurations {
-    optional
-    compile.extendsFrom optional
-}
-
 dependencies {
     compile 'org.dbtools:dbtools-query:3.0.0-SNAPSHOT'
     compile 'com.google.code.findbugs:jsr305:3.0.1'
 
     // optional
-    optional 'io.reactivex:rxjava:1.1.5'
-    optional "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    provided 'io.reactivex:rxjava:1.1.5'
+    provided "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    optional 'joda-time:joda-time:2.9.3'
-    optional 'org.threeten:threetenbp:1.3.1'
+    provided 'joda-time:joda-time:2.9.3'
+    provided 'org.threeten:threetenbp:1.3.1'
 
-    optional 'org.sqlite:sqlite-android-base:3.8.8.1-20150126'
-    optional 'net.sqlcipher:sqlcipher:3.1.0.20140823'
-    optional 'org.xerial:sqlite-jdbc:3.8.11.2'
-
-//    compile project(path: ':core')
+    provided 'org.sqlite:sqlite-android-base:3.8.8.1-20150126'
+    provided 'net.sqlcipher:sqlcipher:3.1.0.20140823'
+    provided 'org.xerial:sqlite-jdbc:3.8.11.2'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.0.52-beta'
 }
-
-
-def libraryGroupId = 'org.dbtools'
-def libraryArtifactId = 'dbtools-android'
 
 tasks.withType(Test) {
     testLogging {
