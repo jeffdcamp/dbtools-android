@@ -7,19 +7,19 @@ public final class DatabaseValueUtil {
     }
 
     public static <I> DatabaseValue getDatabaseValue(Class<I> type) {
-        if (type == Integer.class) {
+        if (type == Integer.class || type == int.class) {
             return new DatabaseInteger();
-        } else if (type == Long.class) {
+        } else if (type == Long.class || type == long.class) {
             return new DatabaseLong();
         } else if (type == String.class) {
             return new DatabaseString();
-        } else if (type == Boolean.class) {
+        } else if (type == Boolean.class || type == boolean.class) {
             return new DatabaseBoolean();
         } else if (type == Date.class) {
             return new DatabaseDate();
-        } else if (type == Float.class) {
+        } else if (type == Float.class || type == float.class) {
             return new DatabaseFloat();
-        } else if (type == Double.class) {
+        } else if (type == Double.class || type == double.class) {
             return new DatabaseDouble();
         } else if (type == byte[].class) {
             return new DatabaseBlob();
