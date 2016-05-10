@@ -1,12 +1,21 @@
 Change Log
 ==========
 
+  Version 7.0.0 *(2016-05)*
+----------------------------
+* Changed the project from Maven to Gradle
+* Changed Artifact from jar to aar
+* Full inserts and updates now use prepared statements
+* JDBCSqlite support for Unit tests support
+* Added DatabaseConfig to DatabaseManager to better support custom database configurations
+* Added sample projects (for Java and Kotlin)
+* Added copy() to Record classes
+
   Version 6.0.0 *(2016-04)*
 ----------------------------
 * Improved RxJava and queries with DatabaseManager to prevent back pressure
 * Replaced DBToolsEventBus with DatabaseTableChange listeners
 * Improved RxJava Published changed listener to only notify when of changes after endTransaction or when NOT in a transaction
-
 
   Version 5.0.3 *(2016-02)*
 ----------------------------

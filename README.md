@@ -13,40 +13,36 @@ Usage
 
 The following are some examples DBTools can be used:
 
-  * Use manager classes to perform CRUD operations on tables (2 options: With injection or without injection)
+  * Insert
 
-        // USING INJECTION (recommended) (when using injection frameworks such as Dagger, RoboGuice, etc)
-        @Inject
-        IndividualManager individualManager;  // simply "Inject" your manager (it has access to the database directly)
-
-        public void onSaveClicked() {
-            // save
-            individualManager.save(individual);
-        }
-
-        ... or ...
-
-        // NO INJECTION
-        IndividualManager individualManager = new IndividualManager(myDatabaseManager); // supply your DatabaseManager
-        
-        public void onSaveClicked() {
-            // save
-            individualManager.save(individual);
-        }
-
-  * Add data to the database
-
-        // create a new domain object
         Individual individual = new Individual();
         individual.setName("Jeff Campbell");
         individual.setPhone("801-555-1234");
-        individual.setIndividualType(IndividualType.HEAD); // enum table example
+        individual.setIndividualType(IndividualType.HEAD);
 
         individualManager.save(individual);
 
+  * Update
+
+        Individual individual = individualManager.findByRowId(1);
+        individual.setPhone("801-555-0000");
+        individualManager.save(individual);
+
+  * Delete
+
+        // Delete using record object
+        Individual individual = individualManager.findByRowId(1);
+        individualManager.delete(individual);
+        
+        // Delete using the primary key id      
+        individualManager.delete(1); 
+        
+        // Delete all individuals who has "555" in their phone number
+        individualManager.delete(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
+        
   * Transactions
 
-        // managers share transactions (use any manager to begin/end a transaction)
+        // Start transaction (all record managers share transactions)
         individualManager.beginTransaction();  
         boolean success = true;
 
@@ -56,47 +52,34 @@ The following are some examples DBTools can be used:
         individualManager.save(individual4);
         individualManager.save(individual5);
 
-        // if false, transaction is reverted
+        // End transaction.  (if success false, transaction is reverted)
         individualManager.endTransaction(success); 
 
-  * Update data to the database
+  DBTools Manager classes have many built-in methods that make working with tables even easier.  Here is a few examples:
 
-        Individual individual = individualManager.findByRowId(1);
-        individual.setPhone("801-555-0000");
-        individualManager.save(individual);
+  * Find records
 
-  * Delete data from the database
-
-        Individual individual = individualManager.findByRowId(1);
-        individualManager.delete(individual);
-        
-        individualManager.delete(1); // delete by primary key id
-        
-        // delete all individuals who has "555" in their phone number
-        individualManager.delete(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
-
-  DBTools Manager classes have a bunch of built-in methods that make working with tables even easier.  Here is a few examples:
-
-  * Get records
-
+        // Individual Record by primary key
         Individual individual = individualManager.findByRowId(1);
         
-        // find FIRST individual who has "555" in their phone number
+        // Find FIRST individual who has "555" in their phone number
         Individual individual = individualManager.findBySelection(IndividualConst.C_PHONE + " LIKE ?", new String[]{"555"}); 
 
-
+        // All Records
         List<Individual> allIndividuals = individualManager.findAll();
+        
+        // All Records, ordered by the "NAME" column
         List<Individual> allOrderedIndividuals = individualManager.findAllOrderBy(IndividualConst.C_NAME);
         
-        // find all those who have "555" in their phone number
+        // ALL Records who have "555" in their phone number
         List<Individual> specificIndividuals = individualManager.findAllBySelection(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
 
   * Using cursors
 
-        // find all, order by NAME column
+        // Find all, order by NAME column
         Cursor cursor = individualManager.findCursorBySelection(null, null, IndividualConst.C_NAME); 
         
-        // find cursor of those who have "555" in their phone number
+        // Find cursor of those who have "555" in their phone number
         Cursor cursor = individualManager.findCursorBySelection(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
         
   * Access data from Cursor
@@ -112,22 +95,24 @@ The following are some examples DBTools can be used:
 
   * Count number of items in the database
 
+        // Find count of ALL records in a table
         int count = individualManager.findCount();
-        // find count of those who have "555" in their phone number
+        
+        // Find count of ALL records who have "555" in their phone number
         int count = individualManager.findCountBySelection(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
 
   Support for ASync writes (guarantees single write per database)
 
-  * Sample save
+  * Sample async save
 
         Individual individual = individualManager.findByRowId(1);
         individual.setPhone("801-555-0000");
         individualManager.saveAsync(individual);
 
 
-  Table Change Listeners / Table Change Rx Observable.  This allow your app to be notified if the database changed.  Examples:
+  Table Change Listeners
 
-  * Add Listener / Subscribe
+  * Add Listener
         // Listener
         individualManager.addChangeTableListener(new DBToolsTableChangeListener() {
             @Override
@@ -135,15 +120,6 @@ The following are some examples DBTools can be used:
                 onTableChanged(event);
             }
         });
-
-        // RxJava Subscribe
-        individualManager.tableChanges().subscribe(event -> onTableChanged(event));
-
-  * Watch for any Insert/Update/Delete changes
-        public void onTableChanged(DatabaseTableChange event) {
-            Log.i(TAG, "Database changed on table");
-        }
-
 
 RxJava
 ======
@@ -171,17 +147,12 @@ RxJava
         individualManager.findAllRx()
               .subscribe(individual -> Log.i(TAG, "Individual: " + individual.getFirstName()));
 
-  Subscribe to table and/or row changes (following example will output 2 table changes and 2 row changes)
+  Subscribe to table changes (following example will output 2 table changes)
   
         public void changeNames() {
             // Subscribe to TABLE changes
             Subscription tableChangeSubscription = individualManager.tableChanges()
                     .subscribe(changeType -> handleTableChange(changeType));
-            
-            // Subscribe to ROW changes
-            Subscription rowChangeSubscription = individualManager.rowChanges()
-                    .subscribe(databaseRowChange -> handleRowChange(databaseRowChange));
-            
             
             // Make some changes
             Individual individual = individualManager.findAll().get(0);
@@ -197,16 +168,10 @@ RxJava
         
             // Unsubscribe
             tableChangeSubscription.unsubscribe();
-            rowChangeSubscription.unsubscribe();
         }
         
-        public void handleTableChange(DatabaseChangeType changeType) {
-            Log.e(TAG, "Individual Table Changed: [" + changeType + "]");
-        }
-    
-        public void handleRowChange(DatabaseRowChange change) {
-            Individual individual = individualManager.findByRowId(change.getRowId());
-            Log.e(TAG, "Individual Row Changed: NAME = " + individual.getFirstName());
+        public void handleTableChange(DatabaseTableChange change) {
+            Log.e(TAG, "Individual Table Changed: [" + change.hasChange() + "]");
         }
 
 
@@ -230,7 +195,6 @@ Setup
 
         dependencies {
             compile 'org.dbtools:dbtools-android:<latest dbtools-android version>'
-            compile 'org.dbtools:dbtools-query:<latest dbtools-query version>' // optional
         }
 
         dbtools {
@@ -239,6 +203,7 @@ Setup
             basePackageName 'org.company.project.domain'
             outputSrcDir 'src/main/java/org/company/project/domain'
 
+            // optional items
             injectionSupport true // support for @Inject (using JEE, Dagger, Guice, etc)
             jsr305Support true // support for @Notnull / @Nullable etc
             includeDatabaseNameInPackage true // place each set of domain objects into a package named after its database
@@ -287,8 +252,10 @@ Setup
 
   DBTools Generator will create the following files to manage all database connections and create/update database tables:
 
-       DatabaseManager.java (extends DatabaseBaseManager and is used for developer customizations.  Contains CONST names and versions of the databases and versions) (NEVER overwritten by generator)
+       DatabaseManager.java (extends DatabaseBaseManager and is used for developer customizations.  Contains CONST versions of the databases) (NEVER overwritten by generator)
        DatabaseBaseManager.java (contains boiler-plate code creating all tables and views for all databases defined in the schema.xml) (this file is ALWAYS overwritten by generator)
+       DatabaseManagerConst.java (contains constant values of the database names) (this file is ALWAYS overwritten by generator)
+       AppDatabaseConfig.java (DatabaseManager configuration) (NEVER overwritten by generator)
 
   DBTools Generator will create the following files for each table (example for the Individual table):
 
@@ -322,9 +289,7 @@ Proguard Rules
 
 Upgrade
 =======
-Instructions for migration from 2.x to 3.x+ (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-3.x.md)
-Instructions for migration from 2.x to 2.3+ (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-2.x-2.3.md)
-Instructions for migration from 1.x to 2.x  (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md)
+Migration guide (https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION.md)
 
 Other Projects
 ==============
@@ -348,5 +313,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-[migration]: https://github.com/jeffdcamp/dbtools-android/blob/master/MIGRATION-1.x-2.x.md
