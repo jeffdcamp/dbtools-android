@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-  Version 7.0.1 *(2016-05)*
+  Version 7.0.2 *(2016-05)*
 ---------------------------
 * Changed the project from Maven to Gradle
 * Changed Artifact from jar to aar

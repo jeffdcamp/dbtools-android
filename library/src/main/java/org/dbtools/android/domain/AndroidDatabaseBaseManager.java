@@ -603,7 +603,16 @@ public abstract class AndroidDatabaseBaseManager {
         createMetaTableIfNotExists(androidDatabase);
 
         String[] selectionArgs = new String[]{getViewVersionKey(androidDatabase)};
-        return AndroidBaseManager.findValueByRawQuery(androidDatabase.getDatabaseWrapper(), Integer.class, FIND_VERSION, selectionArgs, -1);
+        String textValue = AndroidBaseManager.findValueByRawQuery(androidDatabase.getDatabaseWrapper(), String.class, FIND_VERSION, selectionArgs, "-1");
+
+        int value = -1;
+        try {
+            value = Integer.parseInt(textValue);
+        } catch (Exception e) {
+            getLogger().e(TAG, "Cannot parse database view version", e);
+        }
+
+        return value;
     }
 
     public void shutdownAllManagerExecutorServices() {
