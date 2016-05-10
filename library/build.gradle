@@ -42,7 +42,7 @@ android {
 }
 
 dependencies {
-    compile 'org.dbtools:dbtools-query:3.0.0-SNAPSHOT'
+    compile 'org.dbtools:dbtools-query:3.0.0'
     compile 'com.google.code.findbugs:jsr305:3.0.1'
 
     // optional
