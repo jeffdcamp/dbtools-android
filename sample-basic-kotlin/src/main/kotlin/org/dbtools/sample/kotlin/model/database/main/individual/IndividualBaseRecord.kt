@@ -60,9 +60,9 @@ abstract class IndividualBaseRecord : AndroidBaseRecord() {
         values.put(IndividualConst.C_INDIVIDUAL_TYPE, individualType.ordinal.toLong())
         values.put(IndividualConst.C_FIRST_NAME, firstName)
         values.put(IndividualConst.C_LAST_NAME, lastName)
-        values.put(IndividualConst.C_SAMPLE_DATE_TIME, org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(sampleDateTime))
-        values.put(IndividualConst.C_BIRTH_DATE, org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(birthDate))
-        values.put(IndividualConst.C_LAST_MODIFIED, org.dbtools.android.domain.DBToolsDateFormatter.dateToLong(lastModified))
+        values.put(IndividualConst.C_SAMPLE_DATE_TIME, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime))
+        values.put(IndividualConst.C_BIRTH_DATE, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate))
+        values.put(IndividualConst.C_LAST_MODIFIED, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified))
         values.put(IndividualConst.C_NUMBER, (number as Int).toLong())
         values.put(IndividualConst.C_PHONE, phone)
         values.put(IndividualConst.C_EMAIL, email)
@@ -79,9 +79,9 @@ abstract class IndividualBaseRecord : AndroidBaseRecord() {
             individualType.ordinal.toLong(),
             firstName,
             lastName,
-            org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(sampleDateTime),
-            org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(birthDate),
-            org.dbtools.android.domain.DBToolsDateFormatter.dateToLong(lastModified),
+            org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime),
+            org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate),
+            org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified),
             (number as Int).toLong(),
             phone,
             email,
@@ -117,17 +117,17 @@ abstract class IndividualBaseRecord : AndroidBaseRecord() {
         statement.bindString(2, firstName)
         statement.bindString(3, lastName)
         if (sampleDateTime != null) {
-            statement.bindString(4, org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(sampleDateTime)!!)
+            statement.bindString(4, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime)!!)
         } else {
             statement.bindNull(4)
         }
         if (birthDate != null) {
-            statement.bindString(5, org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(birthDate)!!)
+            statement.bindString(5, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate)!!)
         } else {
             statement.bindNull(5)
         }
         if (lastModified != null) {
-            statement.bindLong(6, org.dbtools.android.domain.DBToolsDateFormatter.dateToLong(lastModified)!!)
+            statement.bindLong(6, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified)!!)
         } else {
             statement.bindNull(6)
         }
@@ -178,17 +178,17 @@ abstract class IndividualBaseRecord : AndroidBaseRecord() {
         statement.bindString(2, firstName)
         statement.bindString(3, lastName)
         if (sampleDateTime != null) {
-            statement.bindString(4, org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(sampleDateTime)!!)
+            statement.bindString(4, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime)!!)
         } else {
             statement.bindNull(4)
         }
         if (birthDate != null) {
-            statement.bindString(5, org.dbtools.android.domain.DBToolsDateFormatter.dateToDBString(birthDate)!!)
+            statement.bindString(5, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate)!!)
         } else {
             statement.bindNull(5)
         }
         if (lastModified != null) {
-            statement.bindLong(6, org.dbtools.android.domain.DBToolsDateFormatter.dateToLong(lastModified)!!)
+            statement.bindLong(6, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified)!!)
         } else {
             statement.bindNull(6)
         }
@@ -239,8 +239,8 @@ abstract class IndividualBaseRecord : AndroidBaseRecord() {
         individualType = IndividualType.values()[values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE)]
         firstName = values.getAsString(IndividualConst.C_FIRST_NAME)
         lastName = values.getAsString(IndividualConst.C_LAST_NAME)
-        sampleDateTime = org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_SAMPLE_DATE_TIME))
-        birthDate = org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_BIRTH_DATE))
+        sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_SAMPLE_DATE_TIME))
+        birthDate = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_BIRTH_DATE))
         lastModified = java.util.Date(values.getAsLong(IndividualConst.C_LAST_MODIFIED))
         number = values.getAsInteger(IndividualConst.C_NUMBER)
         phone = values.getAsString(IndividualConst.C_PHONE)
@@ -257,8 +257,8 @@ abstract class IndividualBaseRecord : AndroidBaseRecord() {
         individualType = IndividualType.values()[cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE))]
         firstName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_FIRST_NAME))
         lastName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_NAME))
-        sampleDateTime = org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_SAMPLE_DATE_TIME)))
-        birthDate = org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_BIRTH_DATE)))
+        sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_SAMPLE_DATE_TIME)))
+        birthDate = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_BIRTH_DATE)))
         lastModified = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_MODIFIED))) java.util.Date(cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_MODIFIED))) else null
         number = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_NUMBER))) cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_NUMBER)) else null
         phone = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE))) cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE)) else null

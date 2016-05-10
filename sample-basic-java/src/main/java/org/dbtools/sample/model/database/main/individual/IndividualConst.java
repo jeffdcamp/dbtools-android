@@ -127,11 +127,11 @@ public class IndividualConst {
     }
 
     public static java.util.Date getSampleDateTime(Cursor cursor) {
-        return org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_SAMPLE_DATE_TIME)));
+        return org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_SAMPLE_DATE_TIME)));
     }
 
     public static java.util.Date getBirthDate(Cursor cursor) {
-        return org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_BIRTH_DATE)));
+        return org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_BIRTH_DATE)));
     }
 
     public static java.util.Date getLastModified(Cursor cursor) {

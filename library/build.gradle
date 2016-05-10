@@ -108,23 +108,7 @@ task installLocal(type: Upload) {
             pom.version = VERSION_NAME
             pom.packaging = POM_PACKAGING
             uniqueVersion = false // don't put in a timestamp on the filename (other project will not be able to depend on it)
-
-            // mark optional dependencies
-            pom.withXml {
-                asNode().dependencies.dependency.findAll { xmlDep ->
-                    if (project.configurations.optional.allDependencies.findAll { dep ->
-                        xmlDep.groupId.text() == dep.group && xmlDep.artifactId.text() == dep.name
-                    }) {
-                        def xmlOptional = xmlDep.optional[0];
-                        if (!xmlOptional) {
-                            xmlOptional = xmlDep.appendNode('optional')
-                        }
-                        xmlOptional.value = 'true';
-                    }
-                }
-            }
         }
-
     }
 }
 

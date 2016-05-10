@@ -1,13 +1,21 @@
 package org.dbtools.android.domain;
 
+import org.dbtools.android.domain.date.DBToolsJodaFormatter;
+import org.dbtools.android.domain.date.DBToolsThreeTenFormatter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
-import org.threeten.bp.*;
+import org.threeten.bp.Instant;
+import org.threeten.bp.LocalDate;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.LocalTime;
+import org.threeten.bp.Month;
 
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class DBToolsDateFormatterTest {
 
@@ -47,15 +55,15 @@ public class DBToolsDateFormatterTest {
     @org.junit.Test
     public void testDateTimeLong() throws Exception {
         // Convert to long
-        long jsr301Long = DBToolsDateFormatter.localDateTimeToLong(jsr301DateTime);
-        long jodaLong = DBToolsDateFormatter.dateTimeToLong(jodaDateTime);
+        long jsr301Long = DBToolsThreeTenFormatter.localDateTimeToLong(jsr301DateTime);
+        long jodaLong = DBToolsJodaFormatter.dateTimeToLong(jodaDateTime);
 
         assertEquals(LONG_TIMESTAMP, jsr301Long);
         assertEquals(LONG_TIMESTAMP, jodaLong);
 
         // convert to object
-        LocalDateTime resultJsr310DateTime = DBToolsDateFormatter.longToLocalDateTime(LONG_TIMESTAMP);
-        DateTime resultJodaDateTime = DBToolsDateFormatter.longToDateTime(LONG_TIMESTAMP);
+        LocalDateTime resultJsr310DateTime = DBToolsThreeTenFormatter.longToLocalDateTime(LONG_TIMESTAMP);
+        DateTime resultJodaDateTime = DBToolsJodaFormatter.longToDateTime(LONG_TIMESTAMP);
 
         assertTrue(jsr301DateTime.isEqual(resultJsr310DateTime));
         assertTrue(jodaDateTime.isEqual(resultJodaDateTime));
@@ -64,8 +72,8 @@ public class DBToolsDateFormatterTest {
     @org.junit.Test
     public void testDateTimeLongUtc() throws Exception {
         // Convert to long UTC
-        long jsr301LongUtc = DBToolsDateFormatter.localDateTimeToLongUtc(jsr301DateTime);
-        long jodaLongUtc = DBToolsDateFormatter.dateTimeToLongUtc(jodaDateTimeUtc);
+        long jsr301LongUtc = DBToolsThreeTenFormatter.localDateTimeToLongUtc(jsr301DateTime);
+        long jodaLongUtc = DBToolsJodaFormatter.dateTimeToLongUtc(jodaDateTimeUtc);
 
         System.out.println("jsr: " + jsr301LongUtc);
         System.out.println("joda " + jodaLongUtc);
@@ -76,8 +84,8 @@ public class DBToolsDateFormatterTest {
         assertEquals(LONG_TIMESTAMP_UTC, jodaLongUtc);
 
         // convert to object UTC
-        LocalDateTime resultJsr310DateTime = DBToolsDateFormatter.longToLocalDateTimeUtc(LONG_TIMESTAMP_UTC);
-        DateTime resultJodaDateTime = DBToolsDateFormatter.longToDateTimeUtc(LONG_TIMESTAMP_UTC);
+        LocalDateTime resultJsr310DateTime = DBToolsThreeTenFormatter.longToLocalDateTimeUtc(LONG_TIMESTAMP_UTC);
+        DateTime resultJodaDateTime = DBToolsJodaFormatter.longToDateTimeUtc(LONG_TIMESTAMP_UTC);
 
         assertTrue(jsr301DateTime.isEqual(resultJsr310DateTime));
         assertTrue(jodaDateTimeUtc.isEqual(resultJodaDateTime));
@@ -88,15 +96,15 @@ public class DBToolsDateFormatterTest {
     @org.junit.Test
     public void testDateTimeString() throws Exception {
         // convert to text
-        String jsr310ResultText = DBToolsDateFormatter.localDateTimeToDBString(jsr301DateTime);
-        String jodaResultText = DBToolsDateFormatter.dateTimeToDBString(jodaDateTime);
+        String jsr310ResultText = DBToolsThreeTenFormatter.localDateTimeToDBString(jsr301DateTime);
+        String jodaResultText = DBToolsJodaFormatter.dateTimeToDBString(jodaDateTime);
 
         assertEquals(TEXT_TIMESTAMP, jsr310ResultText);
         assertEquals(TEXT_TIMESTAMP, jodaResultText);
 
         // convert back to object
-        LocalDateTime resultJsr310DateTime = DBToolsDateFormatter.dbStringToLocalDateTime(jsr310ResultText);
-        DateTime resultJodaDateTime = DBToolsDateFormatter.dbStringToDateTime(jodaResultText);
+        LocalDateTime resultJsr310DateTime = DBToolsThreeTenFormatter.dbStringToLocalDateTime(jsr310ResultText);
+        DateTime resultJodaDateTime = DBToolsJodaFormatter.dbStringToDateTime(jodaResultText);
 
         assertNotNull(resultJsr310DateTime);
         assertTrue(jsr301DateTime.isEqual(resultJsr310DateTime));
@@ -108,14 +116,14 @@ public class DBToolsDateFormatterTest {
     @org.junit.Test
     public void testDateText() throws Exception {
         // convert to text
-        String jsr310ResultText = DBToolsDateFormatter.localDateToDBString(jsr301Date);
+        String jsr310ResultText = DBToolsThreeTenFormatter.localDateToDBString(jsr301Date);
 //        String jodaResultText = DBToolsDateFormatter.dateTimeToDBString(jodaDateTime);
 
         assertEquals(TEXT_DATE, jsr310ResultText);
 //        assertEquals(TEXT_TIMESTAMP, jodaResultText);
 
         // convert back to object
-        LocalDate resultJsr310Date = DBToolsDateFormatter.dbStringToLocalDate(jsr310ResultText);
+        LocalDate resultJsr310Date = DBToolsThreeTenFormatter.dbStringToLocalDate(jsr310ResultText);
 //        DateTime resultJodaDateTime = DBToolsDateFormatter.dbStringToDateTime(jodaResultText);
 
         assertNotNull(resultJsr310Date);
@@ -128,14 +136,14 @@ public class DBToolsDateFormatterTest {
     @org.junit.Test
     public void testTimeText() throws Exception {
         // convert to text
-        String jsr310ResultText = DBToolsDateFormatter.localTimeToDBString(jsr301Time);
+        String jsr310ResultText = DBToolsThreeTenFormatter.localTimeToDBString(jsr301Time);
 //        String jodaResultText = DBToolsDateFormatter.dateTimeToDBString(jodaDateTime);
 
         assertEquals(TEXT_TIME, jsr310ResultText);
 //        assertEquals(TEXT_TIMESTAMP, jodaResultText);
 
         // convert back to object
-        LocalTime resultJsr310Time = DBToolsDateFormatter.dbStringToLocalTime(jsr310ResultText);
+        LocalTime resultJsr310Time = DBToolsThreeTenFormatter.dbStringToLocalTime(jsr310ResultText);
 //        DateTime resultJodaDateTime = DBToolsDateFormatter.dbStringToDateTime(jodaResultText);
 
         assertNotNull(resultJsr310Time);

@@ -124,11 +124,11 @@ object IndividualConst {
     }
 
     fun getSampleDateTime(cursor: Cursor): java.util.Date? {
-        return org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_SAMPLE_DATE_TIME)))
+        return org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_SAMPLE_DATE_TIME)))
     }
 
     fun getBirthDate(cursor: Cursor): java.util.Date? {
-        return org.dbtools.android.domain.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_BIRTH_DATE)))
+        return org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_BIRTH_DATE)))
     }
 
     fun getLastModified(cursor: Cursor): java.util.Date? {
