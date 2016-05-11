@@ -113,6 +113,7 @@ The following are some examples DBTools can be used:
   Table Change Listeners
 
   * Add Listener
+  
         // Listener
         individualManager.addChangeTableListener(new DBToolsTableChangeListener() {
             @Override
