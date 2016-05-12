@@ -7,7 +7,6 @@
             <field name="_id" jdbcDataType="BIGINT" increment="true" primaryKey="true" notNull="true"/>
             <field name="NAME" jdbcDataType="VARCHAR" size="255" notNull="true" unique="true"/>
         </table>
-
         <table name="INDIVIDUAL">
             <field name="_id" jdbcDataType="BIGINT" increment="true" primaryKey="true" notNull="true"/>
             <field name="INDIVIDUAL_TYPE_ID" jdbcDataType="INTEGER" varName="individualType" foreignKeyTable="INDIVIDUAL_TYPE" foreignKeyField="_id" foreignKeyType="ENUM" enumerationDefault="HEAD"/>
@@ -25,10 +24,12 @@
             <field name="ENABLED" jdbcDataType="BOOLEAN"/>
             <field name="SPOUSE_INDIVIDUAL_ID" jdbcDataType="BIGINT" notNull="false"/> <!-- test for nullable -->
         </table>
+
         <view name="INDIVIDUAL_VIEW">
             <field name="id" jdbcDataType="BIGINT"/>
             <field name="NAME" jdbcDataType="VARCHAR" size="255" notNull="true"/>
         </view>
+
         <query name="INDIVIDUAL_QUERY">
             <field name="id" jdbcDataType="BIGINT"/>
             <field name="NAME" jdbcDataType="VARCHAR" size="255" notNull="true"/>
