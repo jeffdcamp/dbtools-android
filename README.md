@@ -115,10 +115,10 @@ The following are some examples DBTools can be used:
   * Add Listener
   
         // Listener
-        individualManager.addChangeTableListener(new DBToolsTableChangeListener() {
+        individualManager.addTableChangeListener(new DBToolsTableChangeListener() {
             @Override
             public void onTableChange(DatabaseTableChange event) {
-                onTableChanged(event);
+                onTableChange(event);
             }
         });
 
