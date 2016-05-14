@@ -59,6 +59,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         return SQLiteDatabase.releaseMemory();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void beginTransactionWithListenerNonExclusive(SQLiteTransactionListener transactionListener) {
         database.beginTransactionWithListenerNonExclusive(transactionListener);
     }
@@ -85,6 +86,11 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         return SQLiteDatabase.openDatabase(path, factory, flags);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static SQLiteDatabase openDatabase(String path, SQLiteDatabase.CursorFactory factory, int flags, DatabaseErrorHandler errorHandler) {
+        return SQLiteDatabase.openDatabase(path, factory, flags, errorHandler);
+    }
+
     public long getPageSize() {
         return database.getPageSize();
     }
@@ -94,6 +100,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         return database.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public boolean enableWriteAheadLogging() {
         return database.enableWriteAheadLogging();
     }
@@ -172,6 +179,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         return database.rawQuery(sql, selectionArgs);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void beginTransactionNonExclusive() {
         database.beginTransactionNonExclusive();
     }
@@ -212,10 +220,12 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         return database.isDbLockedByOtherThreads();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public boolean isDatabaseIntegrityOk() {
         return database.isDatabaseIntegrityOk();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void setMaxSqlCacheSize(int cacheSize) {
         database.setMaxSqlCacheSize(cacheSize);
     }
@@ -270,6 +280,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         return SQLiteDatabase.findEditTable(tables);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static SQLiteDatabase openOrCreateDatabase(String path, SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
         return SQLiteDatabase.openOrCreateDatabase(path, factory, errorHandler);
     }
@@ -317,6 +328,7 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
         return database.query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public List<Pair<String, String>> getAttachedDbs() {
         return database.getAttachedDbs();
     }
@@ -338,10 +350,6 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
     @Deprecated
     public void releaseReferenceFromContainer() {
         database.releaseReferenceFromContainer();
-    }
-
-    public static SQLiteDatabase openDatabase(String path, SQLiteDatabase.CursorFactory factory, int flags, DatabaseErrorHandler errorHandler) {
-        return SQLiteDatabase.openDatabase(path, factory, flags, errorHandler);
     }
 
     @Deprecated

@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.0.1-2'
+    ext.kotlin_version = '1.0.2'
 
     repositories {
         mavenLocal()
@@ -15,12 +15,6 @@ buildscript {
     }
 }
 
-def majorVersion = 7
-def minorVersion = 0
-def patchVersion = 0
-def versionCode = majorVersion * 10000 + minorVersion * 100 + patchVersion
-def versionName = "$majorVersion.$minorVersion.$patchVersion"
-
 allprojects {
     repositories {
         mavenLocal()
@@ -35,6 +29,5 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion = "23.1.1"
-    libraryVersion = "$versionName"
+    supportLibVersion = "23.4.0"
 }
