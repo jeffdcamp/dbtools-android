@@ -1,21 +1,29 @@
 package org.dbtools.android.domain.database.statement;
 
-import javax.annotation.Nullable;
+import org.dbtools.android.domain.database.JdbcSqliteDatabaseWrapper;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+
+import javax.annotation.Nullable;
 
 public class JdbcSqliteStatementWrapper implements StatementWrapper {
-    private List<Object> bindArgs = new ArrayList<Object>();
-    private PreparedStatement statement;
-    private Connection conn;
     private String sql;
+    private Object[] bindArgs;
+    private PreparedStatement statement;
 
     public JdbcSqliteStatementWrapper(Connection conn, String sql) {
-        this.conn = conn;
-        this.sql = sql;
+        try {
+            this.sql = sql;
+            statement = conn.prepareStatement(sql);
+            int paramCount = statement.getParameterMetaData().getParameterCount();
+            bindArgs = new Object[paramCount];
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {
@@ -48,8 +56,7 @@ public class JdbcSqliteStatementWrapper implements StatementWrapper {
 
     public void execute() {
         try {
-            statement = conn.prepareStatement(sql);
-            bindArgs(statement, bindArgs.toArray());
+            bindArgs(statement, bindArgs);
             statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,8 +65,8 @@ public class JdbcSqliteStatementWrapper implements StatementWrapper {
 
     public int executeUpdateDelete() {
         try {
-            statement = conn.prepareStatement(sql);
-            bindArgs(statement, bindArgs.toArray());
+            JdbcSqliteDatabaseWrapper.logQuery("Statement Update Delete", sql, bindArgs);
+            bindArgs(statement, bindArgs);
             return statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -68,7 +75,19 @@ public class JdbcSqliteStatementWrapper implements StatementWrapper {
     }
 
     public long executeInsert() {
-        return executeUpdateDelete();
+        try {
+            JdbcSqliteDatabaseWrapper.logQuery("Statement Insert", sql, bindArgs);
+            bindArgs(statement, bindArgs);
+            statement.executeUpdate();
+
+            // get the last inserted id
+            ResultSet rs = statement.getGeneratedKeys();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public long simpleQueryForLong() {
@@ -92,13 +111,11 @@ public class JdbcSqliteStatementWrapper implements StatementWrapper {
     }
 
     public void clearBindings() {
-        if (bindArgs != null) {
-            bindArgs.clear();
-        }
+        Arrays.fill(bindArgs, null);
     }
 
     private void bind(int index, @Nullable Object value) {
-        bindArgs.add(index -1, value);
+        bindArgs[index - 1] = value;
     }
 
     public static void bindArgs(PreparedStatement statement, @Nullable Object[] bindArgs) throws SQLException {
@@ -124,5 +141,4 @@ public class JdbcSqliteStatementWrapper implements StatementWrapper {
             }
         }
     }
-
 }

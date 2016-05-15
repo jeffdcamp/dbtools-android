@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+  Version 7.0.3 *(2016-05)*
+---------------------------
+* Set aar min SDK to 10
+* Fixed issues with TableChangeListener
+* Added full SQL logging to JdbcSqliteDatabaseWrapper
+* Fixed issues with JdbcSqliteDatabaseWrapper
+
   Version 7.0.2 *(2016-05)*
 ---------------------------
 * Changed the project from Maven to Gradle

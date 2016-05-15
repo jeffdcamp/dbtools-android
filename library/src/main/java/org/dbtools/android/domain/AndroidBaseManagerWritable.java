@@ -3,13 +3,18 @@ package org.dbtools.android.domain;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
-import org.dbtools.android.domain.task.*;
+import org.dbtools.android.domain.task.DeleteTask;
+import org.dbtools.android.domain.task.DeleteWhereTask;
+import org.dbtools.android.domain.task.InsertTask;
+import org.dbtools.android.domain.task.UpdateTask;
+import org.dbtools.android.domain.task.UpdateWhereTask;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> extends AndroidBaseManager<T> implements AsyncManager<T> {
@@ -220,7 +225,13 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         // Statement
         StatementWrapper statement = getUpdateStatement(db);
         e.bindUpdateStatement(statement);
-        return statement.executeUpdateDelete();
+        int rowsAffectedCount = statement.executeUpdateDelete();
+
+        if (rowsAffectedCount > 0) {
+            notifyTableListeners(db, new DatabaseTableChange(false, true, false));
+        }
+
+        return rowsAffectedCount;
     }
 
     public int update(@Nonnull DBToolsContentValues values, long rowId) {
@@ -402,7 +413,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
                 transactionInsertOccurred.set(true);
             } else if (changeType.isUpdate()) {
                 transactionUpdateOccurred.set(true);
-            } else if (changeType.isInsert()) {
+            } else if (changeType.isDelete()) {
                 transactionDeleteOccurred.set(true);
             }
         }

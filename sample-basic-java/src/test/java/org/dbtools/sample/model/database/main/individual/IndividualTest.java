@@ -1,8 +1,8 @@
 package org.dbtools.sample.model.database.main.individual;
 
 import org.dbtools.android.domain.config.TestDatabaseConfig;
-import org.dbtools.sample.TestMainDatabaseConfig;
 import org.dbtools.sample.model.database.DatabaseManager;
+import org.dbtools.sample.model.database.TestMainDatabaseConfig;
 import org.dbtools.sample.model.database.main.MainDatabaseManagers;
 import org.junit.Test;
 

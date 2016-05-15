@@ -1,7 +1,7 @@
 package org.dbtools.sample.kotlin.model.database.main.individual
 
-import org.dbtools.sample.kotlin.TestMainDatabaseConfig
 import org.dbtools.sample.kotlin.model.database.DatabaseManager
+import org.dbtools.sample.kotlin.model.database.TestMainDatabaseConfig
 import org.dbtools.sample.kotlin.model.database.main.MainDatabaseManagers
 import org.junit.Assert.assertEquals
 import org.junit.Test

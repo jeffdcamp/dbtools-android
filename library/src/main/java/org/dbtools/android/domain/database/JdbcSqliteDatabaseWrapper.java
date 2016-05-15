@@ -15,12 +15,14 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.annotation.Nullable;
 
 public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, JdbcDBToolsContentValues> {
 
     private Connection conn;
+    private static boolean enableLogging = false;
 
     public JdbcSqliteDatabaseWrapper() {
         this("jdbc:sqlite::memory:");
@@ -129,11 +131,19 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
             }
             sql.append(')');
 
-            PreparedStatement statement = conn.prepareStatement(sql.toString());
+            String insertSql = sql.toString();
+            logQuery("Insert", insertSql, bindArgs);
+
+            PreparedStatement statement = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
             JdbcSqliteStatementWrapper.bindArgs(statement, bindArgs);
 
             try {
-                return statement.executeUpdate();
+                statement.executeUpdate();
+
+                // get the last inserted id
+                ResultSet rs = statement.getGeneratedKeys();
+                rs.next();
+                return rs.getInt(1);
             } finally {
                 statement.close();
             }
@@ -177,6 +187,9 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
                 sql.append(where);
             }
 
+            String updateSql = sql.toString();
+            logQuery("Update", updateSql, bindArgs);
+
             PreparedStatement statement = conn.prepareStatement(sql.toString());
             JdbcSqliteStatementWrapper.bindArgs(statement, bindArgs);
 
@@ -198,9 +211,9 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
             String sql = "DELETE FROM " + table;
             if (where != null && !where.isEmpty()) {
                 sql += " WHERE " + where;
-            } else {
-                sql += whereArgs;
             }
+
+            logQuery("Delete", sql, whereArgs);
 
             PreparedStatement statement = conn.prepareStatement(sql);
             JdbcSqliteStatementWrapper.bindArgs(statement, whereArgs);
@@ -230,6 +243,8 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     @Override
     public void execSQL(String sql, @Nullable  Object[] bindArgs) {
         try {
+            logQuery("execSQL", sql, bindArgs);
+
             PreparedStatement statement = conn.prepareStatement(sql);
             JdbcSqliteStatementWrapper.bindArgs(statement, bindArgs);
 
@@ -262,13 +277,16 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
                 .orderBy(orderBy);
 
         try {
-//            PreparedStatement statement = conn.prepareStatement(builder.buildQuery(), ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
-            PreparedStatement statement = conn.prepareStatement(builder.buildQuery());
+            String sql = builder.buildQuery();
+            logQuery("Query", sql, selectionArgs);
+
+//            PreparedStatement statement = conn.prepareStatement(builder.buildQuery(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            PreparedStatement statement = conn.prepareStatement(sql);
             JdbcSqliteStatementWrapper.bindArgs(statement, selectionArgs);
 
             ResultSet resultSet = statement.executeQuery();
             return new JdbcMemoryCursor(resultSet);
-//            return new JdbcCursor(resultSet);
+//            return new JdbcCursor(resultSet); // not supported because cursors need to go bidirectional on the ResultSet
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -281,6 +299,8 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     @Nullable
     public Cursor rawQuery(String rawQuery, @Nullable String[] selectionArgs) {
         try {
+            logQuery("Raw Query", rawQuery, selectionArgs);
+
             PreparedStatement statement = conn.prepareStatement(rawQuery);
             JdbcSqliteStatementWrapper.bindArgs(statement, selectionArgs);
 
@@ -297,7 +317,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     @Override
     public boolean inTransaction() {
         try {
-            return conn.getAutoCommit();
+            return !conn.getAutoCommit();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -341,5 +361,35 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean isEnableLogging() {
+        return enableLogging;
+    }
+
+    public static void setEnableLogging(boolean enableLogging) {
+        JdbcSqliteDatabaseWrapper.enableLogging = enableLogging;
+    }
+
+    public static void logQuery(String name, String sql, Object[] args) {
+        if (enableLogging) {
+            System.out.println(name + " sql: [" + sql + "] args: [" + getTextLogArgs(args) + "]");
+        }
+    }
+
+    public static String getTextLogArgs(@Nullable Object[] args) {
+        if (args == null) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (Object arg : args) {
+            if (builder.length() > 0) {
+                builder.append(", ");
+            }
+            builder.append(arg);
+        }
+
+        return builder.toString();
     }
 }
