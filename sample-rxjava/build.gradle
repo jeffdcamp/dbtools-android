@@ -1,0 +1,45 @@
+apply plugin: 'com.android.application'
+apply plugin: 'dbtools'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        applicationId "org.dbtools.sample"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile project(path: ':library')
+
+    // Android
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+
+    // RxJava
+    compile 'io.reactivex:rxandroid:1.2.0'
+    compile 'io.reactivex:rxjava:1.1.5'
+
+    // Test
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.xerial:sqlite-jdbc:3.8.11.2'
+}
+
+dbtools {
+    type 'ANDROID'
+
+    basePackageName 'org.dbtools.sample.model.database'
+    outputSrcDir 'src/main/java/org/dbtools/sample/model/database'
+
+    rxJavaSupport true
+}

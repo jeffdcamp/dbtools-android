@@ -15,22 +15,23 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 public class TestDatabaseConfig implements DatabaseConfig {
-    public static final String TEST_DB_DIR = "target/test-db/";
     private String databaseName;
     private File databasePath;
     private List<AndroidDatabase> androidDatabaseList;
+    private BuildEnv buildEnv;
 
-    public TestDatabaseConfig(@Nonnull String databaseName, @Nonnull List<AndroidDatabase> androidDatabaseList) {
+    public TestDatabaseConfig(@Nonnull String databaseName, @Nonnull List<AndroidDatabase> androidDatabaseList, BuildEnv buildEnv) {
         this.databaseName = databaseName;
         this.androidDatabaseList = androidDatabaseList;
-        databasePath = new File(TEST_DB_DIR, databaseName);
+        databasePath = new File(buildEnv.getTestDbDir(), databaseName);
+        this.buildEnv = buildEnv;
     }
 
     @Override
     public DatabaseWrapper createNewDatabaseWrapper(AndroidDatabase androidDatabase) {
-        File testDir = new File(TEST_DB_DIR);
+        File testDir = new File(buildEnv.getTestDbDir());
         testDir.mkdirs();
-        return new JdbcSqliteDatabaseWrapper("jdbc:sqlite:" + TEST_DB_DIR + databaseName);
+        return new JdbcSqliteDatabaseWrapper("jdbc:sqlite:" + buildEnv.getTestDbDir() + databaseName);
     }
 
     @Override
@@ -52,5 +53,9 @@ public class TestDatabaseConfig implements DatabaseConfig {
 
     public void deleteDatabaseFile() {
         databasePath.delete();
+    }
+
+    public BuildEnv getBuildEnv() {
+        return buildEnv;
     }
 }

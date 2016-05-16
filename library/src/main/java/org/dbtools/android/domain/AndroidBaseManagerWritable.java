@@ -172,9 +172,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
 
                 e.setPrimaryKeyId(rowId);
 
-                if (tableChangeListeners.size() > 0) {
-                    notifyTableListeners(db, new DatabaseTableChange(true, false, false));
-                }
+                notifyTableListeners(db, new DatabaseTableChange(true, false, false));
 
                 success = true;
             } catch (Exception ex) {
