@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+  Version 7.0.4 *(2016-05)*
+---------------------------
+* Fixes for RxJava
+* Added sample-rxjava
+
   Version 7.0.3 *(2016-05)*
 ---------------------------
 * Set aar min SDK to 10
