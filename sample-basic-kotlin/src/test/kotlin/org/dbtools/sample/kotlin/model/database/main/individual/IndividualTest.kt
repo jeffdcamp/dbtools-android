@@ -13,7 +13,7 @@ class IndividualTest {
     fun testIndividual() {
         // SETUP
         val databaseConfig = TestMainDatabaseConfig("kotlin-test-individual.db")
-        databaseConfig.deleteDatabaseFile()
+        databaseConfig.deleteAllDatabaseFiles()
         val databaseManager = DatabaseManager(databaseConfig)
         MainDatabaseManagers.init(databaseManager)
         val individualManager = MainDatabaseManagers.individualManager ?: throw IllegalStateException("IndividualManager null")

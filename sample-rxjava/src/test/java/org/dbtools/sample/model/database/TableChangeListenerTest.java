@@ -27,7 +27,7 @@ public class TableChangeListenerTest {
     @Before
     public void setUp() throws Exception {
         TestDatabaseConfig databaseConfig = new TestMainDatabaseConfig("rxjava-test-tablechange.db");
-        databaseConfig.deleteDatabaseFile();
+        databaseConfig.deleteAllDatabaseFiles();
         DatabaseManager databaseManager = new DatabaseManager(databaseConfig);
         MainDatabaseManagers.init(databaseManager);
         JdbcSqliteDatabaseWrapper.setEnableLogging(true); // show all statements

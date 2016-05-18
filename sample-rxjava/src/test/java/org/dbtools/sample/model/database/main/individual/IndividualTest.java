@@ -14,7 +14,7 @@ public class IndividualTest {
     @Test
     public void testIndividual() throws Exception {
         TestDatabaseConfig databaseConfig = new TestMainDatabaseConfig("java-test-individual.db");
-        databaseConfig.deleteDatabaseFile();
+        databaseConfig.deleteAllDatabaseFiles();
         DatabaseManager databaseManager = new DatabaseManager(databaseConfig);
         MainDatabaseManagers.init(databaseManager);
 

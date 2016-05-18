@@ -10,28 +10,33 @@ import org.dbtools.android.domain.log.DBToolsJavaLogger;
 import org.dbtools.android.domain.log.DBToolsLogger;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 
 public class TestDatabaseConfig implements DatabaseConfig {
-    private String databaseName;
-    private File databasePath;
     private List<AndroidDatabase> androidDatabaseList;
-    private BuildEnv buildEnv;
 
-    public TestDatabaseConfig(@Nonnull String databaseName, @Nonnull List<AndroidDatabase> androidDatabaseList, BuildEnv buildEnv) {
-        this.databaseName = databaseName;
+    public TestDatabaseConfig(String databaseName, BuildEnv buildEnv, String databaseFilename, int tableVersion, int viewVersion) {
+        this(databaseName, buildEnv.getTestDbDir() + databaseFilename, tableVersion, viewVersion);
+    }
+
+    public TestDatabaseConfig(String databaseName, String databasePath, int tableVersion, int viewVersion) {
+        androidDatabaseList = new ArrayList<>();
+        androidDatabaseList.add(new AndroidDatabase(databaseName, databasePath, tableVersion, viewVersion));
+    }
+
+    public TestDatabaseConfig(@Nonnull List<AndroidDatabase> androidDatabaseList) {
         this.androidDatabaseList = androidDatabaseList;
-        databasePath = new File(buildEnv.getTestDbDir(), databaseName);
-        this.buildEnv = buildEnv;
     }
 
     @Override
     public DatabaseWrapper createNewDatabaseWrapper(AndroidDatabase androidDatabase) {
-        File testDir = new File(buildEnv.getTestDbDir());
-        testDir.mkdirs();
-        return new JdbcSqliteDatabaseWrapper("jdbc:sqlite:" + buildEnv.getTestDbDir() + databaseName);
+        File testDir = new File(androidDatabase.getPath());
+        testDir.getParentFile().mkdirs();
+
+        return new JdbcSqliteDatabaseWrapper("jdbc:sqlite:" + androidDatabase.getPath());
     }
 
     @Override
@@ -51,11 +56,26 @@ public class TestDatabaseConfig implements DatabaseConfig {
         return new JdbcDBToolsContentValues();
     }
 
-    public void deleteDatabaseFile() {
-        databasePath.delete();
+    /**
+     * Delete single database file, based on database name
+     * @param databaseName name of database to delete
+     */
+    public void deleteDatabaseFile(String databaseName) {
+        for (AndroidDatabase androidDatabase : androidDatabaseList) {
+            if (databaseName.equals(androidDatabase.getName())) {
+                File file = new File(androidDatabase.getPath());
+                file.delete();
+            }
+        }
     }
 
-    public BuildEnv getBuildEnv() {
-        return buildEnv;
+    /**
+     * Delete all database files
+     */
+    public void deleteAllDatabaseFiles() {
+        for (AndroidDatabase androidDatabase : androidDatabaseList) {
+            File file = new File(androidDatabase.getPath());
+            file.delete();
+        }
     }
 }

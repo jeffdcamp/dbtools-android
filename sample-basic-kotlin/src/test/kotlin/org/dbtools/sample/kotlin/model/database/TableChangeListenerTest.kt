@@ -23,7 +23,7 @@ class TableChangeListenerTest {
     @Throws(Exception::class)
     fun setUp() {
         val databaseConfig = TestMainDatabaseConfig("kotlin-test-tablechange.db")
-        databaseConfig.deleteDatabaseFile()
+        databaseConfig.deleteAllDatabaseFiles()
         val databaseManager = DatabaseManager(databaseConfig)
         MainDatabaseManagers.init(databaseManager)
         JdbcSqliteDatabaseWrapper.setEnableLogging(true) // show all statements
