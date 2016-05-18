@@ -13,12 +13,15 @@ import org.sqlite.database.sqlite.SQLiteTransactionListener;
 import org.sqlite.os.CancellationSignal;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, AndroidDBToolsContentValues> {
     private SQLiteDatabase database;
+    private Map<String, StatementWrapper> insertStatementMap = new HashMap<>();
+    private Map<String, StatementWrapper> updateStatementMap = new HashMap<>();
 
     private static boolean libraryLoaded = false;
 
@@ -81,6 +84,19 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, An
     @Override
     public void close() {
         database.close();
+        // cleanup statements
+        DatabaseWrapperUtil.closeStatements(insertStatementMap);
+        DatabaseWrapperUtil.closeStatements(updateStatementMap);
+    }
+
+    @Override
+    public StatementWrapper getInsertStatement(String tableName, String sql) {
+        return DatabaseWrapperUtil.createStatement(this, tableName, sql, insertStatementMap);
+    }
+
+    @Override
+    public StatementWrapper getUpdateStatement(String tableName, String sql) {
+        return DatabaseWrapperUtil.createStatement(this, tableName, sql, updateStatementMap);
     }
 
     public static int releaseMemory() {

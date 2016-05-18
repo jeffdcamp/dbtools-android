@@ -50,4 +50,7 @@ public interface DatabaseWrapper<T, U extends DBToolsContentValues> {
     void setTransactionSuccessful();
 
     void close();
+
+    StatementWrapper getInsertStatement(String tableName, String sql);
+    StatementWrapper getUpdateStatement(String tableName, String sql);
 }

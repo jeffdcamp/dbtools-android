@@ -16,12 +16,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, JdbcDBToolsContentValues> {
 
     private Connection conn;
+    private Map<String, StatementWrapper> insertStatementMap = new HashMap<>();
+    private Map<String, StatementWrapper> updateStatementMap = new HashMap<>();
     private static boolean enableLogging = false;
 
     public JdbcSqliteDatabaseWrapper() {
@@ -361,6 +365,20 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // cleanup statements
+        DatabaseWrapperUtil.closeStatements(insertStatementMap);
+        DatabaseWrapperUtil.closeStatements(updateStatementMap);
+    }
+
+    @Override
+    public StatementWrapper getInsertStatement(String tableName, String sql) {
+        return DatabaseWrapperUtil.createStatement(this, tableName, sql, insertStatementMap);
+    }
+
+    @Override
+    public StatementWrapper getUpdateStatement(String tableName, String sql) {
+        return DatabaseWrapperUtil.createStatement(this, tableName, sql, updateStatementMap);
     }
 
     public static boolean isEnableLogging() {

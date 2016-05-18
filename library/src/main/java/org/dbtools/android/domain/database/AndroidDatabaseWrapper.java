@@ -15,12 +15,16 @@ import org.dbtools.android.domain.database.statement.AndroidStatementWrapper;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, AndroidDBToolsContentValues> {
     private SQLiteDatabase database;
+
+    private Map<String, StatementWrapper> insertStatementMap = new HashMap<>();
+    private Map<String, StatementWrapper> updateStatementMap = new HashMap<>();
 
     public AndroidDatabaseWrapper(String path) {
         database = SQLiteDatabase.openOrCreateDatabase(path, null);
@@ -53,6 +57,20 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
     @Override
     public void close() {
         database.close();
+
+        // cleanup statements
+        DatabaseWrapperUtil.closeStatements(insertStatementMap);
+        DatabaseWrapperUtil.closeStatements(updateStatementMap);
+    }
+
+    @Override
+    public StatementWrapper getInsertStatement(String tableName, String sql) {
+        return DatabaseWrapperUtil.createStatement(this, tableName, sql, insertStatementMap);
+    }
+
+    @Override
+    public StatementWrapper getUpdateStatement(String tableName, String sql) {
+        return DatabaseWrapperUtil.createStatement(this, tableName, sql, updateStatementMap);
     }
 
     public static int releaseMemory() {
