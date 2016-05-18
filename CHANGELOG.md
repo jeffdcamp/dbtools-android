@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+  Version 7.0.5 *(2016-05)*
+---------------------------
+* Improved handling of Insert and Update statements when working with multiple databases and swapping databases
+* Added multiple database support to TestDatabaseConfig
+
   Version 7.0.4 *(2016-05)*
 ---------------------------
 * Fixes for RxJava
