@@ -180,7 +180,7 @@ public class JdbcMemoryCursorTest {
         emptyCursor.moveToFirst();
         singleCursor.moveToFirst();
         mainCursor.moveToFirst();
-        assertFalse("EmptyCursor", emptyCursor.isBeforeFirst()); // Undefined behavior matching AbstractCursor
+        assertTrue("EmptyCursor", emptyCursor.isBeforeFirst()); // Undefined behavior matching AbstractCursor
         assertFalse("SingleCursor", singleCursor.isBeforeFirst());
         assertFalse("MainCursor", mainCursor.isBeforeFirst());
 
@@ -216,7 +216,7 @@ public class JdbcMemoryCursorTest {
         emptyCursor.moveToLast();
         singleCursor.moveToLast();
         mainCursor.moveToLast();
-        assertFalse("EmptyCursor", emptyCursor.isAfterLast()); // Undefined behavior matching AbstractCursor
+        assertTrue("EmptyCursor", emptyCursor.isAfterLast()); // Undefined behavior matching AbstractCursor
         assertFalse("SingleCursor", singleCursor.isAfterLast());
         assertFalse("MainCursor", mainCursor.isAfterLast());
 

@@ -123,12 +123,18 @@ public class JdbcMemoryCursor implements Cursor {
 
     @Override
     public boolean isBeforeFirst() {
-        return currentPosition < 0;
+        if (getCount() == 0) {
+            return true;
+        }
+        return currentPosition == -1;
     }
 
     @Override
     public boolean isAfterLast() {
-        return currentPosition >= getCount();
+        if (getCount() == 0) {
+            return true;
+        }
+        return currentPosition == getCount();
     }
 
     @Override
