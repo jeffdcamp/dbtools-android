@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class JdbcMemoryCursor implements Cursor {
-    private int currentPosition = 0;
+    private int currentPosition = -1;
     private List<List<Object>> data = new ArrayList<List<Object>>();
     private int columnCount;
     private String[] columnNames;
@@ -35,10 +35,16 @@ public class JdbcMemoryCursor implements Cursor {
         }
     }
 
+    public JdbcMemoryCursor(@Nonnull String[] columnNames, List<List<Object>> data) {
+        this.columnNames = columnNames;
+        this.columnCount = columnNames.length;
+        this.data = data;
+    }
+
     private void readMetaData(@Nonnull ResultSet resultSet) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         columnCount = metaData.getColumnCount();
-        columnNames = new String[metaData.getColumnCount()];
+        columnNames = new String[columnCount];
 
         for (int i = 0; i < columnCount; i++) {
             int sqlIndex = i + 1;
@@ -69,18 +75,20 @@ public class JdbcMemoryCursor implements Cursor {
 
     @Override
     public boolean move(int offset) {
-        currentPosition += offset;
-        return true;
+        return moveToPosition(currentPosition + offset);
     }
 
     @Override
     public boolean moveToPosition(int position) {
-        if (position >= 0 && position < getCount()) {
-            currentPosition = position;
-            return true;
+        int count = getCount();
+        if (position < 0) {
+            currentPosition = -1;
+        } else if (position >= count) {
+            currentPosition = count;
         } else {
-            return false;
+            currentPosition = position;
         }
+        return currentPosition >= 0 && currentPosition < count;
     }
 
     @Override
@@ -105,22 +113,28 @@ public class JdbcMemoryCursor implements Cursor {
 
     @Override
     public boolean isFirst() {
-        return currentPosition == 0;
+        return currentPosition == 0 && currentPosition < getCount();
     }
 
     @Override
     public boolean isLast() {
-        return currentPosition == (getCount() - 1);
+        return currentPosition >= 0 && currentPosition == (getCount() - 1);
     }
 
     @Override
     public boolean isBeforeFirst() {
-        return currentPosition < 0;
+        if (getCount() == 0) {
+            return true;
+        }
+        return currentPosition == -1;
     }
 
     @Override
     public boolean isAfterLast() {
-        return currentPosition > getCount();
+        if (getCount() == 0) {
+            return true;
+        }
+        return currentPosition == getCount();
     }
 
     @Override
