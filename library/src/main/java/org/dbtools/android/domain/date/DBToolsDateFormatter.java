@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.annotation.Nullable;
 
 public class DBToolsDateFormatter {
+    // supplying built string ISO format
     public static final String DB_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
     public static final String DB_DATE_FORMAT = "yyyy-MM-dd";
     public static final String DB_TIME_FORMAT = "HH:mm:ss";

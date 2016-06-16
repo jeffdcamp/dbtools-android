@@ -545,6 +545,20 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      *
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param column        Column which contains value
+     * @param rowId         Primary key value (where clause)
+     * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
+     * @return query results value or defaultValue if no data was returned
+     */
+    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, long rowId, I defaultValue) {
+        return findValueBySelection(getDatabaseName(), valueType, column, getPrimaryKey() + " = " + rowId, null, defaultValue);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+     *
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
      * @param selection     Query selection
      * @param selectionArgs Query parameters
      * @param defaultValue  Value returned if nothing is found
