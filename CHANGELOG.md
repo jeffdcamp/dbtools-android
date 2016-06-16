@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+  Version 7.0.6 *(2016-06)*
+---------------------------
+* Added new findValueBySelection() that takes a rowId
+* Added closeAllAndReset() and closeAll() to DatabaseManager
+* Fixes for JdbcMemoryCursor
+
   Version 7.0.5 *(2016-05)*
 ---------------------------
 * Improved handling of Insert and Update statements when working with multiple databases and swapping databases
