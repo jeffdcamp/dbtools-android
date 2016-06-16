@@ -205,7 +205,7 @@ public abstract class AndroidDatabaseBaseManager {
     /**
      * Close all databases that were added
      */
-    private void closeAll() {
+    public void closeAll() {
         for (AndroidDatabase androidDatabase : getDatabaseMap().values()) {
             androidDatabase.close();
         }
@@ -214,7 +214,7 @@ public abstract class AndroidDatabaseBaseManager {
     /**
      * Close all databases that were added, then remove any references to any database that were added
      */
-    private void closeAllAndReset() {
+    public void closeAllAndReset() {
         closeAll();
         reset();
     }
