@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+  Version 7.0.8 *(2016-06)*
+---------------------------
+* Fixed dbtools-gen issues with Kotlin and Date type
+
   Version 7.0.7 *(2016-06)*
 ---------------------------
 * Added new findValueBySelection() that takes a rowId
