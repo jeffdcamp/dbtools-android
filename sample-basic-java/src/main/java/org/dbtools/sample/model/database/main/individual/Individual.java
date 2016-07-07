@@ -15,6 +15,10 @@ import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 public class Individual extends IndividualBaseRecord {
 
 
+    public Individual(Individual record) {
+        super(record);
+    }
+
     public Individual(Cursor cursor) {
         setContent(cursor);
     }

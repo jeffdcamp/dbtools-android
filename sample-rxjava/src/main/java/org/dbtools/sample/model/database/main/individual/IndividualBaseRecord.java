@@ -36,6 +36,23 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     private Boolean enabled = false;
     private Long spouseIndividualId = null;
 
+    public IndividualBaseRecord(Individual record) {
+        this.individualType = record.getIndividualType();
+        this.firstName = record.getFirstName();
+        this.lastName = record.getLastName();
+        this.sampleDateTime = record.getSampleDateTime();
+        this.birthDate = record.getBirthDate();
+        this.lastModified = record.getLastModified();
+        this.number = record.getNumber();
+        this.phone = record.getPhone();
+        this.email = record.getEmail();
+        this.data = record.getData();
+        this.amount1 = record.getAmount1();
+        this.amount2 = record.getAmount2();
+        this.enabled = record.isEnabled();
+        this.spouseIndividualId = record.getSpouseIndividualId();
+    }
+
     public IndividualBaseRecord() {
     }
 

@@ -30,11 +30,11 @@ object IndividualViewConst {
         FULL_C_ID,
         FULL_C_NAME)
 
-    fun getId(cursor: Cursor): Long? {
+    fun getId(cursor: Cursor) : Long? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_ID))) cursor.getLong(cursor.getColumnIndexOrThrow(C_ID)) else null
     }
 
-    fun getName(cursor: Cursor): String {
+    fun getName(cursor: Cursor) : String {
         return cursor.getString(cursor.getColumnIndexOrThrow(C_NAME))
     }
 

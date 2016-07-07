@@ -28,6 +28,10 @@ class IndividualView : IndividualViewBaseRecord {
     constructor() {
     }
 
+    constructor(record: IndividualView) : super(record) {
+    }
+
+
     constructor(cursor: Cursor) {
         setContent(cursor)
     }

@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+  Version 7.0.9 *(2016-07)*
+---------------------------
+* Added copy constructor to XXXBaseRecord
+
   Version 7.0.8 *(2016-06)*
 ---------------------------
 * Fixed dbtools-gen issues with Kotlin and Date type

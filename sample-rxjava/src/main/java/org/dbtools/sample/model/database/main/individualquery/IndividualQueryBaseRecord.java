@@ -22,6 +22,11 @@ public abstract class IndividualQueryBaseRecord extends AndroidBaseRecord {
     private Long id = null;
     private String name = "";
 
+    public IndividualQueryBaseRecord(IndividualQuery record) {
+        this.id = record.getId();
+        this.name = record.getName();
+    }
+
     public IndividualQueryBaseRecord() {
     }
 

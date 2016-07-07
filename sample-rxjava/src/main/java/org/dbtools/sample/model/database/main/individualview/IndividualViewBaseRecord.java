@@ -22,6 +22,11 @@ public abstract class IndividualViewBaseRecord extends AndroidBaseRecord {
     private Long id = null;
     private String name = "";
 
+    public IndividualViewBaseRecord(IndividualView record) {
+        this.id = record.getId();
+        this.name = record.getName();
+    }
+
     public IndividualViewBaseRecord() {
     }
 

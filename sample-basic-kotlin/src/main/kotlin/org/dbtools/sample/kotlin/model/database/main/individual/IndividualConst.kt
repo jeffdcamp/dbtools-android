@@ -107,63 +107,63 @@ object IndividualConst {
         FULL_C_ENABLED,
         FULL_C_SPOUSE_INDIVIDUAL_ID)
 
-    fun getId(cursor: Cursor): Long {
+    fun getId(cursor: Cursor) : Long {
         return cursor.getLong(cursor.getColumnIndexOrThrow(C_ID))
     }
 
-    fun getIndividualType(cursor: Cursor): IndividualType {
+    fun getIndividualType(cursor: Cursor) : IndividualType {
         return IndividualType.values()[cursor.getInt(cursor.getColumnIndexOrThrow(C_INDIVIDUAL_TYPE))]
     }
 
-    fun getFirstName(cursor: Cursor): String {
+    fun getFirstName(cursor: Cursor) : String {
         return cursor.getString(cursor.getColumnIndexOrThrow(C_FIRST_NAME))
     }
 
-    fun getLastName(cursor: Cursor): String {
+    fun getLastName(cursor: Cursor) : String {
         return cursor.getString(cursor.getColumnIndexOrThrow(C_LAST_NAME))
     }
 
-    fun getSampleDateTime(cursor: Cursor): java.util.Date? {
+    fun getSampleDateTime(cursor: Cursor) : java.util.Date? {
         return org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_SAMPLE_DATE_TIME)))
     }
 
-    fun getBirthDate(cursor: Cursor): java.util.Date? {
+    fun getBirthDate(cursor: Cursor) : java.util.Date? {
         return org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(C_BIRTH_DATE)))
     }
 
-    fun getLastModified(cursor: Cursor): java.util.Date? {
+    fun getLastModified(cursor: Cursor) : java.util.Date? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_LAST_MODIFIED))) java.util.Date(cursor.getLong(cursor.getColumnIndexOrThrow(C_LAST_MODIFIED))) else null
     }
 
-    fun getNumber(cursor: Cursor): Int? {
+    fun getNumber(cursor: Cursor) : Int? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_NUMBER))) cursor.getInt(cursor.getColumnIndexOrThrow(C_NUMBER)) else null
     }
 
-    fun getPhone(cursor: Cursor): String? {
+    fun getPhone(cursor: Cursor) : String? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_PHONE))) cursor.getString(cursor.getColumnIndexOrThrow(C_PHONE)) else null
     }
 
-    fun getEmail(cursor: Cursor): String? {
+    fun getEmail(cursor: Cursor) : String? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_EMAIL))) cursor.getString(cursor.getColumnIndexOrThrow(C_EMAIL)) else null
     }
 
-    fun getData(cursor: Cursor): ByteArray? {
+    fun getData(cursor: Cursor) : ByteArray? {
         return cursor.getBlob(cursor.getColumnIndexOrThrow(C_DATA))
     }
 
-    fun getAmount1(cursor: Cursor): Float? {
+    fun getAmount1(cursor: Cursor) : Float? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_AMOUNT1))) cursor.getFloat(cursor.getColumnIndexOrThrow(C_AMOUNT1)) else null
     }
 
-    fun getAmount2(cursor: Cursor): Double? {
+    fun getAmount2(cursor: Cursor) : Double? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_AMOUNT2))) cursor.getDouble(cursor.getColumnIndexOrThrow(C_AMOUNT2)) else null
     }
 
-    fun getEnabled(cursor: Cursor): Boolean? {
+    fun getEnabled(cursor: Cursor) : Boolean? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_ENABLED))) (if (cursor.getInt(cursor.getColumnIndexOrThrow(C_ENABLED)) != 0) true else false) else null
     }
 
-    fun getSpouseIndividualId(cursor: Cursor): Long? {
+    fun getSpouseIndividualId(cursor: Cursor) : Long? {
         return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_SPOUSE_INDIVIDUAL_ID))) cursor.getLong(cursor.getColumnIndexOrThrow(C_SPOUSE_INDIVIDUAL_ID)) else null
     }
 

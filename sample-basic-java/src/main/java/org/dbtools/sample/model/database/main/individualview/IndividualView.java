@@ -27,6 +27,10 @@ public class IndividualView extends IndividualViewBaseRecord {
 
     }
 
+    public IndividualView(IndividualView record) {
+        super(record);
+    }
+
     public IndividualView(Cursor cursor) {
         setContent(cursor);
     }

@@ -17,27 +17,35 @@ import android.database.Cursor
 
 
 @SuppressWarnings("all")
-abstract class IndividualViewBaseRecord : AndroidBaseRecord() {
+abstract class IndividualViewBaseRecord : AndroidBaseRecord {
 
      var id: Long? = 0
      var name: String = ""
 
-    override fun getIdColumnName(): String {
+    constructor(record: IndividualView) {
+        this.id = record.id
+        this.name = record.name
+    }
+
+    constructor() {
+    }
+
+    override fun getIdColumnName() : String {
         return ""
     }
 
-    override fun getPrimaryKeyId(): Long {
+    override fun getPrimaryKeyId() : Long {
         return 0
     }
 
     override fun setPrimaryKeyId(id: Long) {
     }
 
-    override fun getAllColumns(): Array<String> {
+    override fun getAllColumns() : Array<String> {
         return IndividualViewConst.ALL_COLUMNS.clone()
     }
 
-    fun getAllColumnsFull(): Array<String> {
+    fun getAllColumnsFull() : Array<String> {
         return IndividualViewConst.ALL_COLUMNS_FULL.clone()
     }
 
@@ -46,13 +54,13 @@ abstract class IndividualViewBaseRecord : AndroidBaseRecord() {
         values.put(IndividualViewConst.C_NAME, name)
     }
 
-    override fun getValues(): Array<Any?> {
+    override fun getValues() : Array<Any?> {
         return arrayOf(
             id,
             name)
     }
 
-    fun copy(): IndividualView {
+    fun copy() : IndividualView {
         var copy = IndividualView()
         copy.id = id
         copy.name = name
@@ -87,7 +95,7 @@ abstract class IndividualViewBaseRecord : AndroidBaseRecord() {
         name = cursor.getString(cursor.getColumnIndexOrThrow(IndividualViewConst.C_NAME))
     }
 
-    override fun isNewRecord(): Boolean {
+    override fun isNewRecord() : Boolean {
         return primaryKeyId <= 0
     }
 

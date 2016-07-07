@@ -14,6 +14,8 @@ import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 
 class Individual : IndividualBaseRecord {
 
+    constructor(record: Individual) : super(record) {
+    }
 
     constructor() {
     }

@@ -10,12 +10,11 @@
 
 package org.dbtools.sample.model.database.main.individual;
 
-import android.database.Cursor;
-
 import org.dbtools.android.domain.AndroidBaseRecord;
-import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
 import org.dbtools.sample.model.database.main.individualtype.IndividualType;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
+import android.database.Cursor;
 
 
 @SuppressWarnings("all")
@@ -36,6 +35,23 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     private Double amount2 = null;
     private Boolean enabled = false;
     private Long spouseIndividualId = null;
+
+    public IndividualBaseRecord(Individual record) {
+        this.individualType = record.getIndividualType();
+        this.firstName = record.getFirstName();
+        this.lastName = record.getLastName();
+        this.sampleDateTime = record.getSampleDateTime();
+        this.birthDate = record.getBirthDate();
+        this.lastModified = record.getLastModified();
+        this.number = record.getNumber();
+        this.phone = record.getPhone();
+        this.email = record.getEmail();
+        this.data = record.getData();
+        this.amount1 = record.getAmount1();
+        this.amount2 = record.getAmount2();
+        this.enabled = record.isEnabled();
+        this.spouseIndividualId = record.getSpouseIndividualId();
+    }
 
     public IndividualBaseRecord() {
     }

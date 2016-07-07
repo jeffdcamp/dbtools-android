@@ -23,6 +23,10 @@ public class IndividualQuery extends IndividualQueryBaseRecord {
             ")";
     public static final String QUERY_RAW = "SELECT * FROM " + QUERY;
 
+    public IndividualQuery(IndividualQuery record) {
+        super(record);
+    }
+
     public IndividualQuery(Cursor cursor) {
         setContent(cursor);
     }
