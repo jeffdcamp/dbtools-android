@@ -66,10 +66,11 @@ public class SQLCipherDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase,
 
     @Override
     public void close() {
-        database.close();
         // cleanup statements
         DatabaseWrapperUtil.closeStatements(insertStatementMap);
         DatabaseWrapperUtil.closeStatements(updateStatementMap);
+
+        database.close();
     }
 
     @Override

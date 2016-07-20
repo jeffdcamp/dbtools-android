@@ -60,8 +60,8 @@ abstract class IndividualViewBaseRecord : AndroidBaseRecord {
             name)
     }
 
-    fun copy() : IndividualView {
-        var copy = IndividualView()
+    open fun copy() : IndividualView {
+        val copy = IndividualView()
         copy.id = id
         copy.name = name
         return copy

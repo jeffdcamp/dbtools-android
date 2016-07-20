@@ -56,11 +56,11 @@ public class AndroidDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, A
 
     @Override
     public void close() {
-        database.close();
-
         // cleanup statements
         DatabaseWrapperUtil.closeStatements(insertStatementMap);
         DatabaseWrapperUtil.closeStatements(updateStatementMap);
+
+        database.close();
     }
 
     @Override

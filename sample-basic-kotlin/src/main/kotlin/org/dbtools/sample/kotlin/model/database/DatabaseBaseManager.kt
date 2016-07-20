@@ -10,10 +10,9 @@
 
 package org.dbtools.sample.kotlin.model.database
 
-import org.dbtools.android.domain.AndroidDatabase
 import org.dbtools.android.domain.AndroidBaseManager
+import org.dbtools.android.domain.AndroidDatabase
 import org.dbtools.android.domain.AndroidDatabaseManager
-import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.config.DatabaseConfig
 
 
@@ -24,7 +23,7 @@ abstract class DatabaseBaseManager : AndroidDatabaseManager {
     constructor(databaseConfig: DatabaseConfig) : super(databaseConfig) {
     }
 
-    fun createMainTables(androidDatabase: AndroidDatabase) {
+    open fun createMainTables(androidDatabase: AndroidDatabase) {
         val database = androidDatabase.databaseWrapper
         database.beginTransaction()
         
@@ -45,7 +44,7 @@ abstract class DatabaseBaseManager : AndroidDatabaseManager {
         }
     }
 
-    fun createMainViews(androidDatabase: AndroidDatabase) {
+    open fun createMainViews(androidDatabase: AndroidDatabase) {
         val database = androidDatabase.databaseWrapper
         database.beginTransaction()
         
@@ -56,7 +55,7 @@ abstract class DatabaseBaseManager : AndroidDatabaseManager {
         database.endTransaction()
     }
 
-    fun dropMainViews(androidDatabase: AndroidDatabase) {
+    open fun dropMainViews(androidDatabase: AndroidDatabase) {
         val database = androidDatabase.databaseWrapper
         database.beginTransaction()
         

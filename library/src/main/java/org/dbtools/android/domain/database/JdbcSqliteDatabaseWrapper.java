@@ -361,14 +361,15 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     @Override
     public void close() {
         try {
+            // cleanup statements
+            DatabaseWrapperUtil.closeStatements(insertStatementMap);
+            DatabaseWrapperUtil.closeStatements(updateStatementMap);
+
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        // cleanup statements
-        DatabaseWrapperUtil.closeStatements(insertStatementMap);
-        DatabaseWrapperUtil.closeStatements(updateStatementMap);
     }
 
     @Override

@@ -83,10 +83,11 @@ public class SQLiteDatabaseWrapper implements DatabaseWrapper<SQLiteDatabase, An
 
     @Override
     public void close() {
-        database.close();
         // cleanup statements
         DatabaseWrapperUtil.closeStatements(insertStatementMap);
         DatabaseWrapperUtil.closeStatements(updateStatementMap);
+
+        database.close();
     }
 
     @Override
