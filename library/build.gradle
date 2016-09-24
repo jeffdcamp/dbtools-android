@@ -6,7 +6,7 @@ apply plugin: 'maven'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24'
+    buildToolsVersion '24.0.2'
 
     defaultConfig {
         minSdkVersion 10
@@ -44,18 +44,18 @@ dependencies {
     compile 'com.google.code.findbugs:jsr305:3.0.1'
 
     // optional
-    provided 'io.reactivex:rxjava:1.1.5'
+    provided 'io.reactivex:rxjava:1.2.0'
     provided "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     provided 'joda-time:joda-time:2.9.4'
-    provided 'org.threeten:threetenbp:1.3.1'
+    provided 'org.threeten:threetenbp:1.3.2'
 
     provided 'org.sqlite:sqlite-android-base:3.8.8.1-20150126'
     provided 'net.sqlcipher:sqlcipher:3.1.0.20140823'
     provided 'org.xerial:sqlite-jdbc:3.8.11.2'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.0.57-beta'
+    testCompile 'org.mockito:mockito-core:2.1.0-RC.1'
 }
 
 tasks.withType(Test) {

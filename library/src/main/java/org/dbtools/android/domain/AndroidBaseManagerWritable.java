@@ -25,6 +25,14 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
 
     private final List<DBToolsTableChangeListener> tableChangeListeners = new ArrayList<DBToolsTableChangeListener>();
 
+    public boolean inTransaction() {
+        return inTransaction(getDatabaseName());
+    }
+
+    public boolean inTransaction(@Nonnull String databaseName) {
+        return getWritableDatabase(databaseName).inTransaction();
+    }
+
     public void beginTransaction() {
         beginTransaction(getDatabaseName());
     }
