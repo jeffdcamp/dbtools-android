@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+  Version 7.0.11 *(2016-09)*
+---------------------------
+* Added AndroidBaseManagerWritable.inTransaction(...)
+* Updated provided versions 
+
   Version 7.0.10 *(2016-07)*
 ---------------------------
 * Fixed issues with closing database
