@@ -25,9 +25,18 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     private final AtomicBoolean transactionInsertOccurred = new AtomicBoolean(false);
     private final AtomicBoolean transactionUpdateOccurred = new AtomicBoolean(false);
     private final AtomicBoolean transactionDeleteOccurred = new AtomicBoolean(false);
+    private long lastTableModifiedTs = 0L;
 
     private final List<DBToolsTableChangeListener> tableChangeListeners = new ArrayList<DBToolsTableChangeListener>();
     private final PublishSubject<DatabaseTableChange> tableChanges = PublishSubject.create();
+
+    public boolean inTransaction() {
+        return inTransaction(getDatabaseName());
+    }
+
+    public boolean inTransaction(@Nonnull String databaseName) {
+        return getWritableDatabase(databaseName).inTransaction();
+    }
 
     public void beginTransaction() {
         beginTransaction(getDatabaseName());
@@ -406,6 +415,8 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     }
 
     private void notifyTableListeners(boolean forceNotify, @Nullable DatabaseWrapper db, @Nonnull DatabaseTableChange changeType) {
+        updateLastTableModifiedTs();
+
         if (forceNotify || !(db != null && db.inTransaction())) {
             tableChanges.onNext(changeType);
 
@@ -427,5 +438,15 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
     public Observable<DatabaseTableChange> tableChanges() {
         return tableChanges.asObservable();
+    }
+
+    // ===== Table Change =====
+
+    public long getLastTableModifiedTs() {
+        return lastTableModifiedTs;
+    }
+
+    private void updateLastTableModifiedTs() {
+        this.lastTableModifiedTs = System.currentTimeMillis();
     }
 }

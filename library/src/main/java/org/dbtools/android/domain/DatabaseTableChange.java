@@ -18,6 +18,10 @@ public class DatabaseTableChange {
         this.delete = delete;
     }
 
+    public String getTable() {
+        return table;
+    }
+
     public long getRowId() {
         return rowId;
     }
