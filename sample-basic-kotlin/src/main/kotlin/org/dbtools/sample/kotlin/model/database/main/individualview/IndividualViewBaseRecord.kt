@@ -19,8 +19,8 @@ import android.database.Cursor
 @SuppressWarnings("all")
 abstract class IndividualViewBaseRecord : AndroidBaseRecord {
 
-     var id: Long? = 0
-     var name: String = ""
+     open var id: Long? = 0
+     open var name: String = ""
 
     constructor(record: IndividualView) {
         this.id = record.id

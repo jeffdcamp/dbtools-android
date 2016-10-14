@@ -20,21 +20,21 @@ import android.database.Cursor
 @SuppressWarnings("all")
 abstract class IndividualBaseRecord : AndroidBaseRecord {
 
-     var id: Long = 0
-     var individualType: IndividualType = IndividualType.HEAD
-     var firstName: String = ""
-     var lastName: String = ""
-     var sampleDateTime: java.util.Date? = java.util.Date()
-     var birthDate: java.util.Date? = java.util.Date()
-     var lastModified: java.util.Date? = java.util.Date()
-     var number: Int? = 0
-     var phone: String? = ""
-     var email: String? = ""
-     var data: ByteArray? = null
-     var amount1: Float? = 0.0f
-     var amount2: Double? = 0.0
-     var enabled: Boolean? = false
-     var spouseIndividualId: Long? = 0
+     open var id: Long = 0
+     open var individualType: IndividualType = IndividualType.HEAD
+     open var firstName: String = ""
+     open var lastName: String = ""
+     open var sampleDateTime: java.util.Date? = java.util.Date()
+     open var birthDate: java.util.Date? = java.util.Date()
+     open var lastModified: java.util.Date? = java.util.Date()
+     open var number: Int? = 0
+     open var phone: String? = ""
+     open var email: String? = ""
+     open var data: ByteArray? = null
+     open var amount1: Float? = 0.0f
+     open var amount2: Double? = 0.0
+     open var enabled: Boolean? = false
+     open var spouseIndividualId: Long? = 0
 
     constructor(record: Individual) {
         this.individualType = record.individualType
