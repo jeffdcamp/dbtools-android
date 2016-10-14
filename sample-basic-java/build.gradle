@@ -3,7 +3,7 @@ apply plugin: 'dbtools'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '24.0.2'
+    buildToolsVersion '24.0.3'
 
     defaultConfig {
         applicationId "org.dbtools.sample"
@@ -28,7 +28,7 @@ dependencies {
 
     // Test
     testCompile 'junit:junit:4.12'
-    testCompile 'org.xerial:sqlite-jdbc:3.8.11.2'
+    testCompile 'org.xerial:sqlite-jdbc:3.14.2.1'
 }
 
 dbtools {
