@@ -3,16 +3,17 @@ package org.dbtools.android.domain;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
+
 import org.dbtools.android.domain.database.DatabaseWrapper;
-import org.dbtools.android.domain.dbtype.DatabaseValue;
-import rx.Observable;
-import rx.Subscriber;
-import rx.functions.Func0;
+
+import java.util.Arrays;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
+
+import rx.Observable;
+import rx.functions.Func0;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends AndroidBaseManager<T> {
@@ -137,23 +138,43 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
     }
 
     @Nonnull
-    public Observable<T> findAllRx() {
+    public Observable<T> findRx() {
         return findBySelectionRx(null, null, null);
     }
 
     @Nonnull
-    public Observable<T> findAllRx(@Nonnull final String databaseName) {
+    public Observable<T> findRx(@Nonnull final String databaseName) {
         return findBySelectionRx(databaseName, null, null, null);
     }
 
     @Nonnull
-    public Observable<T> findAllOrderByRx(@Nullable final String orderBy) {
+    public Observable<T> findOrderByRx(@Nullable final String orderBy) {
         return findBySelectionRx(null, null, orderBy);
     }
 
     @Nonnull
-    public Observable<T> findAllOrderByRx(@Nonnull final String databaseName, @Nullable final String orderBy) {
+    public Observable<T> findOrderByRx(@Nonnull final String databaseName, @Nullable final String orderBy) {
         return findBySelectionRx(databaseName, null, null, orderBy);
+    }
+
+    @Nonnull
+    public Observable<List<T>> findAllRx() {
+        return findAllBySelectionRx(null, null, null);
+    }
+
+    @Nonnull
+    public Observable<List<T>> findAllRx(@Nonnull final String databaseName) {
+        return findAllBySelectionRx(databaseName, null, null, null);
+    }
+
+    @Nonnull
+    public Observable<List<T>> findAllOrderByRx(@Nullable final String orderBy) {
+        return findAllBySelectionRx(null, null, orderBy);
+    }
+
+    @Nonnull
+    public Observable<List<T>> findAllOrderByRx(@Nonnull final String databaseName, @Nullable final String orderBy) {
+        return findAllBySelectionRx(databaseName, null, null, orderBy);
     }
 
     @Nonnull
@@ -176,6 +197,21 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         return DBToolsRxUtil.from(new Func0<Iterable<T>>() {
             @Override
             public Iterable<T> call() {
+                return findAllBySelection(databaseName, selection, selectionArgs, orderBy);
+            }
+        });
+    }
+
+    @Nonnull
+    public Observable<List<T>> findAllBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+        return findAllBySelectionRx(getDatabaseName(), selection, selectionArgs, orderBy);
+    }
+
+    @Nonnull
+    public Observable<List<T>> findAllBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+        return DBToolsRxUtil.just(new Func0<List<T>>() {
+            @Override
+            public List<T> call() {
                 return findAllBySelection(databaseName, selection, selectionArgs, orderBy);
             }
         });

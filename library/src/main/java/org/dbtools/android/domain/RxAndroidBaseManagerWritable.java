@@ -48,7 +48,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         // determine if there are changes
-        DatabaseTableChange tableChange = new DatabaseTableChange(transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get());
+        DatabaseTableChange tableChange = new DatabaseTableChange(getTableName(), DatabaseTableChange.UNKNOWN_ROW_ID, transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get());
         transactionInsertOccurred.set(false);
         transactionUpdateOccurred.set(false);
         transactionDeleteOccurred.set(false);
@@ -58,7 +58,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
         // post end transaction event
         if (tableChange.hasChange()) {
-            notifyTableListeners(db, tableChange);
+            notifyTableListeners(true, db, tableChange);
         }
     }
 
@@ -176,7 +176,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
                 e.setPrimaryKeyId(rowId);
 
-                notifyTableListeners(db, new DatabaseTableChange(true, false, false));
+                notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), rowId, true, false, false));
 
                 success = true;
             } catch (Exception ex) {
@@ -230,7 +230,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         int rowsAffectedCount = statement.executeUpdateDelete();
 
         if (rowsAffectedCount > 0) {
-            notifyTableListeners(db, new DatabaseTableChange(false, true, false));
+            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), rowId, false, true, false));
         }
 
         return rowsAffectedCount;
@@ -264,7 +264,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         if (success && rowsAffectedCount > 0) {
-            notifyTableListeners(db, new DatabaseTableChange(false, true, false));
+            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), DatabaseTableChange.UNKNOWN_ROW_ID, false, true, false));
         }
 
         return rowsAffectedCount;
@@ -346,7 +346,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         if (success && rowCountAffected > 0) {
-            notifyTableListeners(db, new DatabaseTableChange(false, false, true));
+            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), DatabaseTableChange.UNKNOWN_ROW_ID, false, false, true));
         }
 
         return rowCountAffected;
@@ -405,8 +405,8 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         tableChangeListeners.clear();
     }
 
-    private void notifyTableListeners(@Nullable DatabaseWrapper db, @Nonnull DatabaseTableChange changeType) {
-        if (!(db != null && db.inTransaction())) {
+    private void notifyTableListeners(boolean forceNotify, @Nullable DatabaseWrapper db, @Nonnull DatabaseTableChange changeType) {
+        if (forceNotify || !(db != null && db.inTransaction())) {
             tableChanges.onNext(changeType);
 
             for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
