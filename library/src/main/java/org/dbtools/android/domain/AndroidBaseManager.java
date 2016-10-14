@@ -252,13 +252,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     @Nonnull
     public List<T> findAllBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
-        Cursor cursor = findCursorBySelection(selection, selectionArgs, orderBy);
-        return getAllItemsFromCursor(cursor);
+        return findAllBySelection(selection, selectionArgs, null, null, orderBy, null);
+    }
+
+    @Nonnull
+    public List<T> findAllBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+        return findAllBySelection(getDatabaseName(), true, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
     @Nonnull
     public List<T> findAllBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
-        Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
+        return findAllBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
+    }
+
+    @Nonnull
+    public List<T> findAllBySelection(@Nonnull String databaseName, boolean distinct, @Nonnull String table, @Nonnull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+        Cursor cursor = findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
         return getAllItemsFromCursor(cursor);
     }
 
@@ -330,20 +339,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     @Nullable
     public T findBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
-        Cursor cursor = findCursorBySelection(selection, selectionArgs, orderBy);
-        if (cursor != null) {
-            T record = newRecord();
-            record.setContent(cursor);
-            cursor.close();
-            return record;
-        } else {
-            return null;
-        }
+        return findBySelection(selection, selectionArgs, null, null, orderBy);
     }
 
     @Nullable
     public T findBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
-        Cursor cursor = findCursorBySelection(databaseName, selection, selectionArgs, orderBy);
+        return findBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy);
+    }
+
+    @Nullable
+    public T findBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy) {
+        return findBySelection(getDatabaseName(), true, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+    }
+
+    @Nullable
+    public T findBySelection(@Nonnull String databaseName, boolean distinct, @Nonnull String table, @Nonnull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy) {
+        Cursor cursor = findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, "1");
         return createRecordFromCursor(cursor);
     }
 
@@ -581,8 +592,24 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, String orderBy, I defaultValue) {
+    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
         return findValueBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+     *
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Order by value(s)
+     * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
+     * @return query results value or defaultValue if no data was returned
+     */
+    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+        return findValueBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
     }
 
     /**
@@ -629,8 +656,25 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
+    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+        return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Order by value(s)
+     * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
+     * @return query results value or defaultValue if no data was returned
+     */
     public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
-        return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
+        return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
     }
 
     /**
@@ -648,10 +692,28 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @return query results value or defaultValue if no data was returned
      */
     public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
+        return findValueBySelection(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
+    }
+
+    /**
+     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+     *
+     * @param database      DatabaseWrapper of database to query
+     * @param tableName     Table to run query against
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Order by value(s)
+     * @param defaultValue  Value returned if nothing is found
+     * @param <I>           Type of value
+     * @return query results value or defaultValue if no data was returned
+     */
+    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
-        Cursor c = database.query(false, tableName, new String[]{column}, selection, selectionArgs, null, null, orderBy, "1");
+        Cursor c = database.query(false, tableName, new String[]{column}, selection, selectionArgs, groupBy, having, orderBy, "1");
         if (c != null) {
             if (c.moveToFirst()) {
                 value = databaseValue.getColumnValue(c, 0, defaultValue);
@@ -771,6 +833,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     /**
      * Return a list of all values for the specified column for given selection and selectionArgs.
      *
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Query order by
+     * @param <I>           Type of value
+     * @return query results List or empty List returned
+     */
+    @Nonnull
+    public <I> List<I> findAllValuesBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+        return findAllValuesBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit);
+    }
+
+    /**
+     * Return a list of all values for the specified column for given selection and selectionArgs.
+     *
      * @param databaseName  Name of database to query
      * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
      * @param column        Column which contains value
@@ -782,7 +860,24 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     @Nonnull
     public <I> List<I> findAllValuesBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
-        return findAllValuesBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, orderBy);
+        return findAllValuesBySelection(databaseName, valueType, column, selection, selectionArgs, null, null, orderBy, null);
+    }
+
+    /**
+     * Return a list of all values for the specified column for given selection and selectionArgs.
+     *
+     * @param databaseName  Name of database to query
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Query order by
+     * @param <I>           Type of value
+     * @return query results List or empty List returned
+     */
+    @Nonnull
+    public <I> List<I> findAllValuesBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+        return findAllValuesBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
     /**
@@ -800,10 +895,28 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      */
     @Nonnull
     public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+        return findAllValuesBySelection(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, null);
+    }
+
+    /**
+     * Return a list of all values for the specified column for given selection and selectionArgs.
+     *
+     * @param database      DatabaseWrapper of database to query
+     * @param tableName     Table to run query against
+     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+     * @param column        Column which contains value
+     * @param selection     Query selection
+     * @param selectionArgs Query parameters
+     * @param orderBy       Query order by
+     * @param <I>           Type of value
+     * @return query results List or empty List returned
+     */
+    @Nonnull
+    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         List<I> foundItems;
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
 
-        Cursor c = database.query(tableName, new String[]{column}, selection, selectionArgs, null, null, orderBy);
+        Cursor c = database.query(true, tableName, new String[]{column}, selection, selectionArgs, groupBy, having, orderBy, limit);
         if (c != null) {
             foundItems = new ArrayList<I>(c.getCount());
             if (c.moveToFirst()) {
