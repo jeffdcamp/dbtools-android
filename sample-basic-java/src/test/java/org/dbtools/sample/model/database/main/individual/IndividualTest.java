@@ -1,12 +1,14 @@
 package org.dbtools.sample.model.database.main.individual;
 
 import org.dbtools.android.domain.config.TestDatabaseConfig;
+import org.dbtools.query.sql.SQLQueryBuilder;
 import org.dbtools.sample.model.database.DatabaseManager;
 import org.dbtools.sample.model.database.TestMainDatabaseConfig;
 import org.dbtools.sample.model.database.main.MainDatabaseManagers;
 import org.junit.Test;
 
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -66,5 +68,67 @@ public class IndividualTest {
         // === DELETE ===
         individualManager.delete(individual);
         assertEquals(0, individualManager.findCount());
+    }
+
+    @Test
+    public void testFindBy() throws Exception {
+        TestDatabaseConfig databaseConfig = new TestMainDatabaseConfig("java-test-individual.db");
+        databaseConfig.deleteAllDatabaseFiles();
+        DatabaseManager databaseManager = new DatabaseManager(databaseConfig);
+        MainDatabaseManagers.init(databaseManager);
+        IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
+
+        Individual ind1 = addIndividual("Darth", "Vader", 1, 1.1d, true);
+        Individual ind2 = addIndividual("Boba", "Fett", 2, 2.2d, false);
+        Individual ind3 = addIndividual("Luke", "Skywalker", 3, 3.3d, true);
+        Individual ind4 = addIndividual("Leia", "Organa", 4, 4.4d, true);
+        Individual ind5 = addIndividual("Han", "Solo", 5, 5.5d, false);
+
+        assertEquals("findCount", 5, individualManager.findCount());
+        assertEquals("findCountByRawQuery", 5, individualManager.findCountByRawQuery("SELECT count(1) FROM " + IndividualConst.TABLE));
+        assertEquals("findCountBySelection", 3, individualManager.findCountBySelection(IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1)));
+        assertEquals("findByRawQuery", ind5.getId(), individualManager.findByRawQuery("SELECT * FROM " + IndividualConst.TABLE + " WHERE " + IndividualConst.C_ID + " = ?", SQLQueryBuilder.toSelectionArgs(ind5.getId())).getId());
+        assertEquals("findAllByRawQuery", 3, individualManager.findAllByRawQuery("SELECT * FROM " + IndividualConst.TABLE + " WHERE " + IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1)).size());
+        assertEquals("findValueByRawQuery", "Darth", individualManager.findValueByRawQuery(String.class, "SELECT " + IndividualConst.C_FIRST_NAME + " FROM " + IndividualConst.TABLE + " WHERE " + IndividualConst.C_ID + " = ?", SQLQueryBuilder.toSelectionArgs(1), ""));
+        assertEquals("findAll", 5, individualManager.findAll().size());
+        assertEquals("findByRowId", 1, individualManager.findByRowId(ind1.getId()).getId());
+        assertEquals("findBySelection", ind1.getId(), individualManager.findBySelection(IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1), null).getId());
+        assertEquals("findAllByRowIds", 2, individualManager.findAllByRowIds(new long[]{ind1.getId(), ind2.getId(), 99999}).size());
+        assertEquals("findAllBySelection", 3, individualManager.findAllBySelection(IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1)).size());
+
+        List<Integer> integerList = individualManager.findAllValuesBySelection(Integer.class, IndividualConst.C_NUMBER, IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1));
+        assertEquals("findAllValuesBySelection1", 3, integerList.size());
+        assertEquals("findAllValuesBySelection1 value check", ind3.getNumber(), integerList.get(1));
+
+        Integer value = individualManager.findValueBySelection(Integer.class, IndividualConst.C_NUMBER, ind4.getId(), 99);
+        assertEquals("findAllValuesBySelection2 value check", ind4.getNumber(), value);
+
+        List<Individual> orderedList = individualManager.findAllOrderBy(IndividualConst.C_LAST_NAME);
+        assertEquals("findAllOrderBy", 5, orderedList.size());
+        assertEquals("findAllOrderBy value check", ind1.getLastName(), orderedList.get(4).getLastName());
+
+        assertEquals("tableExists", true, individualManager.tableExists(IndividualConst.TABLE));
+        assertEquals("tableExists false", false, individualManager.tableExists("BadTableName"));
+
+    }
+
+    private Individual addIndividual(String first, String last, int number, double amount, boolean enabled) {
+        IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
+        Individual individual = new Individual();
+        individual.setFirstName(first);
+        individual.setLastName(last);
+//        individual.setSampleDateTime(new GregorianCalendar(1970,1,1).getTime());
+//        individual.setBirthDate(new GregorianCalendar(1970,1,2).getTime());
+//        individual.setLastModified(new GregorianCalendar(1970,1,3).getTime());
+        individual.setNumber(number);
+//        individual.setPhone("555-555-1234");
+//        individual.setEmail("test@test.com");
+//        individual.setAmount1(amount);
+        individual.setAmount2(amount);
+        individual.setEnabled(enabled);
+
+        individualManager.save(individual);
+
+        return individual;
     }
 }

@@ -53,7 +53,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         }
 
         // determine if there are changes
-        DatabaseTableChange tableChange = new DatabaseTableChange(getTableName(), DatabaseTableChange.UNKNOWN_ROW_ID, transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get());
+        DatabaseTableChange tableChange = new DatabaseTableChange(getTableName(), transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get());
         transactionInsertOccurred.set(false);
         transactionUpdateOccurred.set(false);
         transactionDeleteOccurred.set(false);
@@ -269,7 +269,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         }
 
         if (success && rowsAffectedCount > 0) {
-            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), DatabaseTableChange.UNKNOWN_ROW_ID, false, true, false));
+            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), false, true, false));
         }
 
         return rowsAffectedCount;
@@ -351,7 +351,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         }
 
         if (success && rowCountAffected > 0) {
-            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), DatabaseTableChange.UNKNOWN_ROW_ID, false, false, true));
+            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), false, false, true));
         }
 
         return rowCountAffected;

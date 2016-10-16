@@ -9,14 +9,26 @@ public class DatabaseTableChange {
     private final boolean insert;
     private final boolean update;
     private final boolean delete;
+    private final boolean bulkOperation;
 
     public DatabaseTableChange(String table, long rowId, boolean insert, boolean update, boolean delete) {
         this.table = table;
+        this.bulkOperation = false;
         this.rowId = rowId;
         this.insert = insert;
         this.update = update;
         this.delete = delete;
     }
+
+    public DatabaseTableChange(String table, boolean insert, boolean update, boolean delete) {
+        this.table = table;
+        this.rowId = UNKNOWN_ROW_ID;
+        this.insert = insert;
+        this.update = update;
+        this.delete = delete;
+        this.bulkOperation = true;
+    }
+
 
     public String getTable() {
         return table;
@@ -38,6 +50,10 @@ public class DatabaseTableChange {
         return delete;
     }
 
+    public boolean isBulkOperation() {
+        return bulkOperation;
+    }
+
     /**
      * If there were any changes to this table, then return true
      * @return true if a change occurred on this table
@@ -52,6 +68,6 @@ public class DatabaseTableChange {
      * @return true if the row may have changed
      */
     public boolean hasChangeForRowId(long rowId) {
-        return hasChange() && (this.rowId == rowId || this.rowId == UNKNOWN_ROW_ID);
+        return hasChange() && (bulkOperation || this.rowId == rowId);
     }
 }

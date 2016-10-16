@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteTransactionListener;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.util.Pair;
+
 import org.dbtools.android.domain.database.contentvalues.AndroidDBToolsContentValues;
 import org.dbtools.android.domain.database.statement.AndroidStatementWrapper;
 import org.dbtools.android.domain.database.statement.StatementWrapper;

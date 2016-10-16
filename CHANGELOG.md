@@ -1,6 +1,34 @@
 Change Log
 ==========
 
+  Version 7.1.0 *(2016-10)*
+---------------------------
+* Added rowId and table name to DatabaseTableChange object (for helping to identify if a specific row was modified)
+* Added lastTableModifiedTs to each manager (for helping to identify when table content changes)
+* Removed all back pressure issues from Rx Managers
+    * findRx(...) now only emit 1 value
+    * findOrderByRx(...) now only emit 1 value
+    * findBySelectionRx(...) now only emit 1 value
+    * findValueBySelectionRx(...) now only emit 1 value
+* Added findAll*Rx(...) to Rx Managers (emits a list of items, matching non-Rx Managers)
+* Improved support for "groupBy", "having", and "limit"
+* dbtools-gen now marks all Kotlin vars "open"
+* Fixed Kotlin generated logging in DatabaseManager
+* Removed CustomQueryRecord
+
+### Migration for Rx users
+* Search for the following function calls:
+ 
+        findRx(...)
+        findOrderByRx(...)
+        findBySelectionRx(...)
+        findValueBySelectionRx(...)
+        findByRawQueryRx(...)
+   
+* if you expect multiple values, then change to:
+
+        findAll*Rx(...)
+
   Version 7.0.11 *(2016-09)*
 ---------------------------
 * Added AndroidBaseManagerWritable.inTransaction(...)
