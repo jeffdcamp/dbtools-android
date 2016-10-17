@@ -5,6 +5,7 @@ Change Log
 ---------------------------
 * Added rowId and table name to DatabaseTableChange object (for helping to identify if a specific row was modified)
 * Added lastTableModifiedTs to each manager (for helping to identify when table content changes)
+* Improved consistency of all find*Rx(...) calls
 * Removed all back pressure issues from Rx Managers
     * findRx(...) now only emit 1 value
     * findOrderByRx(...) now only emit 1 value
