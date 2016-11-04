@@ -5,12 +5,12 @@ apply plugin: 'jacoco'
 apply plugin: 'maven'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '24.0.3'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 24
+        targetSdkVersion 25
     }
     buildTypes {
         debug {
@@ -47,7 +47,7 @@ dependencies {
     provided 'io.reactivex:rxjava:1.2.1'
     provided "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    provided 'joda-time:joda-time:2.9.4'
+    provided 'joda-time:joda-time:2.9.5'
     provided 'org.threeten:threetenbp:1.3.2'
 
     provided 'org.sqlite:sqlite-android-base:3.8.8.1-20150126'
@@ -55,7 +55,7 @@ dependencies {
     provided 'org.xerial:sqlite-jdbc:3.14.2.1'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.2.1'
+    testCompile 'org.mockito:mockito-core:2.2.10'
 }
 
 tasks.withType(Test) {
