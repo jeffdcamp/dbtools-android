@@ -9,9 +9,11 @@ import org.dbtools.android.domain.task.InsertTask;
 import org.dbtools.android.domain.task.UpdateTask;
 import org.dbtools.android.domain.task.UpdateWhereTask;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,9 +27,10 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     private final AtomicBoolean transactionInsertOccurred = new AtomicBoolean(false);
     private final AtomicBoolean transactionUpdateOccurred = new AtomicBoolean(false);
     private final AtomicBoolean transactionDeleteOccurred = new AtomicBoolean(false);
-    private long lastTableModifiedTs = 0L;
+    private long lastTableModifiedTs = -1L;
 
-    private final List<DBToolsTableChangeListener> tableChangeListeners = new ArrayList<DBToolsTableChangeListener>();
+    private final Lock listenerLock = new ReentrantLock();
+    private final Set<DBToolsTableChangeListener> tableChangeListeners = new HashSet<>();
     private final PublishSubject<DatabaseTableChange> tableChanges = PublishSubject.create();
 
     public boolean inTransaction() {
@@ -85,7 +88,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
      * Save Record.
      *
      * @param databaseName database name to use
-     * @param e Record to be saved
+     * @param e            Record to be saved
      * @return true if record was saved
      */
     public boolean save(@Nonnull String databaseName, @Nullable T e) {
@@ -218,8 +221,9 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
     /**
      * Update a record
+     *
      * @param db database
-     * @param e record
+     * @param e  record
      * @return number of rows effected
      */
     public int update(@Nonnull DatabaseWrapper db, @Nullable T e) {
@@ -297,7 +301,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     }
 
     public void updateAsync(@Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        updateAsync(getDatabaseName(),  contentValues, where, whereArgs);
+        updateAsync(getDatabaseName(), contentValues, where, whereArgs);
     }
 
     public void updateAsync(@Nonnull String databaseName, @Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
@@ -403,15 +407,30 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     // ===== Listeners =====
 
     public void addTableChangeListener(DBToolsTableChangeListener listener) {
-        tableChangeListeners.add(listener);
+        listenerLock.lock();
+        try {
+            tableChangeListeners.add(listener);
+        } finally {
+            listenerLock.unlock();
+        }
     }
 
     public void removeTableChangeListener(DBToolsTableChangeListener listener) {
-        tableChangeListeners.remove(listener);
+        listenerLock.lock();
+        try {
+            tableChangeListeners.remove(listener);
+        } finally {
+            listenerLock.unlock();
+        }
     }
 
     public void clearTableChangeListeners() {
-        tableChangeListeners.clear();
+        listenerLock.lock();
+        try {
+            tableChangeListeners.clear();
+        } finally {
+            listenerLock.unlock();
+        }
     }
 
     private void notifyTableListeners(boolean forceNotify, @Nullable DatabaseWrapper db, @Nonnull DatabaseTableChange changeType) {
@@ -420,8 +439,13 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         if (forceNotify || !(db != null && db.inTransaction())) {
             tableChanges.onNext(changeType);
 
-            for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
-                tableChangeListener.onTableChange(changeType);
+            listenerLock.lock();
+            try {
+                for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
+                    tableChangeListener.onTableChange(changeType);
+                }
+            } finally {
+                listenerLock.unlock();
             }
         } else {
             if (changeType.isInsert()) {
@@ -442,6 +466,11 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
     // ===== Table Change =====
 
+    /**
+     * Returns the last modification long ts
+     *
+     * @return long ts value of the last modification to this table using this manager, or -1 if no modifications have occurred since app launch
+     */
     public long getLastTableModifiedTs() {
         return lastTableModifiedTs;
     }
