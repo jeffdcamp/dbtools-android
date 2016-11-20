@@ -5,6 +5,9 @@ import org.dbtools.query.sql.SQLQueryBuilder;
 import org.dbtools.sample.model.database.DatabaseManager;
 import org.dbtools.sample.model.database.TestMainDatabaseConfig;
 import org.dbtools.sample.model.database.main.MainDatabaseManagers;
+import org.dbtools.sample.model.database.main.individualdata.IndividualData;
+import org.dbtools.sample.model.database.main.individualdata.IndividualDataManager;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -17,13 +20,16 @@ import rx.observers.TestSubscriber;
 import static org.junit.Assert.assertEquals;
 
 public class IndividualTest {
-    @Test
-    public void testIndividual() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         TestDatabaseConfig databaseConfig = new TestMainDatabaseConfig("java-test-individual.db");
         databaseConfig.deleteAllDatabaseFiles();
         DatabaseManager databaseManager = new DatabaseManager(databaseConfig);
         MainDatabaseManagers.init(databaseManager);
+    }
 
+    @Test
+    public void testIndividual() throws Exception {
         // === CREATE / INSERT ===
         IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
         Individual individual = new Individual();
@@ -151,5 +157,23 @@ public class IndividualTest {
         individualManager.save(individual);
 
         return individual;
+    }
+
+    @Test
+    public void testNoPrimaryKeyAndUnique() {
+        IndividualDataManager individualDataManager = MainDatabaseManagers.getIndividualDataManager();
+
+        IndividualData data = new IndividualData();
+        data.setExternalId(555L);
+        data.setTypeId(1);
+        data.setName("Foo");
+
+        // save
+        individualDataManager.save(data);
+        assertEquals(1, individualDataManager.findAll().size());
+
+        // save again... unique constraint should replace the existing conflict
+        individualDataManager.save(data);
+        assertEquals(1, individualDataManager.findAll().size());
     }
 }

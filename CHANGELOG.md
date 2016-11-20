@@ -1,9 +1,13 @@
 Change Log
 ==========
 
+  Version 7.2.0 *(2016-11)*
+---------------------------
+* Added support for no primary key on a table
+ 
   Version 7.1.1 *(2016-11)*
 ---------------------------
-* DBTools 7.1.1 Added locking to listeners (to prevent ConcurrentModificationException) 
+* Added locking to listeners (to prevent ConcurrentModificationException) 
 * Adjusted AndroidBaseManagerWritable.lastTableModifiedTs = -1L
 
   Version 7.1.0 *(2016-10)*

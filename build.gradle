@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.0.4'
+    ext.kotlin_version = '1.0.5-2'
 
     repositories {
         mavenLocal()
@@ -10,14 +10,13 @@ buildscript {
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0' // version plugin support
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-        classpath 'org.dbtools:gradle-dbtools-plugin:7.1.1'
+        classpath 'org.dbtools:gradle-dbtools-plugin:7.2.0'
     }
 }
 
 allprojects {
     repositories {
         mavenLocal()
-        maven { url "http://www.soupbowl.net/nexus/content/groups/public/" }
         jcenter()
     }
     apply plugin: 'com.github.ben-manes.versions' // ./gradlew dependencyUpdates -Drevision=release
@@ -28,5 +27,6 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion = '25.0.0'
+    supportLibVersion = '25.0.1'
+    xerialSqliteJdbcVersion = '3.15.1'
 }

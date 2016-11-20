@@ -4,19 +4,25 @@ import org.dbtools.query.sql.SQLQueryBuilder
 import org.dbtools.sample.kotlin.model.database.DatabaseManager
 import org.dbtools.sample.kotlin.model.database.TestMainDatabaseConfig
 import org.dbtools.sample.kotlin.model.database.main.MainDatabaseManagers
+import org.dbtools.sample.kotlin.model.database.main.individualdata.IndividualData
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import java.util.*
 
 class IndividualTest {
-    @Test
-    @Throws(Exception::class)
-    fun testIndividual() {
+    @Before
+    fun setUp() {
         // SETUP
         val databaseConfig = TestMainDatabaseConfig("kotlin-test-individual.db")
         databaseConfig.deleteAllDatabaseFiles()
         val databaseManager = DatabaseManager(databaseConfig)
         MainDatabaseManagers.init(databaseManager)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testIndividual() {
         val individualManager = MainDatabaseManagers.individualManager ?: throw IllegalStateException("IndividualManager null")
 
         // === CREATE / INSERT ===
@@ -126,5 +132,23 @@ class IndividualTest {
         individualManager.save(individual)
 
         return individual
+    }
+
+    @Test
+    fun testNoPrimaryKeyAndUnique() {
+        val individualDataManager = MainDatabaseManagers.individualDataManager ?: throw IllegalStateException("IndividualManager null")
+
+        val data = IndividualData()
+        data.externalId = 555
+        data.typeId = 1
+        data.name = "Foo"
+
+        // save
+        individualDataManager.save(data)
+        assertEquals(1, individualDataManager.findAll().size.toLong())
+
+        // save again... unique constraint should replace the existing conflict
+        individualDataManager.save(data)
+        assertEquals(1, individualDataManager.findAll().size.toLong())
     }
 }

@@ -33,6 +33,7 @@ abstract class DatabaseBaseManager : AndroidDatabaseManager {
         
         // Tables
         AndroidBaseManager.createTable(database, org.dbtools.sample.kotlin.model.database.main.individual.IndividualConst.CREATE_TABLE)
+        AndroidBaseManager.createTable(database, org.dbtools.sample.kotlin.model.database.main.individualdata.IndividualDataConst.CREATE_TABLE)
         
         database.setTransactionSuccessful()
         database.endTransaction()

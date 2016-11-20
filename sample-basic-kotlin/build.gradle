@@ -50,7 +50,7 @@ dependencies {
 
     // Test
     testCompile 'junit:junit:4.12'
-    testCompile 'org.xerial:sqlite-jdbc:3.14.2.1'
+    testCompile "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 }
 
 dbtools {
