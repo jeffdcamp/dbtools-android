@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+  Version 7.2.1 *(2016-12)*
+---------------------------
+* Min SDK 15
+* Added bindArgs to AndroidBaseManager.executeSql(...)
+
   Version 7.2.0 *(2016-11)*
 ---------------------------
 * Added support for no primary key on a table
