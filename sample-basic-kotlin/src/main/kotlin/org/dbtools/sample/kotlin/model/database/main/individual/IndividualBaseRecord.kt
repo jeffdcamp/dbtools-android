@@ -10,11 +10,11 @@
 
 package org.dbtools.sample.kotlin.model.database.main.individual
 
+import android.database.Cursor
 import org.dbtools.android.domain.AndroidBaseRecord
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import org.dbtools.android.domain.database.statement.StatementWrapper
 import org.dbtools.sample.kotlin.model.database.main.individualtype.IndividualType
-import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
-import android.database.Cursor
 
 
 @SuppressWarnings("all")
@@ -83,13 +83,13 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
         values.put(IndividualConst.C_SAMPLE_DATE_TIME, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime))
         values.put(IndividualConst.C_BIRTH_DATE, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate))
         values.put(IndividualConst.C_LAST_MODIFIED, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified))
-        values.put(IndividualConst.C_NUMBER, (number as Int).toLong())
+        values.put(IndividualConst.C_NUMBER, number?.toLong())
         values.put(IndividualConst.C_PHONE, phone)
         values.put(IndividualConst.C_EMAIL, email)
         values.put(IndividualConst.C_DATA, data)
-        values.put(IndividualConst.C_AMOUNT1, (amount1 as Float).toDouble())
+        values.put(IndividualConst.C_AMOUNT1, amount1?.toDouble())
         values.put(IndividualConst.C_AMOUNT2, amount2)
-        values.put(IndividualConst.C_ENABLED, if (enabled != null) (if (enabled as Boolean) 1L else 0L) else 0L)
+        values.put(IndividualConst.C_ENABLED, if (enabled ?: false) 1L else 0L)
         values.put(IndividualConst.C_SPOUSE_INDIVIDUAL_ID, spouseIndividualId)
     }
 
@@ -102,13 +102,13 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime),
             org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate),
             org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified),
-            (number as Int).toLong(),
+            number?.toLong(),
             phone,
             email,
             data,
-            (amount1 as Float).toDouble(),
+            amount1?.toDouble(),
             amount2,
-            if (enabled != null) (if (enabled as Boolean) 1L else 0L) else 0L,
+            if (enabled ?: false) 1L else 0L,
             spouseIndividualId)
     }
 
@@ -152,7 +152,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(6)
         }
         if (number != null) {
-            statement.bindLong(7, (number as Int).toLong()!!)
+            statement.bindLong(7, number?.toLong()!!)
         } else {
             statement.bindNull(7)
         }
@@ -172,7 +172,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(10)
         }
         if (amount1 != null) {
-            statement.bindDouble(11, (amount1 as Float).toDouble()!!)
+            statement.bindDouble(11, amount1?.toDouble()!!)
         } else {
             statement.bindNull(11)
         }
@@ -182,7 +182,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(12)
         }
         if (enabled != null) {
-            statement.bindLong(13, if (enabled != null) (if (enabled as Boolean) 1L else 0L) else 0L!!)
+            statement.bindLong(13, if (enabled ?: false) 1L else 0L)
         } else {
             statement.bindNull(13)
         }
@@ -213,7 +213,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(6)
         }
         if (number != null) {
-            statement.bindLong(7, (number as Int).toLong()!!)
+            statement.bindLong(7, number?.toLong()!!)
         } else {
             statement.bindNull(7)
         }
@@ -233,7 +233,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(10)
         }
         if (amount1 != null) {
-            statement.bindDouble(11, (amount1 as Float).toDouble()!!)
+            statement.bindDouble(11, amount1?.toDouble()!!)
         } else {
             statement.bindNull(11)
         }
@@ -243,7 +243,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(12)
         }
         if (enabled != null) {
-            statement.bindLong(13, if (enabled != null) (if (enabled as Boolean) 1L else 0L) else 0L!!)
+            statement.bindLong(13, if (enabled ?: false) 1L else 0L)
         } else {
             statement.bindNull(13)
         }

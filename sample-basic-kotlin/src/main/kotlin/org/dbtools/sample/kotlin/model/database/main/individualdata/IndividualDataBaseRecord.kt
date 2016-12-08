@@ -42,14 +42,14 @@ abstract class IndividualDataBaseRecord : AndroidBaseRecord {
 
     override fun getContentValues(values: DBToolsContentValues<*>) {
         values.put(IndividualDataConst.C_EXTERNAL_ID, externalId)
-        values.put(IndividualDataConst.C_TYPE_ID, (typeId as Int).toLong())
+        values.put(IndividualDataConst.C_TYPE_ID, typeId?.toLong())
         values.put(IndividualDataConst.C_NAME, name)
     }
 
     override fun getValues() : Array<Any?> {
         return arrayOf(
             externalId,
-            (typeId as Int).toLong(),
+            typeId?.toLong(),
             name)
     }
 
@@ -68,7 +68,7 @@ abstract class IndividualDataBaseRecord : AndroidBaseRecord {
             statement.bindNull(1)
         }
         if (typeId != null) {
-            statement.bindLong(2, (typeId as Int).toLong()!!)
+            statement.bindLong(2, typeId?.toLong()!!)
         } else {
             statement.bindNull(2)
         }
@@ -86,7 +86,7 @@ abstract class IndividualDataBaseRecord : AndroidBaseRecord {
             statement.bindNull(1)
         }
         if (typeId != null) {
-            statement.bindLong(2, (typeId as Int).toLong()!!)
+            statement.bindLong(2, typeId?.toLong()!!)
         } else {
             statement.bindNull(2)
         }

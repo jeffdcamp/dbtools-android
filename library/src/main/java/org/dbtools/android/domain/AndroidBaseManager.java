@@ -133,6 +133,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(getDatabaseName(), sql);
     }
 
+    public void executeSql(@Nonnull String sql, @Nullable Object[] bindArgs) {
+        executeSql(getDatabaseName(), sql, bindArgs);
+    }
+
+    public void executeSql(@Nonnull String databaseName, @Nonnull String sql, @Nullable Object[] bindArgs) {
+        executeSql(getWritableDatabase(databaseName), sql, bindArgs);
+    }
+
     public void executeSql(@Nonnull String databaseName, @Nonnull String sql) {
         executeSql(getWritableDatabase(databaseName), sql);
     }
@@ -142,13 +150,21 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public static void executeSql(@Nullable DatabaseWrapper db, @Nonnull String sql) {
+        executeSql(db, sql, null);
+    }
+
+    public static void executeSql(@Nullable DatabaseWrapper db, @Nonnull String sql, @Nullable Object[] bindArgs) {
         checkDB(db);
 
         String[] sqlStatements = sql.split(";");
 
         for (String sqlStatement : sqlStatements) {
             if (sqlStatement.length() > 0) {
-                db.execSQL(sqlStatement);
+                if (bindArgs != null) {
+                    db.execSQL(sqlStatement, bindArgs);
+                } else {
+                    db.execSQL(sqlStatement);
+                }
             }
         }
     }
