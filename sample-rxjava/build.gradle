@@ -3,7 +3,7 @@ apply plugin: 'dbtools'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         applicationId "org.dbtools.sample"
@@ -28,7 +28,7 @@ dependencies {
 
     // RxJava
     compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.2.2'
+    compile 'io.reactivex:rxjava:1.2.5'
 
     // Test
     testCompile 'junit:junit:4.12'
