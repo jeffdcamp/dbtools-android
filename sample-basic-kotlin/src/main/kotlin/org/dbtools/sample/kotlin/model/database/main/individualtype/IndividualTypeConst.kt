@@ -13,6 +13,7 @@ package org.dbtools.sample.kotlin.model.database.main.individualtype
 import android.database.Cursor
 
 
+@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody")
 @SuppressWarnings("all")
 object IndividualTypeConst {
 

@@ -11,6 +11,7 @@
 package org.dbtools.sample.kotlin.model.database
 
 
+@Suppress("unused", "ConvertSecondaryConstructorToPrimary", "RemoveEmptySecondaryConstructorBody")
 @SuppressWarnings("all")
 object DatabaseManagerConst {
 

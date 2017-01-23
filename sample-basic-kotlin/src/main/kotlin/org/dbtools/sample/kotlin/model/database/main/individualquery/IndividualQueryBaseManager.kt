@@ -14,6 +14,7 @@ import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.KotlinAndroidBaseManagerReadOnly
 
 
+@Suppress("unused", "ConvertSecondaryConstructorToPrimary")
 @SuppressWarnings("all")
 abstract class IndividualQueryBaseManager : KotlinAndroidBaseManagerReadOnly<IndividualQuery> {
 
@@ -56,10 +57,10 @@ abstract class IndividualQueryBaseManager : KotlinAndroidBaseManagerReadOnly<Ind
     }
 
     override fun getDatabaseConfig() : org.dbtools.android.domain.config.DatabaseConfig {
-        return databaseManager.getDatabaseConfig()
+        return databaseManager.databaseConfig
     }
 
-    abstract fun getQuery() : String;
+    abstract fun getQuery() : String
 
     override fun getTableName() : String {
         return getQuery()

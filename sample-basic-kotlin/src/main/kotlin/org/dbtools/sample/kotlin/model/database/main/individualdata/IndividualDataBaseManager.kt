@@ -14,6 +14,7 @@ import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.KotlinAndroidBaseManagerWritable
 
 
+@Suppress("unused", "ConvertSecondaryConstructorToPrimary")
 @SuppressWarnings("all")
 abstract class IndividualDataBaseManager : KotlinAndroidBaseManagerWritable<IndividualData> {
 
@@ -60,7 +61,7 @@ abstract class IndividualDataBaseManager : KotlinAndroidBaseManagerWritable<Indi
     }
 
     override fun getDatabaseConfig() : org.dbtools.android.domain.config.DatabaseConfig {
-        return databaseManager.getDatabaseConfig()
+        return databaseManager.databaseConfig
     }
 
     override fun getPrimaryKey() : String {

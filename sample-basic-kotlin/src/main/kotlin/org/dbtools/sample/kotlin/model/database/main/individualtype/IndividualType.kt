@@ -11,6 +11,7 @@
 package org.dbtools.sample.kotlin.model.database.main.individualtype
 
 
+@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody")
 @SuppressWarnings("all")
 enum class IndividualType {
 HEAD, SPOUSE, CHILD;

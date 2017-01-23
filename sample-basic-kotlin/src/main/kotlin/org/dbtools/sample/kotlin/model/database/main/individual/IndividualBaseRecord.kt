@@ -10,13 +10,14 @@
 
 package org.dbtools.sample.kotlin.model.database.main.individual
 
-import android.database.Cursor
 import org.dbtools.android.domain.AndroidBaseRecord
-import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import org.dbtools.android.domain.database.statement.StatementWrapper
 import org.dbtools.sample.kotlin.model.database.main.individualtype.IndividualType
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
+import android.database.Cursor
 
 
+@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody")
 @SuppressWarnings("all")
 abstract class IndividualBaseRecord : AndroidBaseRecord {
 
@@ -182,7 +183,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(12)
         }
         if (enabled != null) {
-            statement.bindLong(13, if (enabled ?: false) 1L else 0L)
+            statement.bindLong(13, if (enabled ?: false) 1L else 0L!!)
         } else {
             statement.bindNull(13)
         }
@@ -243,7 +244,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
             statement.bindNull(12)
         }
         if (enabled != null) {
-            statement.bindLong(13, if (enabled ?: false) 1L else 0L)
+            statement.bindLong(13, if (enabled ?: false) 1L else 0L!!)
         } else {
             statement.bindNull(13)
         }
