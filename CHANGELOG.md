@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+  Version 7.2.2 *(2017-01)*
+---------------------------
+* Improvements with dbtools-gen and Kotlin
+
   Version 7.2.1 *(2016-12)*
 ---------------------------
 * Min SDK 15
