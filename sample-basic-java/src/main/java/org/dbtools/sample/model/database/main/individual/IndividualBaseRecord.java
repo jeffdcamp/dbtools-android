@@ -36,23 +36,6 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     private Boolean enabled = false;
     private Long spouseIndividualId = null;
 
-    public IndividualBaseRecord(Individual record) {
-        this.individualType = record.getIndividualType();
-        this.firstName = record.getFirstName();
-        this.lastName = record.getLastName();
-        this.sampleDateTime = record.getSampleDateTime();
-        this.birthDate = record.getBirthDate();
-        this.lastModified = record.getLastModified();
-        this.number = record.getNumber();
-        this.phone = record.getPhone();
-        this.email = record.getEmail();
-        this.data = record.getData();
-        this.amount1 = record.getAmount1();
-        this.amount2 = record.getAmount2();
-        this.enabled = record.isEnabled();
-        this.spouseIndividualId = record.getSpouseIndividualId();
-    }
-
     public IndividualBaseRecord() {
     }
 
@@ -266,7 +249,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     }
 
     public void setContent(DBToolsContentValues values) {
-        individualType = IndividualType.values()[values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE)];
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType.class, values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE), IndividualType.HEAD);
         firstName = values.getAsString(IndividualConst.C_FIRST_NAME);
         lastName = values.getAsString(IndividualConst.C_LAST_NAME);
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_SAMPLE_DATE_TIME));
@@ -285,7 +268,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     @Override
     public void setContent(Cursor cursor) {
         id = cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_ID));
-        individualType = IndividualType.values()[cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE))];
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType.class, cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE)), IndividualType.HEAD);
         firstName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_FIRST_NAME));
         lastName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_NAME));
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_SAMPLE_DATE_TIME)));

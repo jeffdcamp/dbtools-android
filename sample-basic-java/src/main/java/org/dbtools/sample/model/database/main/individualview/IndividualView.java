@@ -8,11 +8,7 @@
 
 package org.dbtools.sample.model.database.main.individualview;
 
-import android.database.Cursor;
-
 import org.dbtools.sample.model.database.main.individual.IndividualConst;
-
-import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 
 public class IndividualView extends IndividualViewBaseRecord {
 
@@ -26,29 +22,4 @@ public class IndividualView extends IndividualViewBaseRecord {
         DROP_VIEW = "DROP VIEW IF EXISTS " + IndividualViewConst.TABLE + ";";
 
     }
-
-    public IndividualView(IndividualView record) {
-        super(record);
-    }
-
-    public IndividualView(Cursor cursor) {
-        setContent(cursor);
-    }
-
-    public IndividualView(DBToolsContentValues values) {
-        setContent(values);
-    }
-
-    public IndividualView() {
-    }
-
-    public String getDropSql() {
-        return DROP_VIEW;
-    }
-
-    public String getCreateSql() {
-        return CREATE_VIEW;
-    }
-
-
 }

@@ -115,7 +115,7 @@ public class IndividualConst {
     }
 
     public static IndividualType getIndividualType(Cursor cursor) {
-        return IndividualType.values()[cursor.getInt(cursor.getColumnIndexOrThrow(C_INDIVIDUAL_TYPE))];
+        return org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType.class, cursor.getInt(cursor.getColumnIndexOrThrow(C_INDIVIDUAL_TYPE)), IndividualType.HEAD);
     }
 
     public static String getFirstName(Cursor cursor) {

@@ -8,11 +8,9 @@
 
 package org.dbtools.sample.kotlin.model.database.main.individualview
 
-import android.database.Cursor
-import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualConst
 
-class IndividualView : IndividualViewBaseRecord {
+class IndividualView : IndividualViewBaseRecord() {
 
     companion object {
         val DROP_VIEW: String
@@ -25,20 +23,6 @@ class IndividualView : IndividualViewBaseRecord {
         }
     }
 
-    constructor() {
-    }
-
-    constructor(record: IndividualView) : super(record) {
-    }
-
-
-    constructor(cursor: Cursor) {
-        setContent(cursor)
-    }
-
-    constructor(values: DBToolsContentValues<*>) {
-        setContent(values)
-    }
 
 
 }

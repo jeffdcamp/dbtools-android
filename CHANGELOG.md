@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+  Version 8.0.0 *(2017-01)*
+---------------------------
+* Removed default constructors of Record classes 
+* Enum columns will not cause a ArrayIndexOutOfBoundsException, instead it will return default value
+
+Migration
+
+* Remove unused constructors from all Record classes
+
   Version 7.2.2 *(2017-01)*
 ---------------------------
 * Improvements with dbtools-gen and Kotlin

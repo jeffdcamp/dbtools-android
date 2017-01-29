@@ -13,7 +13,7 @@ package org.dbtools.sample.kotlin.model.database.main.individualdata
 import android.database.Cursor
 
 
-@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody")
+@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody", "ConvertSecondaryConstructorToPrimary")
 @SuppressWarnings("all")
 object IndividualDataConst {
 

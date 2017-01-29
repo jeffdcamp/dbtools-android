@@ -14,7 +14,7 @@ import android.database.Cursor
 import org.dbtools.sample.kotlin.model.database.main.individualtype.IndividualType
 
 
-@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody")
+@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody", "ConvertSecondaryConstructorToPrimary")
 @SuppressWarnings("all")
 object IndividualConst {
 
@@ -113,7 +113,7 @@ object IndividualConst {
     }
 
     fun getIndividualType(cursor: Cursor) : IndividualType {
-        return IndividualType.values()[cursor.getInt(cursor.getColumnIndexOrThrow(C_INDIVIDUAL_TYPE))]
+        return org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType::class.java, cursor.getInt(cursor.getColumnIndexOrThrow(C_INDIVIDUAL_TYPE)), IndividualType.HEAD)
     }
 
     fun getFirstName(cursor: Cursor) : String {
@@ -161,7 +161,7 @@ object IndividualConst {
     }
 
     fun getEnabled(cursor: Cursor) : Boolean? {
-        return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_ENABLED))) (if (cursor.getInt(cursor.getColumnIndexOrThrow(C_ENABLED)) != 0) true else false) else null
+        return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_ENABLED))) (cursor.getInt(cursor.getColumnIndexOrThrow(C_ENABLED)) != 0) else null
     }
 
     fun getSpouseIndividualId(cursor: Cursor) : Long? {

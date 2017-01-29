@@ -17,7 +17,7 @@ import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import android.database.Cursor
 
 
-@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody")
+@Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody", "ConvertSecondaryConstructorToPrimary")
 @SuppressWarnings("all")
 abstract class IndividualBaseRecord : AndroidBaseRecord {
 
@@ -36,23 +36,6 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
      open var amount2: Double? = 0.0
      open var enabled: Boolean? = false
      open var spouseIndividualId: Long? = 0
-
-    constructor(record: Individual) {
-        this.individualType = record.individualType
-        this.firstName = record.firstName
-        this.lastName = record.lastName
-        this.sampleDateTime = record.sampleDateTime
-        this.birthDate = record.birthDate
-        this.lastModified = record.lastModified
-        this.number = record.number
-        this.phone = record.phone
-        this.email = record.email
-        this.data = record.data
-        this.amount1 = record.amount1
-        this.amount2 = record.amount2
-        this.enabled = record.enabled
-        this.spouseIndividualId = record.spouseIndividualId
-    }
 
     constructor() {
     }
@@ -119,9 +102,9 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
         copy.individualType = individualType
         copy.firstName = firstName
         copy.lastName = lastName
-        copy.sampleDateTime = if (sampleDateTime != null) java.util.Date((sampleDateTime as java.util.Date).getTime()) else null 
-        copy.birthDate = if (birthDate != null) java.util.Date((birthDate as java.util.Date).getTime()) else null 
-        copy.lastModified = if (lastModified != null) java.util.Date((lastModified as java.util.Date).getTime()) else null 
+        copy.sampleDateTime = if (sampleDateTime != null) java.util.Date((sampleDateTime as java.util.Date).time) else null 
+        copy.birthDate = if (birthDate != null) java.util.Date((birthDate as java.util.Date).time) else null 
+        copy.lastModified = if (lastModified != null) java.util.Date((lastModified as java.util.Date).time) else null 
         copy.number = number
         copy.phone = phone
         copy.email = email
@@ -133,6 +116,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
         return copy
     }
 
+    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     override fun bindInsertStatement(statement: StatementWrapper) {
         statement.bindLong(1, individualType.ordinal.toLong())
         statement.bindString(2, firstName)
@@ -194,6 +178,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
         }
     }
 
+    @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     override fun bindUpdateStatement(statement: StatementWrapper) {
         statement.bindLong(1, individualType.ordinal.toLong())
         statement.bindString(2, firstName)
@@ -257,7 +242,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
     }
 
     override fun setContent(values: DBToolsContentValues<*>) {
-        individualType = IndividualType.values()[values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE)]
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType::class.java, values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE), IndividualType.HEAD)
         firstName = values.getAsString(IndividualConst.C_FIRST_NAME)
         lastName = values.getAsString(IndividualConst.C_LAST_NAME)
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_SAMPLE_DATE_TIME))
@@ -275,7 +260,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
 
     override fun setContent(cursor: Cursor) {
         id = cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_ID))
-        individualType = IndividualType.values()[cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE))]
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType::class.java, cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE)), IndividualType.HEAD)
         firstName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_FIRST_NAME))
         lastName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_NAME))
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_SAMPLE_DATE_TIME)))
@@ -287,7 +272,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
         data = cursor.getBlob(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA))
         amount1 = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1))) cursor.getFloat(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1)) else null
         amount2 = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2))) cursor.getDouble(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2)) else null
-        enabled = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED))) (if (cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED)) != 0) true else false) else null
+        enabled = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED))) (cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED)) != 0) else null
         spouseIndividualId = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_SPOUSE_INDIVIDUAL_ID))) cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_SPOUSE_INDIVIDUAL_ID)) else null
     }
 

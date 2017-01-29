@@ -8,11 +8,9 @@
 
 package org.dbtools.sample.kotlin.model.database.main.individualquery
 
-import android.database.Cursor
-import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualConst
 
-class IndividualQuery : IndividualQueryBaseRecord {
+class IndividualQuery : IndividualQueryBaseRecord() {
 
     companion object {
         val QUERY = "(" +
@@ -23,20 +21,4 @@ class IndividualQuery : IndividualQueryBaseRecord {
             ")"
         val QUERY_RAW = "SELECT * FROM " + QUERY
     }
-
-    constructor() {
-    }
-
-    constructor(record: IndividualQuery) : super(record) {
-    }
-
-    constructor(cursor: Cursor) {
-        setContent(cursor)
-    }
-
-    constructor(values: DBToolsContentValues<*>) {
-        setContent(values)
-    }
-
-
 }

@@ -1,6 +1,7 @@
 package org.dbtools.android.domain;
 
 import android.database.Cursor;
+
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
 
@@ -49,5 +50,7 @@ public abstract class AndroidBaseRecord implements Serializable {
     public boolean longToBoolean(long b) {
         return b != 0;
     }
+
+
 
 }
