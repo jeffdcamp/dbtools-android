@@ -12,7 +12,6 @@ package org.dbtools.sample.model.database.main.individual;
 
 import org.dbtools.android.domain.AndroidBaseRecord;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
-import org.dbtools.sample.model.database.main.individualtype.IndividualType;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import android.database.Cursor;
 
@@ -21,19 +20,19 @@ import android.database.Cursor;
 public abstract class IndividualBaseRecord extends AndroidBaseRecord {
 
     private long id = 0;
-    private IndividualType individualType = IndividualType.HEAD;
+    private org.dbtools.sample.model.type.IndividualType individualType = org.dbtools.sample.model.type.IndividualType.HEAD;
     private String firstName = "";
     private String lastName = "";
     private java.util.Date sampleDateTime = null;
     private java.util.Date birthDate = null;
     private java.util.Date lastModified = null;
     private Integer number = null;
-    private String phone = "";
-    private String email = "";
+    private String phone = null;
+    private String email = null;
     private byte[] data = null;
     private Float amount1 = null;
     private Double amount2 = null;
-    private Boolean enabled = false;
+    private Boolean enabled = null;
     private Long spouseIndividualId = null;
 
     public IndividualBaseRecord() {
@@ -249,7 +248,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     }
 
     public void setContent(DBToolsContentValues values) {
-        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType.class, values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE), IndividualType.HEAD);
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(org.dbtools.sample.model.type.IndividualType.class, values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE), org.dbtools.sample.model.type.IndividualType.HEAD);
         firstName = values.getAsString(IndividualConst.C_FIRST_NAME);
         lastName = values.getAsString(IndividualConst.C_LAST_NAME);
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_SAMPLE_DATE_TIME));
@@ -268,7 +267,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     @Override
     public void setContent(Cursor cursor) {
         id = cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_ID));
-        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType.class, cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE)), IndividualType.HEAD);
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(org.dbtools.sample.model.type.IndividualType.class, cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE)), org.dbtools.sample.model.type.IndividualType.HEAD);
         firstName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_FIRST_NAME));
         lastName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_NAME));
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_SAMPLE_DATE_TIME)));
@@ -296,12 +295,12 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         this.id = id;
     }
 
-    @javax.annotation.Nonnull
-    public IndividualType getIndividualType() {
+    @javax.annotation.Nullable
+    public org.dbtools.sample.model.type.IndividualType getIndividualType() {
         return individualType;
     }
 
-    public void setIndividualType(@javax.annotation.Nonnull IndividualType individualType) {
+    public void setIndividualType(@javax.annotation.Nullable org.dbtools.sample.model.type.IndividualType individualType) {
         this.individualType = individualType;
     }
 

@@ -3,6 +3,7 @@ package org.dbtools.android.domain;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
+import android.support.annotation.NonNull;
 
 import org.dbtools.android.domain.config.DatabaseConfig;
 import org.dbtools.android.domain.database.DatabaseWrapper;
@@ -24,9 +25,9 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public static final int MAX_TRY_COUNT = 3;
     public static final String DEFAULT_COLLATE_LOCALIZED = " COLLATE LOCALIZED";
 
-    public abstract DatabaseWrapper getReadableDatabase(String databaseName);
+    public abstract DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getReadableDatabase(String databaseName);
 
-    public abstract DatabaseWrapper getWritableDatabase(String databaseName);
+    public abstract DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getWritableDatabase(String databaseName);
 
     public abstract AndroidDatabase getAndroidDatabase(String databaseName);
 
@@ -67,14 +68,14 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public void createTable(@Nonnull String databaseName) {
-        executeSql(getWritableDatabase(databaseName), getCreateSql());
+//        executeSql(getWritableDatabase(databaseName), getCreateSql());
+//    }
+//
+//    public void createTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+        executeSql(databaseName, getCreateSql());
     }
 
-    public void createTable(@Nonnull DatabaseWrapper db) {
-        executeSql(db, getCreateSql());
-    }
-
-    public static void createTable(@Nonnull DatabaseWrapper db, String sql) {
+    public static  void createTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, String sql) {
         executeSql(db, sql);
     }
 
@@ -83,15 +84,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public void dropTable(@Nonnull String databaseName) {
-        executeSql(getWritableDatabase(databaseName), getDropSql());
-    }
-
-    public void dropTable(@Nonnull DatabaseWrapper db) {
-        executeSql(db, getDropSql());
+//        executeSql(getWritableDatabase(databaseName), getDropSql());
+//    }
+//
+//    public void dropTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+        executeSql(databaseName, getDropSql());
     }
 
     // for use with enum records
-    public static void dropTable(@Nonnull DatabaseWrapper db, @Nonnull String sql) {
+    public static void dropTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String sql) {
         executeSql(db, sql);
     }
 
@@ -100,11 +101,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public void cleanTable(@Nonnull String databaseName) {
-        cleanTable(getWritableDatabase(databaseName), getDropSql(), getCreateSql());
-    }
-
-    public void cleanTable(@Nonnull DatabaseWrapper db) {
-        cleanTable(db, getDropSql(), getCreateSql());
+//        cleanTable(getWritableDatabase(databaseName), getDropSql(), getCreateSql());
+//    }
+//
+//    public void cleanTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+        cleanTable(databaseName, getDropSql(), getCreateSql());
     }
 
     public void cleanTable(@Nonnull String dropSql, @Nonnull String createSql) {
@@ -112,20 +113,22 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     public void cleanTable(@Nonnull String databaseName, @Nonnull String dropSql, @Nonnull String createSql) {
-        cleanTable(getWritableDatabase(databaseName), dropSql, createSql);
-    }
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-    public void cleanTable(@Nonnull DatabaseWrapper db, @Nonnull String dropSql, @Nonnull String createSql) {
+//        cleanTable(getWritableDatabase(databaseName), dropSql, createSql);
+//    }
+//
+//    public void cleanTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String dropSql, @Nonnull String createSql) {
         checkDB(db);
         executeSql(db, dropSql);
         executeSql(db, createSql);
     }
 
-    public StatementWrapper getInsertStatement(@Nonnull DatabaseWrapper db) {
+    public StatementWrapper getInsertStatement(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
         return db.getInsertStatement(getTableName(), getInsertSql());
     }
 
-    public StatementWrapper getUpdateStatement(@Nonnull DatabaseWrapper db) {
+    public StatementWrapper getUpdateStatement(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
         return db.getUpdateStatement(getTableName(), getUpdateSql());
     }
 
@@ -149,11 +152,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(androidDatabase.getDatabaseWrapper(), sql);
     }
 
-    public static void executeSql(@Nullable DatabaseWrapper db, @Nonnull String sql) {
+    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String sql) {
         executeSql(db, sql, null);
     }
 
-    public static void executeSql(@Nullable DatabaseWrapper db, @Nonnull String sql, @Nullable Object[] bindArgs) {
+    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String sql, @Nullable Object[] bindArgs) {
         checkDB(db);
 
         String[] sqlStatements = sql.split(";");
@@ -327,7 +330,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public List<T> getAllItemsFromCursor(@Nullable Cursor cursor) {
         List<T> foundItems;
         if (cursor != null) {
-            foundItems = new ArrayList<T>(cursor.getCount());
+            foundItems = new ArrayList<>(cursor.getCount());
             if (cursor.moveToFirst()) {
                 do {
                     T record = newRecord();
@@ -337,7 +340,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
             }
             cursor.close();
         } else {
-            foundItems = new ArrayList<T>();
+            foundItems = new ArrayList<>();
         }
 
         return foundItems;
@@ -450,7 +453,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return findCountBySelection(getReadableDatabase(databaseName), getTableName(), selection, selectionArgs);
     }
 
-    public static long findCountBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nullable String selection, @Nullable String[] selectionArgs) {
+    public static long findCountBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nullable String selection, @Nullable String[] selectionArgs) {
         long count = -1;
 
         Cursor c = database.query(tableName, new String[]{"count(1)"}, selection, selectionArgs, null, null, null);
@@ -499,7 +502,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return findCountByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
     }
 
-    public static long findCountByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public static long findCountByRawQuery(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         long count = 0;
         Cursor c = database.rawQuery(rawQuery, selectionArgs);
         if (c != null) {
@@ -552,7 +555,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
+    public static <I> I findValueByRawQuery(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
@@ -672,9 +675,43 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
-        return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
+    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
+        return findValueBySelection(databaseName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
     }
+
+//    /**
+//     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+//     *
+//     * @param database      DatabaseWrapper of database to query
+//     * @param tableName     Table to run query against
+//     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+//     * @param column        Column which contains value
+//     * @param selection     Query selection
+//     * @param selectionArgs Query parameters
+//     * @param orderBy       Order by value(s)
+//     * @param defaultValue  Value returned if nothing is found
+//     * @param <I>           Type of value
+//     * @return query results value or defaultValue if no data was returned
+//     */
+//    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
+//        return findValueBySelection(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
+//    }
+//
+//    /**
+//     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
+//     *
+//     * @param database      DatabaseWrapper of database to query
+//     * @param tableName     Table to run query against
+//     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
+//     * @param column        Column which contains value
+//     * @param selection     Query selection
+//     * @param selectionArgs Query parameters
+//     * @param orderBy       Order by value(s)
+//     * @param defaultValue  Value returned if nothing is found
+//     * @param <I>           Type of value
+//     * @return query results value or defaultValue if no data was returned
+//     */
+//    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
 
     /**
      * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
@@ -689,8 +726,10 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
-        return findValueBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
+    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
+        String tableName = getTableName();
+        return findValueBySelection(db, tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
     }
 
     /**
@@ -707,25 +746,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
-        return findValueBySelection(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
-    }
-
-    /**
-     * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
-     *
-     * @param database      DatabaseWrapper of database to query
-     * @param tableName     Table to run query against
-     * @param valueType     Type to be used when getting data from database and what type is used on return (Integer.class, Boolean.class, etc)
-     * @param column        Column which contains value
-     * @param selection     Query selection
-     * @param selectionArgs Query parameters
-     * @param orderBy       Order by value(s)
-     * @param defaultValue  Value returned if nothing is found
-     * @param <I>           Type of value
-     * @return query results value or defaultValue if no data was returned
-     */
-    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
@@ -795,7 +816,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    public static <I> List<I> findAllValuesByRawQuery(@Nonnull DatabaseWrapper database, @Nonnull Class<I> valueType, int columnIndex, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public static <I> List<I> findAllValuesByRawQuery(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull Class<I> valueType, int columnIndex, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
         List<I> foundItems;
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
 
@@ -910,7 +931,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @return query results List or empty List returned
      */
     @Nonnull
-    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findAllValuesBySelection(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, null);
     }
 
@@ -928,7 +949,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @return query results List or empty List returned
      */
     @Nonnull
-    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         List<I> foundItems;
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
 
@@ -948,7 +969,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return foundItems;
     }
 
-    protected static <I> DatabaseValue<I> getDatabaseValue(Class<I> type) {
+    public static <I> DatabaseValue getDatabaseValue(Class<? extends I> type) {
         return DatabaseValueUtil.getDatabaseValue(type);
     }
 
@@ -966,7 +987,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return tableExists(androidDatabase.getDatabaseWrapper(), tableName);
     }
 
-    public static boolean tableExists(@Nullable DatabaseWrapper db, @Nullable String tableName) {
+    public static boolean tableExists(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable String tableName) {
         if (tableName == null || db == null || !db.isOpen()) {
             return false;
         }
@@ -1010,15 +1031,18 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return mx;
     }
 
-    public Cursor mergeCursors(Cursor... cursors) {
+    @NonNull
+    public Cursor mergeCursors(@NonNull Cursor... cursors) {
         return new MergeCursor(cursors);
     }
 
+    @NonNull
     public Cursor addAllToCursorTop(Cursor cursor, List<T> records) {
         return mergeCursors(toMatrixCursor(records), cursor);
     }
 
-    public Cursor addAllToCursorTop(Cursor cursor, T... records) {
+    @SafeVarargs
+    public final Cursor addAllToCursorTop(Cursor cursor, T... records) {
         return mergeCursors(toMatrixCursor(records), cursor);
     }
 
@@ -1026,9 +1050,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return mergeCursors(cursor, toMatrixCursor(records));
     }
 
-    public Cursor addAllToCursorBottom(Cursor cursor, T... records) {
+    @SafeVarargs
+    public final Cursor addAllToCursorBottom(Cursor cursor, T... records) {
         return mergeCursors(cursor, toMatrixCursor(records));
     }
-
-
 }

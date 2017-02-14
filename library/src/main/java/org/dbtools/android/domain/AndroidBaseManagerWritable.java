@@ -3,11 +3,6 @@ package org.dbtools.android.domain;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
-import org.dbtools.android.domain.task.DeleteTask;
-import org.dbtools.android.domain.task.DeleteWhereTask;
-import org.dbtools.android.domain.task.InsertTask;
-import org.dbtools.android.domain.task.UpdateTask;
-import org.dbtools.android.domain.task.UpdateWhereTask;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("UnusedDeclaration")
-public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> extends AndroidBaseManager<T> implements AsyncManager<T> {
+public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> extends AndroidBaseManager<T> {
 
     private final AtomicBoolean transactionInsertOccurred = new AtomicBoolean(false);
     private final AtomicBoolean transactionUpdateOccurred = new AtomicBoolean(false);
@@ -50,7 +45,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     }
 
     public void endTransaction(@Nonnull String databaseName, boolean success) {
-        DatabaseWrapper db = getWritableDatabase(databaseName);
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
         if (success) {
             db.setTransactionSuccessful();
         }
@@ -88,6 +83,17 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
      * @return true if record was saved
      */
     public boolean save(@Nonnull String databaseName, @Nullable T e) {
+//        return save(getWritableDatabase(databaseName), e);
+//    }
+//
+//    /**
+//     * Save Record.
+//     *
+//     * @param db database for the record to be saved to
+//     * @param e  Record to be saved
+//     * @return true if record was saved
+//     */
+//    public boolean save(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
         if (e == null) {
             return false;
         }
@@ -98,43 +104,6 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         } else {
             int count = update(databaseName, e);
             return count != 0;
-        }
-    }
-
-    /**
-     * Save Record.
-     *
-     * @param db database for the record to be saved to
-     * @param e  Record to be saved
-     * @return true if record was saved
-     */
-    public boolean save(@Nonnull DatabaseWrapper db, @Nullable T e) {
-        if (e == null) {
-            return false;
-        }
-
-        if (e.isNewRecord()) {
-            long newId = insert(db, e);
-            return newId != 0;
-        } else {
-            int count = update(db, e);
-            return count != 0;
-        }
-    }
-
-    public void saveAsync(@Nullable T e) {
-        saveAsync(getDatabaseName(), e);
-    }
-
-    public void saveAsync(@Nonnull String databaseName, @Nullable T e) {
-        if (e == null) {
-            return;
-        }
-
-        if (e.isNewRecord()) {
-            insertAsync(databaseName, e);
-        } else {
-            updateAsync(databaseName, e);
         }
     }
 
@@ -155,17 +124,19 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
      * @return long value of new id
      */
     public long insert(@Nonnull String databaseName, @Nullable T e) {
-        return insert(getWritableDatabase(databaseName), e);
-    }
+//        return insert(getWritableDatabase(databaseName), e);
+//    }
+//
+//    /**
+//     * Insert record into database.
+//     *
+//     * @param db database for the record inserted into
+//     * @param e  record to be inserted
+//     * @return long value of new id
+//     */
+//    public long insert(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-    /**
-     * Insert record into database.
-     *
-     * @param db database for the record inserted into
-     * @param e  record to be inserted
-     * @return long value of new id
-     */
-    public long insert(@Nonnull DatabaseWrapper db, @Nullable T e) {
         if (e == null) {
             return -1;
         }
@@ -194,35 +165,24 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         return rowId;
     }
 
-    public void insertAsync(@Nullable T e) {
-        insertAsync(getDatabaseName(), e);
-    }
-
-    public void insertAsync(@Nonnull String databaseName, @Nullable T e) {
-        if (e == null) {
-            return;
-        }
-
-        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
-        androidDatabase.getManagerExecutorServiceInstance().submit(new InsertTask<T>(databaseName, this, e));
-    }
-
     public int update(@Nullable T e) {
         return update(getDatabaseName(), e);
     }
 
     public int update(@Nonnull String databaseName, @Nullable T e) {
-        return update(getWritableDatabase(databaseName), e);
-    }
+//        return update(getWritableDatabase(databaseName), e);
+//    }
+//
+//    /**
+//     * Update a record
+//     *
+//     * @param db database
+//     * @param e  record
+//     * @return number of rows effected
+//     */
+//    public int update(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-    /**
-     * Update a record
-     *
-     * @param db database
-     * @param e  record
-     * @return number of rows effected
-     */
-    public int update(@Nonnull DatabaseWrapper db, @Nullable T e) {
         if (e == null) {
             return 0;
         }
@@ -245,19 +205,21 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         return rowsAffectedCount;
     }
 
-    public int update(@Nonnull DBToolsContentValues values, long rowId) {
+    public int update(@Nonnull DBToolsContentValues<?> values, long rowId) {
         return update(getDatabaseName(), values, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
-    public int update(@Nonnull DBToolsContentValues values, @Nullable String where, @Nullable String[] whereArgs) {
+    public int update(@Nonnull DBToolsContentValues<?> values, @Nullable String where, @Nullable String[] whereArgs) {
         return update(getDatabaseName(), values, where, whereArgs);
     }
 
-    public int update(@Nonnull String databaseName, @Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        return update(getWritableDatabase(databaseName), contentValues, where, whereArgs);
-    }
+    public int update(@Nonnull String databaseName, @Nonnull DBToolsContentValues<?> contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+//        return update(getWritableDatabase(databaseName), contentValues, where, whereArgs);
+//    }
+//
+//    public int update(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull DBToolsContentValues<?> contentValues, @Nullable String where, @Nullable String[] whereArgs) {
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-    public int update(@Nonnull DatabaseWrapper db, @Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         int rowsAffectedCount = 0;
 
         checkDB(db);
@@ -279,52 +241,26 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         return rowsAffectedCount;
     }
 
-    public void updateAsync(@Nullable T e) {
-        updateAsync(getDatabaseName(), e);
-    }
-
-    public void updateAsync(@Nonnull String databaseName, @Nullable T e) {
-        if (e == null) {
-            return;
-        }
-
-        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
-        androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateTask<T>(databaseName, this, e));
-    }
-
-    public void updateAsync(@Nonnull DBToolsContentValues contentValues, long rowId) {
-        updateAsync(getDatabaseName(), contentValues, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)});
-    }
-
-    public void updateAsync(@Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        updateAsync(getDatabaseName(), contentValues, where, whereArgs);
-    }
-
-    public void updateAsync(@Nonnull String databaseName, @Nonnull DBToolsContentValues contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
-        androidDatabase.getManagerExecutorServiceInstance().submit(new UpdateWhereTask<T>(databaseName, this, contentValues, where, whereArgs));
-    }
-
     public int delete(@Nullable T e) {
         return delete(getDatabaseName(), e);
     }
 
     public int delete(@Nonnull String databaseName, @Nullable T e) {
-        return delete(getWritableDatabase(databaseName), e);
-    }
+//        return delete(getWritableDatabase(databaseName), e);
+//    }
+//
+//    public int delete(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
 
-    public int delete(@Nonnull DatabaseWrapper db, @Nullable T e) {
         if (e == null) {
             return 0;
         }
 
-        checkDB(db);
         long rowId = e.getPrimaryKeyId();
         if (rowId <= 0) {
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "]");
         }
 
-        return delete(db, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+        return delete(databaseName, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
     public int delete(long rowId) {
@@ -336,10 +272,12 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     }
 
     public int delete(@Nonnull String databaseName, @Nullable String where, @Nullable String[] whereArgs) {
-        return delete(getWritableDatabase(databaseName), where, whereArgs);
-    }
+//        return delete(getWritableDatabase(databaseName), where, whereArgs);
+//    }
+//
+//    public int delete(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable String where, @Nullable String[] whereArgs) {
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-    public int delete(@Nonnull DatabaseWrapper db, @Nullable String where, @Nullable String[] whereArgs) {
         checkDB(db);
         int rowCountAffected = 0;
 
@@ -361,43 +299,12 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         return rowCountAffected;
     }
 
-    public void deleteAsync(@Nullable T e) {
-        deleteAsync(getDatabaseName(), e);
-    }
-
-    public void deleteAsync(@Nonnull String databaseName, @Nullable T e) {
-        if (e == null) {
-            return;
-        }
-
-        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
-        androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteTask<T>(databaseName, this, e));
-    }
-
-    public void deleteAsync(@Nullable String where, @Nullable String[] whereArgs) {
-        deleteAsync(getDatabaseName(), where, whereArgs);
-    }
-
-    public void deleteAsync(@Nonnull String databaseName, @Nullable String where, @Nullable String[] whereArgs) {
-        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
-        androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteWhereTask<T>(databaseName, this, where, whereArgs));
-    }
-
     public long deleteAll() {
         return deleteAll(getDatabaseName());
     }
 
     public long deleteAll(@Nonnull String databaseName) {
-        return delete(getWritableDatabase(databaseName), null, null);
-    }
-
-    public void deleteAllAsync() {
-        deleteAllAsync(getDatabaseName());
-    }
-
-    public void deleteAllAsync(@Nonnull String databaseName) {
-        AndroidDatabase androidDatabase = getAndroidDatabase(databaseName);
-        androidDatabase.getManagerExecutorServiceInstance().submit(new DeleteWhereTask<T>(databaseName, this, null, null));
+        return delete(databaseName, null, null);
     }
 
     // ===== Listeners =====
@@ -429,7 +336,7 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         }
     }
 
-    private void notifyTableListeners(boolean forceNotify, @Nullable DatabaseWrapper db, @Nonnull DatabaseTableChange changeType) {
+    private void notifyTableListeners(boolean forceNotify, @Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull DatabaseTableChange changeType) {
         updateLastTableModifiedTs();
 
         if (forceNotify || !(db != null && db.inTransaction())) {

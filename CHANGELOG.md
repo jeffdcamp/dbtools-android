@@ -3,12 +3,16 @@ Change Log
 
   Version 8.0.0 *(2017-01)*
 ---------------------------
-* Removed default constructors of Record classes 
-* Enum columns will not cause a ArrayIndexOutOfBoundsException, instead it will return default value
+* Kotlin generated classes use functions with Default Arguments
+* Removed default constructors on all Record classes 
+* Enum columns will not cause a ArrayIndexOutOfBoundsException (if the database contains an invalid ordinal), instead it will return default value
+* Removed xxxAsync methods (apps should handle their own threads and background calls) 
 
 Migration
-
 * Remove unused constructors from all Record classes
+* Move CREATE_VIEW and DROP_VIEW from Record class to Manager class
+* Move QUERY from Record class to Manager class
+* Kotlin: Change function calls to use Default Arguments
 
   Version 7.2.2 *(2017-01)*
 ---------------------------

@@ -63,7 +63,7 @@ class IndividualTest {
         individual.firstName = "Jeffery"
         individualManager.save(individual)
 
-        val dbFirstName = individualManager.findValueBySelection(String::class.java, IndividualConst.C_FIRST_NAME, IndividualConst.C_ID + " = " + individual.id, null, "")
+        val dbFirstName = individualManager.findValueBySelection(String::class.java, IndividualConst.C_FIRST_NAME,  "", IndividualConst.C_ID + " = " + individual.id, null)
         assertEquals("Jeffery", dbFirstName)
 
         // === DELETE ===
@@ -94,9 +94,9 @@ class IndividualTest {
         assertEquals("findValueByRawQuery", "Darth", individualManager.findValueByRawQuery(String::class.java, "SELECT " + IndividualConst.C_FIRST_NAME + " FROM " + IndividualConst.TABLE + " WHERE " + IndividualConst.C_ID + " = ?", SQLQueryBuilder.toSelectionArgs(1), ""))
         assertEquals("findAll", 5, individualManager.findAll().size.toLong())
         assertEquals("findByRowId", 1, individualManager.findByRowId(ind1.id)!!.id)
-        assertEquals("findBySelection", ind1.id, individualManager.findBySelection(IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1), null)!!.id)
+        assertEquals("findBySelection", ind1.id, individualManager.findBySelection(selection = IndividualConst.C_ENABLED + " = ?", selectionArgs = SQLQueryBuilder.toSelectionArgs(1))!!.id)
         assertEquals("findAllByRowIds", 2, individualManager.findAllByRowIds(longArrayOf(ind1.id, ind2.id, 99999)).size.toLong())
-        assertEquals("findAllBySelection", 3, individualManager.findAllBySelection(IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1)).size.toLong())
+        assertEquals("findAllBySelection", 3, individualManager.findAllBySelection(selection = IndividualConst.C_ENABLED + " = ?", selectionArgs = SQLQueryBuilder.toSelectionArgs(1)).size.toLong())
 
         val integerList = individualManager.findAllValuesBySelection(Int::class.java, IndividualConst.C_NUMBER, IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1))
         assertEquals("findAllValuesBySelection1", 3, integerList.size.toLong())
@@ -105,7 +105,7 @@ class IndividualTest {
         val value = individualManager.findValueBySelection(Int::class.java, IndividualConst.C_NUMBER, ind4.id, 99)
         assertEquals("findAllValuesBySelection2 value check", ind4.number, value)
 
-        val orderedList = individualManager.findAllOrderBy(IndividualConst.C_LAST_NAME)
+        val orderedList = individualManager.findAll(orderBy = IndividualConst.C_LAST_NAME)
         assertEquals("findAllOrderBy", 5, orderedList.size.toLong())
         assertEquals("findAllOrderBy value check", ind1.lastName, orderedList.get(4).lastName)
 

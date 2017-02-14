@@ -74,17 +74,17 @@ public abstract class IndividualViewBaseManager extends AndroidBaseManagerReadOn
 
     @javax.annotation.Nonnull
     public String getPrimaryKey() {
-        return null;
+        return "<NO_PRIMARY_KEY_ON_VIEWS>";
     }
 
     @javax.annotation.Nonnull
     public String getDropSql() {
-        return IndividualView.DROP_VIEW;
+        return IndividualViewManager.DROP_VIEW;
     }
 
     @javax.annotation.Nonnull
     public String getCreateSql() {
-        return IndividualView.CREATE_VIEW;
+        return IndividualViewManager.CREATE_VIEW;
     }
 
     @javax.annotation.Nonnull

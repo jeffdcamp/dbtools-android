@@ -6,7 +6,7 @@ public final class DatabaseValueUtil {
     private DatabaseValueUtil() {
     }
 
-    public static <I> DatabaseValue getDatabaseValue(Class<I> type) {
+    public static DatabaseValue getDatabaseValue(Class<?> type) {
         if (type == Integer.class || type == int.class) {
             return new DatabaseInteger();
         } else if (type == Long.class || type == long.class) {

@@ -601,7 +601,7 @@ public abstract class AndroidDatabaseBaseManager {
 
         String table = DBToolsMetaData.TABLE;
 
-        DBToolsContentValues contentValues = androidDatabase.getDatabaseWrapper().newContentValues();
+        DBToolsContentValues<?> contentValues = androidDatabase.getDatabaseWrapper().newContentValues();
         contentValues.put(DBToolsMetaData.C_KEY, keyName);
         contentValues.put(DBToolsMetaData.C_VALUE, version);
 

@@ -12,30 +12,29 @@ package org.dbtools.sample.kotlin.model.database.main.individual
 
 import org.dbtools.android.domain.AndroidBaseRecord
 import org.dbtools.android.domain.database.statement.StatementWrapper
-import org.dbtools.sample.kotlin.model.database.main.individualtype.IndividualType
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import android.database.Cursor
 
 
 @Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody", "ConvertSecondaryConstructorToPrimary")
 @SuppressWarnings("all")
-abstract class IndividualBaseRecord : AndroidBaseRecord {
+abstract class IndividualBaseRecord  : AndroidBaseRecord {
 
      open var id: Long = 0
-     open var individualType: IndividualType = IndividualType.HEAD
+     open var individualType: org.dbtools.sample.kotlin.model.type.IndividualType = org.dbtools.sample.kotlin.model.type.IndividualType.HEAD
      open var firstName: String = ""
      open var lastName: String = ""
-     open var sampleDateTime: java.util.Date? = java.util.Date()
-     open var birthDate: java.util.Date? = java.util.Date()
-     open var lastModified: java.util.Date? = java.util.Date()
-     open var number: Int? = 0
-     open var phone: String? = ""
-     open var email: String? = ""
+     open var sampleDateTime: java.util.Date? = null
+     open var birthDate: java.util.Date? = null
+     open var lastModified: java.util.Date? = null
+     open var number: Int? = null
+     open var phone: String? = null
+     open var email: String? = null
      open var data: ByteArray? = null
-     open var amount1: Float? = 0.0f
-     open var amount2: Double? = 0.0
-     open var enabled: Boolean? = false
-     open var spouseIndividualId: Long? = 0
+     open var amount1: Float? = null
+     open var amount2: Double? = null
+     open var enabled: Boolean? = null
+     open var spouseIndividualId: Long? = null
 
     constructor() {
     }
@@ -61,7 +60,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
     }
 
     override fun getContentValues(values: DBToolsContentValues<*>) {
-        values.put(IndividualConst.C_INDIVIDUAL_TYPE, individualType.ordinal.toLong())
+        values.put(IndividualConst.C_INDIVIDUAL_TYPE, individualType?.ordinal?.toLong())
         values.put(IndividualConst.C_FIRST_NAME, firstName)
         values.put(IndividualConst.C_LAST_NAME, lastName)
         values.put(IndividualConst.C_SAMPLE_DATE_TIME, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime))
@@ -80,7 +79,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
     override fun getValues() : Array<Any?> {
         return arrayOf(
             id,
-            individualType.ordinal.toLong(),
+            individualType?.ordinal?.toLong(),
             firstName,
             lastName,
             org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime),
@@ -118,7 +117,11 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
 
     @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     override fun bindInsertStatement(statement: StatementWrapper) {
-        statement.bindLong(1, individualType.ordinal.toLong())
+        if (individualType != null) {
+            statement.bindLong(1, individualType?.ordinal?.toLong()!!)
+        } else {
+            statement.bindNull(1)
+        }
         statement.bindString(2, firstName)
         statement.bindString(3, lastName)
         if (sampleDateTime != null) {
@@ -180,7 +183,11 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
 
     @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
     override fun bindUpdateStatement(statement: StatementWrapper) {
-        statement.bindLong(1, individualType.ordinal.toLong())
+        if (individualType != null) {
+            statement.bindLong(1, individualType?.ordinal?.toLong()!!)
+        } else {
+            statement.bindNull(1)
+        }
         statement.bindString(2, firstName)
         statement.bindString(3, lastName)
         if (sampleDateTime != null) {
@@ -242,7 +249,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
     }
 
     override fun setContent(values: DBToolsContentValues<*>) {
-        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType::class.java, values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE), IndividualType.HEAD)
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(org.dbtools.sample.kotlin.model.type.IndividualType::class.java, values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE), org.dbtools.sample.kotlin.model.type.IndividualType.HEAD)
         firstName = values.getAsString(IndividualConst.C_FIRST_NAME)
         lastName = values.getAsString(IndividualConst.C_LAST_NAME)
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_SAMPLE_DATE_TIME))
@@ -260,7 +267,7 @@ abstract class IndividualBaseRecord : AndroidBaseRecord {
 
     override fun setContent(cursor: Cursor) {
         id = cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_ID))
-        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(IndividualType::class.java, cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE)), IndividualType.HEAD)
+        individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(org.dbtools.sample.kotlin.model.type.IndividualType::class.java, cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE)), org.dbtools.sample.kotlin.model.type.IndividualType.HEAD)
         firstName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_FIRST_NAME))
         lastName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_NAME))
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_SAMPLE_DATE_TIME)))

@@ -21,7 +21,7 @@ public abstract class IndividualDataBaseRecord extends AndroidBaseRecord {
 
     private Long externalId = null;
     private Integer typeId = null;
-    private String name = "";
+    private String name = null;
 
     public IndividualDataBaseRecord() {
     }

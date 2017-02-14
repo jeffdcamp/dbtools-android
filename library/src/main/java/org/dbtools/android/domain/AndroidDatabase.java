@@ -1,15 +1,17 @@
 package org.dbtools.android.domain;
 
 import org.dbtools.android.domain.database.DatabaseWrapper;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 @SuppressWarnings("UnusedDeclaration")
-public class AndroidDatabase {
+public class AndroidDatabase  {
     private final boolean attached;
     private final String name;
     private final String path;
@@ -18,7 +20,7 @@ public class AndroidDatabase {
 
     private final String password;
 
-    private DatabaseWrapper databaseWrapper;
+    private DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> databaseWrapper;
 
     // attached Database info
     private final AndroidDatabase attachedMainDatabase;
@@ -86,11 +88,11 @@ public class AndroidDatabase {
         return password;
     }
 
-    public DatabaseWrapper getDatabaseWrapper() {
+    public DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getDatabaseWrapper() {
         return databaseWrapper;
     }
 
-    public void setDatabaseWrapper(@Nullable DatabaseWrapper databaseWrapper) {
+    public void setDatabaseWrapper(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> databaseWrapper) {
         this.databaseWrapper = databaseWrapper;
     }
 
@@ -103,11 +105,7 @@ public class AndroidDatabase {
     }
 
     public boolean inTransaction() {
-        if (databaseWrapper != null) {
-            return databaseWrapper.inTransaction();
-        }
-
-        return false;
+        return databaseWrapper != null && databaseWrapper.inTransaction();
     }
 
     public void close() {

@@ -1,5 +1,5 @@
 package org.dbtools.android.domain
 
-abstract class KotlinAndroidBaseManagerReadOnly<T : AndroidBaseRecord> : AndroidBaseManagerReadOnly<T>() {
+abstract class KotlinAndroidBaseManagerReadOnly<T : AndroidBaseRecord> : KotlinAndroidBaseManager<T>() {
 
 }

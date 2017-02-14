@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         val individual = individualManager.findLastIndividual()
         if (individual != null) {
-            individual!!.firstName = "Jeffery"
+            individual.firstName = "Jeffery"
             individualManager.update(individual)
             Toast.makeText(this, "Last individual updated", Toast.LENGTH_SHORT).show()
         } else {

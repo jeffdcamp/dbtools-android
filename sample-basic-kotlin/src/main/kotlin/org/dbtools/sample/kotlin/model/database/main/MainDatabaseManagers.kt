@@ -14,7 +14,7 @@ import org.dbtools.sample.kotlin.model.database.DatabaseManager
 
 
 @SuppressWarnings("all")
-object MainDatabaseManagers {
+object MainDatabaseManagers  {
 
      var individualManager: IndividualManager? = null
      var individualDataManager: IndividualDataManager? = null

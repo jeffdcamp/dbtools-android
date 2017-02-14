@@ -8,18 +8,6 @@
 
 package org.dbtools.sample.model.database.main.individualview;
 
-import org.dbtools.sample.model.database.main.individual.IndividualConst;
-
 public class IndividualView extends IndividualViewBaseRecord {
 
-    public static final String DROP_VIEW;
-    public static final String CREATE_VIEW = "CREATE VIEW IF NOT EXISTS " + IndividualViewConst.TABLE + " AS SELECT " +
-            IndividualConst.FULL_C_ID + " AS " + IndividualViewConst.C_ID + ", " +
-            IndividualConst.FULL_C_FIRST_NAME + " AS " + IndividualViewConst.C_NAME +
-            " FROM " + IndividualConst.TABLE;
-
-    static {
-        DROP_VIEW = "DROP VIEW IF EXISTS " + IndividualViewConst.TABLE + ";";
-
-    }
 }

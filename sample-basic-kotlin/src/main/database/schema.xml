@@ -3,13 +3,9 @@
           xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
           xsi:schemaLocation='https://github.com/jeffdcamp/dbtools-gen dbschema.xsd'>
     <database name="main"> <!-- use fieldsDefaultNotNull="true" to make all table field default notNull -->
-        <table name="INDIVIDUAL_TYPE" className="IndividualType" enumerations="HEAD,SPOUSE,CHILD" readOnly="true">
-            <field name="_id" jdbcDataType="BIGINT" increment="true" primaryKey="true" notNull="true"/>
-            <field name="NAME" jdbcDataType="VARCHAR" size="255" notNull="true" unique="true"/>
-        </table>
         <table name="INDIVIDUAL">
             <field name="_id" jdbcDataType="BIGINT" increment="true" primaryKey="true" notNull="true"/>
-            <field name="INDIVIDUAL_TYPE_ID" jdbcDataType="INTEGER" varName="individualType" foreignKeyTable="INDIVIDUAL_TYPE" foreignKeyField="_id" foreignKeyType="ENUM" enumerationDefault="HEAD"/>
+            <field name="INDIVIDUAL_TYPE" jdbcDataType="INTEGER" enumerationClass="org.dbtools.sample.kotlin.model.type.IndividualType" enumerationDefault="HEAD"/>
             <field name="FIRST_NAME" jdbcDataType="VARCHAR" size="255" notNull="true"/>
             <field name="LAST_NAME" jdbcDataType="VARCHAR" size="255" notNull="true"/>
             <field name="SAMPLE_DATE_TIME" jdbcDataType="DATETIME"/> <!-- text -->
@@ -44,7 +40,6 @@
         <query name="INDIVIDUAL_QUERY">
             <field name="id" jdbcDataType="BIGINT"/>
             <field name="NAME" jdbcDataType="VARCHAR" size="255" notNull="true"/>
-            <!--<field name="LOCATION_TYPE" jdbcDataType="INTEGER" enumerationClass="LocationType" enumerationDefault="HOME"/>-->
         </query>
     </database>
 </dbSchema>

@@ -8,17 +8,6 @@
 
 package org.dbtools.sample.kotlin.model.database.main.individualquery
 
-import org.dbtools.sample.kotlin.model.database.main.individual.IndividualConst
-
 class IndividualQuery : IndividualQueryBaseRecord() {
 
-    companion object {
-        val QUERY = "(" +
-            "SELECT " +
-            IndividualConst.FULL_C_ID + " AS " + IndividualQueryConst.C_ID + ", " +
-            IndividualConst.FULL_C_FIRST_NAME + " AS " + IndividualQueryConst.C_NAME +
-            " FROM SOME TABLE(S)" +
-            ")"
-        val QUERY_RAW = "SELECT * FROM " + QUERY
-    }
 }

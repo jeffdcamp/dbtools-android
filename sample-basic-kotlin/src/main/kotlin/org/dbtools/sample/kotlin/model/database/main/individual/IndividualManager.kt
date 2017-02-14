@@ -13,11 +13,7 @@ import org.dbtools.query.sql.SQLQueryBuilder
 import org.dbtools.sample.kotlin.model.database.DatabaseManager
 
 
-class IndividualManager : IndividualBaseManager {
-
-
-    constructor(databaseManager: DatabaseManager): super(databaseManager) {
-    }
+class IndividualManager(databaseManager: DatabaseManager) : IndividualBaseManager(databaseManager) {
 
     fun findLastIndividualId(): Long {
         return findValueByRawQuery(Long::class.java, "SELECT MAX(" + IndividualConst.C_ID + ") FROM " + IndividualConst.TABLE, null, 0L)
@@ -28,6 +24,6 @@ class IndividualManager : IndividualBaseManager {
     }
 
     fun findFirstNameById(id: Long): String {
-        return findValueBySelection(String::class.java, IndividualConst.C_FIRST_NAME, IndividualConst.C_ID + " = ?", SQLQueryBuilder.toSelectionArgs(id), "")
+        return findValueBySelection(String::class.java, IndividualConst.C_FIRST_NAME, "", IndividualConst.C_ID + " = ?", SQLQueryBuilder.toSelectionArgs(id), "")
     }
 }

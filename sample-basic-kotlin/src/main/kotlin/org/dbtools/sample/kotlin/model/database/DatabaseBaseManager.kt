@@ -18,7 +18,7 @@ import org.dbtools.android.domain.config.DatabaseConfig
 
 @Suppress("unused", "ConvertSecondaryConstructorToPrimary", "RemoveEmptySecondaryConstructorBody")
 @SuppressWarnings("all")
-abstract class DatabaseBaseManager : AndroidDatabaseManager {
+abstract class DatabaseBaseManager  : AndroidDatabaseManager {
 
 
     constructor(databaseConfig: DatabaseConfig) : super(databaseConfig) {
@@ -29,7 +29,6 @@ abstract class DatabaseBaseManager : AndroidDatabaseManager {
         database.beginTransaction()
         
         // Enum Tables
-        AndroidBaseManager.createTable(database, org.dbtools.sample.kotlin.model.database.main.individualtype.IndividualTypeConst.CREATE_TABLE)
         
         // Tables
         AndroidBaseManager.createTable(database, org.dbtools.sample.kotlin.model.database.main.individual.IndividualConst.CREATE_TABLE)
@@ -51,7 +50,7 @@ abstract class DatabaseBaseManager : AndroidDatabaseManager {
         database.beginTransaction()
         
         // Views
-        AndroidBaseManager.createTable(database, org.dbtools.sample.kotlin.model.database.main.individualview.IndividualView.CREATE_VIEW)
+        AndroidBaseManager.createTable(database, org.dbtools.sample.kotlin.model.database.main.individualview.IndividualViewManager.CREATE_VIEW)
         
         database.setTransactionSuccessful()
         database.endTransaction()
@@ -62,7 +61,7 @@ abstract class DatabaseBaseManager : AndroidDatabaseManager {
         database.beginTransaction()
         
         // Views
-        AndroidBaseManager.dropTable(database, org.dbtools.sample.kotlin.model.database.main.individualview.IndividualView.DROP_VIEW)
+        AndroidBaseManager.dropTable(database, org.dbtools.sample.kotlin.model.database.main.individualview.IndividualViewManager.DROP_VIEW)
         
         database.setTransactionSuccessful()
         database.endTransaction()

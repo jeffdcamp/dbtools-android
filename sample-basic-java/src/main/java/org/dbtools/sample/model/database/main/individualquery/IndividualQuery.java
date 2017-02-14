@@ -8,18 +8,6 @@
 
 package org.dbtools.sample.model.database.main.individualquery;
 
-import org.dbtools.sample.model.database.main.individual.IndividualConst;
-
 public class IndividualQuery extends IndividualQueryBaseRecord {
-
-    public static final String QUERY = "(" +
-            "SELECT " +
-            IndividualConst.FULL_C_ID + " AS " + IndividualQueryConst.C_ID + ", " +
-            IndividualConst.FULL_C_FIRST_NAME + " AS " + IndividualQueryConst.C_NAME + ", " +
-            " FROM SOME TABLE(S)" +
-            ")";
-    public static final String QUERY_RAW = "SELECT * FROM " + QUERY;
-
-
 
 }

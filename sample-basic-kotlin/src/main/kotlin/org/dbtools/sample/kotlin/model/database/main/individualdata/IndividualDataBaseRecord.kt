@@ -18,11 +18,11 @@ import android.database.Cursor
 
 @Suppress("LeakingThis", "unused", "RemoveEmptySecondaryConstructorBody", "ConvertSecondaryConstructorToPrimary")
 @SuppressWarnings("all")
-abstract class IndividualDataBaseRecord : AndroidBaseRecord {
+abstract class IndividualDataBaseRecord  : AndroidBaseRecord {
 
-     open var externalId: Long? = 0
-     open var typeId: Int? = 0
-     open var name: String? = ""
+     open var externalId: Long? = null
+     open var typeId: Int? = null
+     open var name: String? = null
 
     constructor() {
     }
