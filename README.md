@@ -5,10 +5,21 @@ DBTools for Android is an Android ORM library that makes it easy to work with SQ
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android)
 
-Documentation
-=============
+**Features**
 
-DBTools-Android Javadoc: http://jeffdcamp.github.io/dbtools-android/javadoc/
+* Clean layout of of domain classes, domain manager classes, database definitions
+* Mature/Stable library: Used in many apps for years, and large apps with millions of users
+* Fast: Benchmark as one of the fastest ORMs for both reading and writing small, medium, and large sets of data
+* Code generator generates all of the boiler plate code.
+* Table change listeners (both Rx and non-Rx), to know when changes happen to specific tables
+* First class testing support:  All JUnit tests can run against JDBC Sqlite in the JVM
+* Rx support: Full support for Rx java Observables
+* Injection/Dagger support
+* Kotlin support: Generator can generate Kotlin and KotlinRx classes
+* Support Android Sqlite, sqlite.org sqlite, SQLCipher
+* SQLBuilder library to simplify building of SQL queries
+* Multiple database support: Easily work with many databases at the same time, and even merge databases
+
 
 Usage
 =====
@@ -172,6 +183,8 @@ RxJava
 Setup
 =====
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android)
+
 *For a working implementation of DBTools for Android see the Android-Template application (https://github.com/jeffdcamp/android-template)
 
   1. Add DBTools Gradle Plugin and dbtools-android dependency to build.gradle file
@@ -189,6 +202,10 @@ Setup
 
         dependencies {
             compile 'org.dbtools:dbtools-android:<latest dbtools-android version>'
+            
+            // optional dependencies
+            compile 'com.google.code.findbugs:jsr305:3.0.1'
+            androidTestCompile 'com.google.code.findbugs:jsr305:3.0.1' // fix conflicting issue with jsr305 annotations (espresso-core)
         }
 
         dbtools {
@@ -198,10 +215,10 @@ Setup
             outputSrcDir 'src/main/java/org/company/project/domain'
 
             // optional items
-            injectionSupport true // support for @Inject (using JEE, Dagger, Guice, etc)
+            injectionSupport false // support for @Inject (using Dagger, Guice, JEE, etc)
             jsr305Support true // support for @Notnull / @Nullable etc
             includeDatabaseNameInPackage true // place each set of domain objects into a package named after its database
-            dateType 'JSR-310' // DATE, JSR-310, JODA
+            dateType 'DATE' // DATE, JSR-310, JODA
             rxJavaSupport false // support RxJava
         }
 
@@ -209,6 +226,11 @@ Setup
 
         ./gradlew dbtools-init
 
+        ... or ...
+        
+        cd app
+        gradle dbtools-init
+        
         ... or ...
 
         From Android Studio:  DOUBLE-CLICK on "dbtools-init" task from the "Gradle" Tools Window
@@ -239,6 +261,11 @@ Setup
   4. Use DBTools Generator to generate DatabaseManager and all domain classes.  Execute gradle task:
 
         ./gradlew dbtools-genclasses
+        
+        ... or ...
+        
+        cd app
+        gradle dbtools-genclasses
 
         ... or ...
 
@@ -260,6 +287,23 @@ Setup
 
                IndividualManager.java (extends IndividualBaseManager and is used for developer customizations (such as adding new findByXXX(...) methods) (NEVER overwritten by generator)
                IndividualBaseManager.java (contains boiler-plate code for doing CRUD operations) (this file is ALWAYS overwritten by generator)
+               
+   5. Use DBTools
+   
+        IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
+        
+        Individual individual1 = new Individual();
+        individual1.setFirstName("Bob");
+        individual1.setPhone("555-555-1234");
+
+        individualManager.save(individual1);
+        
+    6. Refer to sample app using DBTools: https://github.com/jeffdcamp/android-template
+
+Documentation
+=============
+
+DBTools-Android Javadoc: http://jeffdcamp.github.io/dbtools-android/javadoc/
 
 Proguard Rules
 ==============
