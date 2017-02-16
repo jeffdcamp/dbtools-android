@@ -149,7 +149,7 @@ public class IndividualConst {
     }
 
     public static byte[] getData(Cursor cursor) {
-        return cursor.getBlob(cursor.getColumnIndexOrThrow(C_DATA));
+        return !cursor.isNull(cursor.getColumnIndexOrThrow(C_DATA)) ? cursor.getBlob(cursor.getColumnIndexOrThrow(C_DATA)) : null;
     }
 
     public static Float getAmount1(Cursor cursor) {
@@ -157,7 +157,7 @@ public class IndividualConst {
     }
 
     public static Double getAmount2(Cursor cursor) {
-        return cursor.getDouble(cursor.getColumnIndexOrThrow(C_AMOUNT2));
+        return !cursor.isNull(cursor.getColumnIndexOrThrow(C_AMOUNT2)) ? cursor.getDouble(cursor.getColumnIndexOrThrow(C_AMOUNT2)) : null;
     }
 
     public static Boolean isEnabled(Cursor cursor) {

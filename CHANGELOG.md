@@ -5,10 +5,13 @@ Change Log
 ---------------------------
 * Kotlin generated classes use functions with Default Arguments
 * Removed default constructors on all Record classes 
-* Enum columns will not cause a ArrayIndexOutOfBoundsException (if the database contains an invalid ordinal), instead it will return default value
+* Enum columns will no longer cause a ArrayIndexOutOfBoundsException (if the database contains an invalid ordinal), instead it will fall-back to default value
 * Removed xxxAsync methods (apps should handle their own threads and background calls) 
+* All NULLABLE String/VARCHAR columns now default to null (previously they would default to "")
+* Fixed issues with nullable Double and Byte[]
 
-Migration
+**Migration**
+
 * Remove unused constructors from all Record classes
 * Move CREATE_VIEW and DROP_VIEW from Record class to Manager class
 * Move QUERY from Record class to Manager class

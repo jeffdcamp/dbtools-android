@@ -276,7 +276,7 @@ abstract class IndividualBaseRecord  : AndroidBaseRecord {
         number = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_NUMBER))) cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_NUMBER)) else null
         phone = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE))) cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE)) else null
         email = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_EMAIL))) cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_EMAIL)) else null
-        data = cursor.getBlob(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA))
+        data = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA))) cursor.getBlob(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA)) else null
         amount1 = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1))) cursor.getFloat(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1)) else null
         amount2 = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2))) cursor.getDouble(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2)) else null
         enabled = if (!cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED))) (cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED)) != 0) else null

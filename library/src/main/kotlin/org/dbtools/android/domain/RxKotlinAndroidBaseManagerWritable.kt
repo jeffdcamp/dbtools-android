@@ -30,6 +30,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         }
     }
 
+    @JvmOverloads
     open fun inTransaction(databaseName: String = this.getDatabaseName()): Boolean {
         return getWritableDatabase(databaseName).inTransaction()
     }
@@ -108,6 +109,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
             try {
                 // statement
                 val statement = getInsertStatement(db)
+                statement.clearBindings();
                 record.bindInsertStatement(statement)
                 rowId = statement.executeInsert()
 
@@ -140,6 +142,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
 
         // Statement
         val statement = getUpdateStatement(db)
+        statement.clearBindings()
         record.bindUpdateStatement(statement)
         val rowsAffectedCount = statement.executeUpdateDelete()
 

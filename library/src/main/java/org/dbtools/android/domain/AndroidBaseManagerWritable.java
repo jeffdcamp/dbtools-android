@@ -68,41 +68,30 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     /**
      * Save Record.
      *
-     * @param e Record to be saved
+     * @param record Record to be saved
      * @return true if record was saved
      */
-    public boolean save(@Nullable T e) {
-        return save(getDatabaseName(), e);
+    public boolean save(@Nullable T record) {
+        return save(getDatabaseName(), record);
     }
 
     /**
      * Save Record.
      *
      * @param databaseName database name to use
-     * @param e            Record to be saved
+     * @param record            Record to be saved
      * @return true if record was saved
      */
-    public boolean save(@Nonnull String databaseName, @Nullable T e) {
-//        return save(getWritableDatabase(databaseName), e);
-//    }
-//
-//    /**
-//     * Save Record.
-//     *
-//     * @param db database for the record to be saved to
-//     * @param e  Record to be saved
-//     * @return true if record was saved
-//     */
-//    public boolean save(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
-        if (e == null) {
+    public boolean save(@Nonnull String databaseName, @Nullable T record) {
+        if (record == null) {
             return false;
         }
 
-        if (e.isNewRecord()) {
-            long newId = insert(databaseName, e);
+        if (record.isNewRecord()) {
+            long newId = insert(databaseName, record);
             return newId > 0;
         } else {
-            int count = update(databaseName, e);
+            int count = update(databaseName, record);
             return count != 0;
         }
     }
@@ -110,34 +99,23 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     /**
      * Insert record into database.
      *
-     * @param e record to be inserted
+     * @param record record to be inserted
      * @return long value of new id
      */
-    public long insert(@Nullable T e) {
-        return insert(getDatabaseName(), e);
+    public long insert(@Nullable T record) {
+        return insert(getDatabaseName(), record);
     }
 
     /**
      * Insert record into database.
      *
-     * @param e record to be inserted
+     * @param record record to be inserted
      * @return long value of new id
      */
-    public long insert(@Nonnull String databaseName, @Nullable T e) {
-//        return insert(getWritableDatabase(databaseName), e);
-//    }
-//
-//    /**
-//     * Insert record into database.
-//     *
-//     * @param db database for the record inserted into
-//     * @param e  record to be inserted
-//     * @return long value of new id
-//     */
-//    public long insert(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
+    public long insert(@Nonnull String databaseName, @Nullable T record) {
         DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-        if (e == null) {
+        if (record == null) {
             return -1;
         }
 
@@ -150,10 +128,11 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
             try {
                 // statement
                 StatementWrapper statement = getInsertStatement(db);
-                e.bindInsertStatement(statement);
+                statement.clearBindings();
+                record.bindInsertStatement(statement);
                 rowId = statement.executeInsert();
 
-                e.setPrimaryKeyId(rowId);
+                record.setPrimaryKeyId(rowId);
 
                 notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), rowId, true, false, false));
 
@@ -165,37 +144,27 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         return rowId;
     }
 
-    public int update(@Nullable T e) {
-        return update(getDatabaseName(), e);
+    public int update(@Nullable T record) {
+        return update(getDatabaseName(), record);
     }
 
-    public int update(@Nonnull String databaseName, @Nullable T e) {
-//        return update(getWritableDatabase(databaseName), e);
-//    }
-//
-//    /**
-//     * Update a record
-//     *
-//     * @param db database
-//     * @param e  record
-//     * @return number of rows effected
-//     */
-//    public int update(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
+    public int update(@Nonnull String databaseName, @Nullable T record) {
         DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-        if (e == null) {
+        if (record == null) {
             return 0;
         }
 
         checkDB(db);
-        long rowId = e.getPrimaryKeyId();
+        long rowId = record.getPrimaryKeyId();
         if (rowId <= 0) {
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "] be sure to call create(...) before update(...)");
         }
 
         // Statement
         StatementWrapper statement = getUpdateStatement(db);
-        e.bindUpdateStatement(statement);
+        statement.clearBindings();
+        record.bindUpdateStatement(statement);
         int rowsAffectedCount = statement.executeUpdateDelete();
 
         if (rowsAffectedCount > 0) {
@@ -214,10 +183,6 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     }
 
     public int update(@Nonnull String databaseName, @Nonnull DBToolsContentValues<?> contentValues, @Nullable String where, @Nullable String[] whereArgs) {
-//        return update(getWritableDatabase(databaseName), contentValues, where, whereArgs);
-//    }
-//
-//    public int update(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull DBToolsContentValues<?> contentValues, @Nullable String where, @Nullable String[] whereArgs) {
         DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
         int rowsAffectedCount = 0;
@@ -241,26 +206,21 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         return rowsAffectedCount;
     }
 
-    public int delete(@Nullable T e) {
-        return delete(getDatabaseName(), e);
+    public int delete(@Nullable T record) {
+        return delete(getDatabaseName(), record);
     }
 
-    public int delete(@Nonnull String databaseName, @Nullable T e) {
-//        return delete(getWritableDatabase(databaseName), e);
-//    }
-//
-//    public int delete(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable T e) {
-
-        if (e == null) {
+    public int delete(@Nonnull String databaseName, @Nullable T record) {
+        if (record == null) {
             return 0;
         }
 
-        long rowId = e.getPrimaryKeyId();
+        long rowId = record.getPrimaryKeyId();
         if (rowId <= 0) {
             throw new IllegalArgumentException("Invalid rowId [" + rowId + "]");
         }
 
-        return delete(databaseName, e.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
+        return delete(databaseName, record.getIdColumnName() + " = ?", new String[]{String.valueOf(rowId)});
     }
 
     public int delete(long rowId) {
@@ -272,10 +232,6 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
     }
 
     public int delete(@Nonnull String databaseName, @Nullable String where, @Nullable String[] whereArgs) {
-//        return delete(getWritableDatabase(databaseName), where, whereArgs);
-//    }
-//
-//    public int delete(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable String where, @Nullable String[] whereArgs) {
         DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
         checkDB(db);

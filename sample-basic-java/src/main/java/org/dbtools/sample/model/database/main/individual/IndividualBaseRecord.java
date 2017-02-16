@@ -10,10 +10,11 @@
 
 package org.dbtools.sample.model.database.main.individual;
 
-import org.dbtools.android.domain.AndroidBaseRecord;
-import org.dbtools.android.domain.database.statement.StatementWrapper;
-import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import android.database.Cursor;
+
+import org.dbtools.android.domain.AndroidBaseRecord;
+import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
+import org.dbtools.android.domain.database.statement.StatementWrapper;
 
 
 @SuppressWarnings("all")
@@ -276,9 +277,9 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         number = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_NUMBER)) ? cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_NUMBER)) : null;
         phone = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE)) ? cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_PHONE)) : null;
         email = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_EMAIL)) ? cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_EMAIL)) : null;
-        data = cursor.getBlob(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA));
+        data = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA)) ? cursor.getBlob(cursor.getColumnIndexOrThrow(IndividualConst.C_DATA)) : null;
         amount1 = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1)) ? cursor.getFloat(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT1)) : null;
-        amount2 = cursor.getDouble(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2));
+        amount2 = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2)) ? cursor.getDouble(cursor.getColumnIndexOrThrow(IndividualConst.C_AMOUNT2)) : null;
         enabled = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED)) ? cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_ENABLED)) != 0 ? true : false : null;
         spouseIndividualId = !cursor.isNull(cursor.getColumnIndexOrThrow(IndividualConst.C_SPOUSE_INDIVIDUAL_ID)) ? cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_SPOUSE_INDIVIDUAL_ID)) : null;
     }

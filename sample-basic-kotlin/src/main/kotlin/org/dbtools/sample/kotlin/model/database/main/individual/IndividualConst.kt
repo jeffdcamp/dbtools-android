@@ -147,7 +147,7 @@ object IndividualConst  {
     }
 
     fun getData(cursor: Cursor) : ByteArray? {
-        return cursor.getBlob(cursor.getColumnIndexOrThrow(C_DATA))
+        return if (!cursor.isNull(cursor.getColumnIndexOrThrow(C_DATA))) cursor.getBlob(cursor.getColumnIndexOrThrow(C_DATA)) else null
     }
 
     fun getAmount1(cursor: Cursor) : Float? {

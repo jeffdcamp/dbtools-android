@@ -1,3 +1,10 @@
+Migration to 8.0.x
+==================
+* Remove unused constructors from all Record classes
+* Move CREATE_VIEW and DROP_VIEW from Record class to Manager class
+* Move QUERY from Record class to Manager class
+* Kotlin: Change function calls to use Default Arguments
+
 Migration to 7.0.x
 ==================
  * DBTools now uses a wrapped version of ContentValues (to help support unit testing)... All record classes will need to change its constructor: from

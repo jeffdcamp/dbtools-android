@@ -1,11 +1,12 @@
 package org.dbtools.sample.kotlin.model.database.main.individual
 
+import org.dbtools.android.domain.database.JdbcSqliteDatabaseWrapper
 import org.dbtools.query.sql.SQLQueryBuilder
 import org.dbtools.sample.kotlin.model.database.DatabaseManager
 import org.dbtools.sample.kotlin.model.database.TestMainDatabaseConfig
 import org.dbtools.sample.kotlin.model.database.main.MainDatabaseManagers
 import org.dbtools.sample.kotlin.model.database.main.individualdata.IndividualData
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.util.*
@@ -136,7 +137,7 @@ class IndividualTest {
 
     @Test
     fun testNoPrimaryKeyAndUnique() {
-        val individualDataManager = MainDatabaseManagers.individualDataManager ?: throw IllegalStateException("IndividualManager null")
+        val individualDataManager = MainDatabaseManagers.individualDataManager ?: throw IllegalStateException("IndividualDataManager null")
 
         val data = IndividualData()
         data.externalId = 555
@@ -150,5 +151,43 @@ class IndividualTest {
         // save again... unique constraint should replace the existing conflict
         individualDataManager.save(data)
         assertEquals(1, individualDataManager.findAll().size.toLong())
+    }
+
+    @Test
+    fun testNullColumns() {
+        JdbcSqliteDatabaseWrapper.setEnableLogging(true)
+
+        val individualManager = MainDatabaseManagers.individualManager ?: throw IllegalStateException("IndividualManager null")
+
+        val individual1 = Individual()
+        individual1.firstName = "Bob"
+        individual1.phone = "555"
+
+        val individual2 = Individual()
+        individual2.firstName = "Sam"
+
+        // Make sure all null fields save
+        individualManager.save(individual1)
+        individualManager.save(individual2)
+
+        // Make sure all null fields load
+        val individual1a = individualManager.findByRowId(individual1.id)
+        val individual2a = individualManager.findByRowId(individual2.id)
+
+        assertNotNull(individual1a)
+        assertNotNull(individual2a)
+        if (individual1a == null || individual2a == null) {
+            return
+        }
+
+        assertEquals(individual1a.firstName, "Bob")
+        assertEquals(individual1a.lastName, "") // not null column
+        assertEquals(individual1a.phone, "555") // null column
+        assertNull(individual1a.number)
+
+        assertEquals(individual2a.firstName, "Sam")
+        assertEquals(individual2a.lastName, "") // not null column
+        assertNull(individual2a.phone) // null column.. Make sure statement does NOT carry over individual1 data
+        assertNull(individual2a.number)
     }
 }

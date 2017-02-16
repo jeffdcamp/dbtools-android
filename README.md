@@ -103,15 +103,6 @@ The following are some examples DBTools can be used:
         // Find count of ALL records who have "555" in their phone number
         int count = individualManager.findCountBySelection(IndividualConst.C_PHONE + " LIKE ?, new String[]{"555"}); 
 
-  Support for ASync writes (guarantees single write per database)
-
-  * Sample async save
-
-        Individual individual = individualManager.findByRowId(1);
-        individual.setPhone("801-555-0000");
-        individualManager.saveAsync(individual);
-
-
   Table Change Listeners
 
   * Add Listener

@@ -27,6 +27,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : KotlinA
         }
     }
 
+    @JvmOverloads
     open fun inTransaction(databaseName: String = this.getDatabaseName()): Boolean {
         return getWritableDatabase(databaseName).inTransaction()
     }
@@ -105,6 +106,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : KotlinA
             try {
                 // statement
                 val statement = getInsertStatement(db)
+                statement.clearBindings();
                 record.bindInsertStatement(statement)
                 rowId = statement.executeInsert()
 
@@ -137,6 +139,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : KotlinA
 
         // Statement
         val statement = getUpdateStatement(db)
+        statement.clearBindings()
         record.bindUpdateStatement(statement)
         val rowsAffectedCount = statement.executeUpdateDelete()
 

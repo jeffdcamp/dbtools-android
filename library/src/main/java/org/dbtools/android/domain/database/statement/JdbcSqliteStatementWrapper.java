@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
@@ -137,6 +138,10 @@ public class JdbcSqliteStatementWrapper implements StatementWrapper {
                     statement.setDouble(index, (Double) arg);
                 } else if (arg instanceof Boolean) {
                     statement.setBoolean(index, (Boolean) arg);
+                } else if (arg == null) {
+                    statement.setNull(index, Types.VARCHAR);
+                } else {
+                    throw new IllegalStateException("UNSUPPORTED BIND TYPE: Unable to bind arg for index [" + index + "]  arg [" + arg + "]");
                 }
             }
         }

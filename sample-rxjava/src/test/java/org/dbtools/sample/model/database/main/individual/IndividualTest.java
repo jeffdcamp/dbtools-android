@@ -1,6 +1,7 @@
 package org.dbtools.sample.model.database.main.individual;
 
 import org.dbtools.android.domain.config.TestDatabaseConfig;
+import org.dbtools.android.domain.database.JdbcSqliteDatabaseWrapper;
 import org.dbtools.query.sql.SQLQueryBuilder;
 import org.dbtools.sample.model.database.DatabaseManager;
 import org.dbtools.sample.model.database.TestMainDatabaseConfig;
@@ -18,6 +19,8 @@ import rx.Observable;
 import rx.observers.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class IndividualTest {
     @Before
@@ -175,5 +178,41 @@ public class IndividualTest {
         // save again... unique constraint should replace the existing conflict
         individualDataManager.save(data);
         assertEquals(1, individualDataManager.findAll().size());
+    }
+
+
+    @Test
+    public void testNullColumns() {
+        JdbcSqliteDatabaseWrapper.setEnableLogging(true);
+
+        IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
+
+        Individual individual1 = new Individual();
+        individual1.setFirstName("Bob");
+        individual1.setPhone("555");
+
+        Individual individual2 = new Individual();
+        individual2.setFirstName("Sam");
+
+        // Make sure all null fields save
+        individualManager.save(individual1);
+        individualManager.save(individual2);
+
+        // Make sure all null fields load
+        Individual individual1a = individualManager.findByRowId(individual1.getId());
+        Individual individual2a = individualManager.findByRowId(individual2.getId());
+
+        assertNotNull(individual1a);
+        assertNotNull(individual2a);
+
+        assertEquals(individual1a.getFirstName(), "Bob");
+        assertEquals(individual1a.getLastName(), ""); // not null column
+        assertEquals(individual1a.getPhone(), "555"); // null column
+        assertNull(individual1a.getNumber());
+
+        assertEquals(individual2a.getFirstName(), "Sam");
+        assertEquals(individual2a.getLastName(), ""); // not null column
+        assertNull(individual2a.getPhone()); // null column.. Make sure statement does NOT carry over individual1 data
+        assertNull(individual2a.getNumber());
     }
 }
