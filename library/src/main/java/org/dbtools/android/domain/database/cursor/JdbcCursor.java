@@ -37,8 +37,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getRow();
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -51,8 +50,7 @@ public class JdbcCursor implements Cursor {
             return true;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -62,8 +60,7 @@ public class JdbcCursor implements Cursor {
             resultSet.absolute(position);
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -73,8 +70,7 @@ public class JdbcCursor implements Cursor {
             resultSet.first();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -84,8 +80,7 @@ public class JdbcCursor implements Cursor {
             resultSet.last();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -95,8 +90,7 @@ public class JdbcCursor implements Cursor {
             resultSet.next();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -106,8 +100,7 @@ public class JdbcCursor implements Cursor {
             resultSet.previous();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -117,8 +110,7 @@ public class JdbcCursor implements Cursor {
             resultSet.isFirst();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -128,8 +120,7 @@ public class JdbcCursor implements Cursor {
             resultSet.isLast();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -139,8 +130,7 @@ public class JdbcCursor implements Cursor {
             resultSet.isBeforeFirst();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -150,8 +140,7 @@ public class JdbcCursor implements Cursor {
             resultSet.isAfterLast();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -160,8 +149,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.findColumn(columnName);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return -1;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -170,8 +158,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.findColumn(columnName);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Cannot find column [" + columnName + "]");
+            throw new IllegalArgumentException("Cannot find column [" + columnName + "]", e);
         }
     }
 
@@ -180,8 +167,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getMetaData().getColumnName(index);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return "";
+            throw new IllegalStateException(e);
         }
     }
 
@@ -196,8 +182,7 @@ public class JdbcCursor implements Cursor {
             }
             return columnNames;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return new String[]{};
+            throw new IllegalStateException(e);
         }
     }
 
@@ -206,8 +191,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getMetaData().getColumnCount();
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -216,8 +200,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getBytes(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return new byte[]{};
+            throw new IllegalStateException(e);
         }
     }
 
@@ -226,8 +209,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getString(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return "";
+            throw new IllegalStateException(e);
         }
     }
 
@@ -241,8 +223,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getShort(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -251,8 +232,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getInt(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -261,8 +241,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getLong(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -271,8 +250,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getFloat(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -281,8 +259,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getDouble(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -291,18 +268,16 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.getInt(i);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            throw new IllegalStateException(e);
         }
     }
 
     @Override
     public boolean isNull(int i) {
         try {
-            return resultSet.wasNull();
+            return resultSet.getObject(i) == null;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -321,7 +296,7 @@ public class JdbcCursor implements Cursor {
         try {
             resultSet.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
     }
 
@@ -330,8 +305,7 @@ public class JdbcCursor implements Cursor {
         try {
             return resultSet.isClosed();
         } catch (SQLException e) {
-            e.printStackTrace();
-            return true;
+            throw new IllegalStateException(e);
         }
     }
 
