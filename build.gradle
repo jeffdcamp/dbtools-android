@@ -6,8 +6,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-beta3'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0' // version plugin support
+        classpath 'com.android.tools.build:gradle:2.3.0-rc1'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0' // version plugin support
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
         classpath 'org.dbtools:gradle-dbtools-plugin:8.0.0'
@@ -27,6 +27,6 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion = '25.1.0'
+    supportLibVersion = '25.2.0'
     xerialSqliteJdbcVersion = '3.16.1'
 }
