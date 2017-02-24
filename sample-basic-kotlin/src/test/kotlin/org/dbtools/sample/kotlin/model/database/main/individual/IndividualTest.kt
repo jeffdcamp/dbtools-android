@@ -24,7 +24,7 @@ class IndividualTest {
     @Test
     @Throws(Exception::class)
     fun testIndividual() {
-        val individualManager = MainDatabaseManagers.individualManager ?: throw IllegalStateException("IndividualManager null")
+        val individualManager = MainDatabaseManagers.individualManager
 
         // === CREATE / INSERT ===
         val individual = Individual()

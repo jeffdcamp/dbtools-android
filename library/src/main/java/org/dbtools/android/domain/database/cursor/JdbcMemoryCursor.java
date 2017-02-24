@@ -31,7 +31,7 @@ public class JdbcMemoryCursor implements Cursor {
             readData(resultSet);
             resultSet.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(e);
         }
     }
 

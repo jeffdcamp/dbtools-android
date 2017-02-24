@@ -3,6 +3,7 @@ package org.dbtools.android.domain;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 
 import org.dbtools.android.domain.config.DatabaseConfig;
 import org.dbtools.android.domain.database.DatabaseWrapper;
@@ -29,7 +30,10 @@ public abstract class AndroidDatabaseBaseManager {
     private static final String TABLE_NAMES_QUERY = "SELECT name FROM %1$ssqlite_master WHERE type='table' AND name NOT IN ('metadata', 'sqlite_sequence')";
     private static final String MERGE_INSERT_QUERY = "INSERT OR IGNORE INTO %1$s SELECT * FROM %2$s";
 
-    private Map<String, AndroidDatabase> databaseMap = new HashMap<String, AndroidDatabase>(); // <Database name, Database Path>
+    public static final int CLOSE_MAX_RETRY = 10;
+    public static final int CLOSE_RETRY_MS = 100;
+
+    private Map<String, AndroidDatabase> databaseMap = new HashMap<>(); // <Database name, Database Path>
     private DatabaseConfig databaseConfig;
     private DBToolsLogger log;
 
@@ -163,7 +167,7 @@ public abstract class AndroidDatabaseBaseManager {
             throw new IllegalStateException("Database [" + primaryDatabaseName + "] does not exist");
         }
 
-        List<AndroidDatabase> attachedDatabases = new ArrayList<AndroidDatabase>();
+        List<AndroidDatabase> attachedDatabases = new ArrayList<>();
         for (String databaseNameToAttach : attachedDatabaseNames) {
             AndroidDatabase databaseToAttach = getDatabase(databaseNameToAttach);
             if (databaseToAttach == null) {
@@ -199,7 +203,7 @@ public abstract class AndroidDatabaseBaseManager {
      * Reset/Removes any references to any database that was added
      */
     public void reset() {
-        databaseMap = new HashMap<String, AndroidDatabase>();
+        databaseMap = new HashMap<>();
     }
 
     /**
@@ -260,18 +264,44 @@ public abstract class AndroidDatabaseBaseManager {
         return wrapper.isOpen();
     }
 
-    public void closeDatabase(@Nonnull String databaseName) {
+    public boolean closeDatabase(@Nonnull String databaseName) {
         AndroidDatabase database = getDatabase(databaseName);
-        if (database != null) {
-            closeDatabase(database);
-        }
+        return database != null && closeDatabase(database);
     }
 
     public boolean closeDatabase(@Nonnull AndroidDatabase androidDatabase) {
         DatabaseWrapper wrapper = androidDatabase.getDatabaseWrapper();
-        if (wrapper != null && wrapper.isOpen() && !wrapper.inTransaction()) {
+        if (wrapper != null) {
+            if (!wrapper.isOpen()) {
+                // database is already closed
+                return true;
+            }
+
+            // if in transaction, then wait CLOSE_RETRY_MS and retry CLOSE_MAX_RETRY times
+            if (wrapper.inTransaction()) {
+                for (int i = 0; i < CLOSE_MAX_RETRY; i++) {
+                    try {
+                        log.w(TAG, "Trying to close database ["+ androidDatabase.getName() +"] while in transaction... waiting " + CLOSE_RETRY_MS + "...");
+                        Thread.sleep(CLOSE_RETRY_MS);
+                        if (!wrapper.inTransaction()) {
+                            break;
+                        }
+                    } catch (InterruptedException e) {
+                        log.e(TAG, "InterruptedException", e);
+                    }
+                }
+            }
+
+            if (wrapper.inTransaction()) {
+                log.e(TAG, "Transaction still open on database ["+ androidDatabase.getName() +"] while closing database... closing anyway");
+            }
+
+            // close the database
             wrapper.close();
+
+            // remove reference
             androidDatabase.setDatabaseWrapper(null);
+
             return true;
         }
 
@@ -301,7 +331,7 @@ public abstract class AndroidDatabaseBaseManager {
             File databaseFile = new File(databasePath);
             boolean databaseExists = databaseFile.exists();
             log.i(TAG, "Connecting to database");
-            log.i(TAG, "Database exists: " + databaseExists + "(path: " + databasePath + ")");
+            log.i(TAG, "Database exists: [" + databaseExists + "]  path: [" + databasePath + "]");
 
             // if this is an attached database, make sure the main database is open first
             AndroidDatabase attachMainDatabase = androidDatabase.getAttachMainDatabase();
@@ -468,35 +498,36 @@ public abstract class AndroidDatabaseBaseManager {
         databaseConfig.identifyDatabases(this);
     }
 
-    public void deleteDatabase(@Nonnull String databaseName) {
+    public boolean deleteDatabase(@Nonnull String databaseName) {
         AndroidDatabase database = getDatabase(databaseName);
         if (database != null) {
             deleteDatabase(database);
         } else {
             log.e(TAG, "FAILED to delete database named [" + databaseName + "]. This database is not added to DatabaseManager");
+            return false;
         }
+        return false;
     }
 
-    public void deleteDatabase(@Nonnull AndroidDatabase androidDatabase) {
+    public boolean deleteDatabase(@Nonnull AndroidDatabase androidDatabase) {
         String databasePath = androidDatabase.getPath();
 
         try {
-            if (!androidDatabase.inTransaction()) {
-                androidDatabase.close(); // this will hang if there is an open transaction
-            }
+            closeDatabase(androidDatabase);
         } catch (Exception e) {
             // inTransaction can throw "IllegalStateException: attempt to re-open an already-closed object"
             // This should not keep LDS Tools from performing a SYNC
-            log.w(TAG, "deleteDatabase().inTransaction() Error: [" + e.getMessage() + "]");
+            log.w(TAG, "Failed to close database.  Error: [" + e.getMessage() + "]");
         }
 
         log.i(TAG, "Deleting database: [" + databasePath + "]");
         File databaseFile = new File(databasePath);
         if (databaseFile.exists() && !deleteDatabaseFiles(databaseFile)) {
-            String errorMessage = "FAILED to delete database: [" + databasePath + "]";
-            log.e(TAG, errorMessage);
-            throw new IllegalStateException(errorMessage);
+            log.e(TAG, "FAILED to delete database: [" + databasePath + "]");
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -627,7 +658,7 @@ public abstract class AndroidDatabaseBaseManager {
         try {
             value = Integer.parseInt(textValue);
         } catch (Exception e) {
-            getLogger().e(TAG, "Cannot parse database view version", e);
+            log.e(TAG, "Cannot parse database view version", e);
         }
 
         return value;
@@ -717,7 +748,7 @@ public abstract class AndroidDatabaseBaseManager {
     @Nonnull
     private List<String> findTableNames(@Nullable AndroidDatabase database, @Nullable String attachedDatabaseName) {
         if (database == null) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
 
         List<String> tableNames;
@@ -733,7 +764,7 @@ public abstract class AndroidDatabaseBaseManager {
 
         Cursor tableNamesCursor = database.getDatabaseWrapper().rawQuery(query, null);
         if (tableNamesCursor != null) {
-            tableNames = new ArrayList<String>(tableNamesCursor.getCount());
+            tableNames = new ArrayList<>(tableNamesCursor.getCount());
             if (tableNamesCursor.moveToFirst()) {
                 do {
                     tableNames.add(tableNamesCursor.getString(0));
@@ -741,7 +772,7 @@ public abstract class AndroidDatabaseBaseManager {
             }
             tableNamesCursor.close();
         } else {
-            tableNames = new ArrayList<String>();
+            tableNames = new ArrayList<>();
         }
 
         return tableNames;
@@ -753,5 +784,39 @@ public abstract class AndroidDatabaseBaseManager {
 
     public DatabaseConfig getDatabaseConfig() {
         return databaseConfig;
+    }
+
+    public boolean swapDatabase(@NonNull String databaseName, @NonNull File newDatabaseFile) {
+        log.i(TAG, "Swapping database name:[" + databaseName + "] with new database file: [" + newDatabaseFile.getAbsolutePath() + "]...");
+
+        // Verify that database and new file is valid
+        if (!newDatabaseFile.exists()) {
+            log.e(TAG, "Cannot swap database.... newDatabaseFile [" + newDatabaseFile.getAbsolutePath() + "] does not exist");
+            return false;
+        }
+
+        AndroidDatabase androidDatabase = getDatabase(databaseName);
+        if (androidDatabase == null) {
+            log.e(TAG, "Cannot swap database... [" + databaseName + "] not added to dbtools");
+            return false;
+        }
+
+        File databaseFile = new File(androidDatabase.getPath());
+
+        // close database and delete database
+        deleteDatabase(androidDatabase);
+
+        if (databaseFile.exists()) {
+            log.e(TAG, "Existing database failed to delete [" + databaseFile.getAbsolutePath() + "]");
+            return false;
+        }
+
+        // copy new database to proper location
+        if (!newDatabaseFile.renameTo(databaseFile)) {
+            log.e(TAG, "Failed to move new database [" + newDatabaseFile.getAbsolutePath() + "] -> [" + databaseFile.getAbsolutePath() + "]");
+            return false;
+        }
+
+        return true;
     }
 }

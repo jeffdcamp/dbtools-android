@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+  Version 8.1.0 *(2017-02)*
+---------------------------
+* Added databaseManager.swapDatabase(...)
+
+
   Version 8.0.0 *(2017-01)*
 ---------------------------
 * Kotlin generated classes use functions with Default Arguments

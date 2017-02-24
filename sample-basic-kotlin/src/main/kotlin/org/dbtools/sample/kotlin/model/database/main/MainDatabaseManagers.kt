@@ -6,20 +6,20 @@
 
 package org.dbtools.sample.kotlin.model.database.main
 
+import org.dbtools.sample.kotlin.model.database.DatabaseManager
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualManager
 import org.dbtools.sample.kotlin.model.database.main.individualdata.IndividualDataManager
-import org.dbtools.sample.kotlin.model.database.main.individualview.IndividualViewManager
 import org.dbtools.sample.kotlin.model.database.main.individualquery.IndividualQueryManager
-import org.dbtools.sample.kotlin.model.database.DatabaseManager
+import org.dbtools.sample.kotlin.model.database.main.individualview.IndividualViewManager
 
 
 @SuppressWarnings("all")
 object MainDatabaseManagers  {
 
-     var individualManager: IndividualManager? = null
-     var individualDataManager: IndividualDataManager? = null
-     var individualViewManager: IndividualViewManager? = null
-     var individualQueryManager: IndividualQueryManager? = null
+     lateinit var individualManager: IndividualManager private set
+     lateinit var individualDataManager: IndividualDataManager private set
+     lateinit var individualViewManager: IndividualViewManager private set
+     lateinit var individualQueryManager: IndividualQueryManager private set
 
     fun init(databaseManager: DatabaseManager) {
         individualManager = IndividualManager(databaseManager);
@@ -27,6 +27,4 @@ object MainDatabaseManagers  {
         individualViewManager = IndividualViewManager(databaseManager);
         individualQueryManager = IndividualQueryManager(databaseManager);
     }
-
-
 }
