@@ -31,6 +31,9 @@ dependencies {
     testCompile "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 }
 
+// cd <project folder>
+// gradle dbtools-genclasses
+// debug: gradle dbtools-genclasses --no-daemon -Dorg.gradle.debug=true
 dbtools {
     type 'ANDROID'
 
