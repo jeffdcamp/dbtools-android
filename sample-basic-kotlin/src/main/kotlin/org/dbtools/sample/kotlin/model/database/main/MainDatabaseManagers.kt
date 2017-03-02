@@ -6,11 +6,11 @@
 
 package org.dbtools.sample.kotlin.model.database.main
 
-import org.dbtools.sample.kotlin.model.database.DatabaseManager
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualManager
 import org.dbtools.sample.kotlin.model.database.main.individualdata.IndividualDataManager
-import org.dbtools.sample.kotlin.model.database.main.individualquery.IndividualQueryManager
 import org.dbtools.sample.kotlin.model.database.main.individualview.IndividualViewManager
+import org.dbtools.sample.kotlin.model.database.main.individualquery.IndividualQueryManager
+import org.dbtools.sample.kotlin.model.database.DatabaseManager
 
 
 @SuppressWarnings("all")
@@ -27,4 +27,6 @@ object MainDatabaseManagers  {
         individualViewManager = IndividualViewManager(databaseManager);
         individualQueryManager = IndividualQueryManager(databaseManager);
     }
+
+
 }

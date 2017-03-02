@@ -20,7 +20,7 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord> : KotlinAndroid
     }
 
     @JvmOverloads
-    open fun findCursorBySelectionRx(selection: String? = null, selectionArgs: Array<String>? = null, distinct: Boolean = false, columns: Array<String>, groupBy: String? = null, having: String? = null, orderBy: String? = null, limit: String? = null, table: String = tableName, databaseName: String = getDatabaseName()): Observable<Cursor> {
+    open fun findCursorBySelectionRx(selection: String? = null, selectionArgs: Array<String>? = null, distinct: Boolean = false, columns: Array<String>, groupBy: String? = null, having: String? = null, orderBy: String? = null, limit: String? = null, table: String = getTableName(), databaseName: String = getDatabaseName()): Observable<Cursor> {
         return DBToolsRxUtil.just { findCursorBySelection(selection, selectionArgs, columns = columns, databaseName = databaseName, table = table, groupBy = groupBy, having = having, orderBy = orderBy, distinct = distinct, limit = limit) }
     }
 
@@ -47,7 +47,7 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord> : KotlinAndroid
                                groupBy: String? = null,
                                having: String? = null,
                                orderBy: String? = null,
-                               table: String = this.tableName,
+                               table: String = this.getTableName(),
                                databaseName: String = getDatabaseName()): Observable<T> {
         return DBToolsRxUtil.just { findBySelection(selection = selection, selectionArgs = selectionArgs, distinct = distinct, table = table, columns = columns, groupBy = groupBy, having = having, orderBy = orderBy, databaseName = databaseName) }
     }
@@ -61,7 +61,7 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord> : KotlinAndroid
                                   having: String? = null,
                                   orderBy: String? = null,
                                   limit: String? = null,
-                                  table: String = tableName,
+                                  table: String = getTableName(),
                                   databaseName: String = getDatabaseName()): Observable<List<T>> {
         return DBToolsRxUtil.just { findAllBySelection(selection, selectionArgs, distinct = distinct, columns = columns, groupBy = groupBy, having = having, orderBy = orderBy, limit = limit, table = table, databaseName = databaseName) }
     }
@@ -99,7 +99,7 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord> : KotlinAndroid
     }
 
     open fun findCountBySelectionRx(selection: String?, selectionArgs: Array<String>?, databaseName: String): Observable<Long> {
-        return DBToolsRxUtil.just { AndroidBaseManager.findCountBySelection(getReadableDatabase(databaseName), tableName, selection, selectionArgs) }
+        return DBToolsRxUtil.just { AndroidBaseManager.findCountBySelection(getReadableDatabase(databaseName), getTableName(), selection, selectionArgs) }
     }
 
     @JvmOverloads
@@ -166,7 +166,7 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord> : KotlinAndroid
      */
     @JvmOverloads
     open fun <I> findAllValuesBySelectionRx(valueType: Class<I>, column: String, selection: String? = null, selectionArgs: Array<String>? = null, groupBy: String? = null, having: String? = null, orderBy: String? = null, limit: String? = null, databaseName: String = getDatabaseName()): Observable<List<I>> {
-        return RxAndroidBaseManager.findAllValuesBySelectionRx(getReadableDatabase(databaseName), tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit)
+        return RxAndroidBaseManager.findAllValuesBySelectionRx(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit)
     }
 
     open fun tableExistsRx(tableName: String, databaseName: String = getDatabaseName()): Observable<Boolean> {

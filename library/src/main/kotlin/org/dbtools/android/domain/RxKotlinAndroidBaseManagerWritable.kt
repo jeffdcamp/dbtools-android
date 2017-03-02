@@ -48,7 +48,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         }
 
         // determine if there are changes
-        val tableChange = DatabaseTableChange(tableName, transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get())
+        val tableChange = DatabaseTableChange(getTableName(), transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get())
         transactionInsertOccurred.set(false)
         transactionUpdateOccurred.set(false)
         transactionDeleteOccurred.set(false)
@@ -115,7 +115,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
 
                 record.primaryKeyId = rowId
 
-                notifyTableListeners(false, db, DatabaseTableChange(tableName, rowId, true, false, false))
+                notifyTableListeners(false, db, DatabaseTableChange(getTableName(), rowId, true, false, false))
 
                 success = true
             } catch (ex: Exception) {
@@ -147,7 +147,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         val rowsAffectedCount = statement.executeUpdateDelete()
 
         if (rowsAffectedCount > 0) {
-            notifyTableListeners(false, db, DatabaseTableChange(tableName, rowId, false, true, false))
+            notifyTableListeners(false, db, DatabaseTableChange(getTableName(), rowId, false, true, false))
         }
 
         return rowsAffectedCount
@@ -169,7 +169,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         var tryCount = 0
         while (tryCount < AndroidBaseManager.MAX_TRY_COUNT && !success) {
             try {
-                rowsAffectedCount = db.update(tableName, contentValues, where, whereArgs)
+                rowsAffectedCount = db.update(getTableName(), contentValues, where, whereArgs)
                 success = true
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -179,7 +179,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         }
 
         if (success && rowsAffectedCount > 0) {
-            notifyTableListeners(false, db, DatabaseTableChange(tableName, false, true, false))
+            notifyTableListeners(false, db, DatabaseTableChange(getTableName(), false, true, false))
         }
 
         return rowsAffectedCount
@@ -215,7 +215,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         var tryCount = 0
         while (tryCount < AndroidBaseManager.MAX_TRY_COUNT && !success) {
             try {
-                rowCountAffected = db.delete(tableName, where, whereArgs)
+                rowCountAffected = db.delete(getTableName(), where, whereArgs)
                 success = true
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -225,7 +225,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         }
 
         if (success && rowCountAffected > 0) {
-            notifyTableListeners(false, db, DatabaseTableChange(tableName, false, false, true))
+            notifyTableListeners(false, db, DatabaseTableChange(getTableName(), false, false, true))
         }
 
         return rowCountAffected

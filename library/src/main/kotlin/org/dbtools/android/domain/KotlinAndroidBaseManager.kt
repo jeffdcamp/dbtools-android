@@ -18,8 +18,6 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
 
     abstract fun getAndroidDatabase(databaseName: String = getDatabaseName()): AndroidDatabase?
 
-    abstract val tableName: String
-
     abstract val primaryKey: String
 
     abstract val allColumns: Array<String>
@@ -33,6 +31,8 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
     abstract val updateSql: String
 
     abstract fun getDatabaseName(): String
+
+    abstract fun getTableName(): String
 
     abstract fun newRecord(): T
 
@@ -69,11 +69,11 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
     }
 
     open fun getInsertStatement(db: DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>>): StatementWrapper {
-        return db.getInsertStatement(tableName, insertSql)
+        return db.getInsertStatement(getTableName(), insertSql)
     }
 
     open fun getUpdateStatement(db: DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>>): StatementWrapper {
-        return db.getUpdateStatement(tableName, updateSql)
+        return db.getUpdateStatement(getTableName(), updateSql)
     }
 
     @JvmOverloads
@@ -100,7 +100,7 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
                                    having: String? = null,
                                    orderBy: String? = null,
                                    limit: String? = null,
-                                   table: String = tableName,
+                                   table: String = getTableName(),
                                    databaseName: String = getDatabaseName()): Cursor? {
         val cursor = getReadableDatabase(databaseName).query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit)
 
@@ -125,7 +125,7 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
                                 having: String? = null,
                                 orderBy: String? = null,
                                 limit: String? = null,
-                                table: String = this.tableName,
+                                table: String = this.getTableName(),
                                 databaseName: String = getDatabaseName()): List<T> {
         val cursor = findCursorBySelection(selection, selectionArgs, distinct, columns, groupBy, having, orderBy, limit, table, databaseName)
         return getAllItemsFromCursor(cursor)
@@ -182,7 +182,7 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
     open fun findBySelection(selection: String? = null,
                              selectionArgs: Array<String>? = null,
                              distinct: Boolean = true,
-                             table: String = this.tableName,
+                             table: String = this.getTableName(),
                              columns: Array<String> = emptyArray(),
                              groupBy: String? = null,
                              having: String? = null,
@@ -243,7 +243,7 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
 
     @JvmOverloads
     open fun findCountBySelection(selection: String? = null, selectionArgs: Array<String>? = null, databaseName: String = getDatabaseName()): Long {
-        return AndroidBaseManager.findCountBySelection(getReadableDatabase(databaseName), tableName, selection, selectionArgs)
+        return AndroidBaseManager.findCountBySelection(getReadableDatabase(databaseName), getTableName(), selection, selectionArgs)
     }
 
     @JvmOverloads
@@ -324,7 +324,7 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
         val databaseValue = AndroidBaseManager.getDatabaseValue<I>(valueType)
         var value = defaultValue
 
-        val c = getReadableDatabase(databaseName).query(false, tableName, arrayOf(column), selection, selectionArgs, groupBy, having, orderBy, "1")
+        val c = getReadableDatabase(databaseName).query(false, getTableName(), arrayOf(column), selection, selectionArgs, groupBy, having, orderBy, "1")
         if (c != null) {
             if (c.moveToFirst()) {
                 value = databaseValue.getColumnValue(c, 0, defaultValue) as I
@@ -378,11 +378,11 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
                                           orderBy: String? = null,
                                           limit: String? = null,
                                           databaseName: String = getDatabaseName()): List<I> {
-        return AndroidBaseManager.findAllValuesBySelection(getReadableDatabase(databaseName), tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit)
+        return AndroidBaseManager.findAllValuesBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit)
     }
 
     @JvmOverloads
-    open fun tableExists(tableName: String = this.tableName, databaseName: String = getDatabaseName()): Boolean {
+    open fun tableExists(tableName: String = this.getTableName(), databaseName: String = getDatabaseName()): Boolean {
         return AndroidBaseManager.tableExists(getReadableDatabase(databaseName), tableName)
     }
 
