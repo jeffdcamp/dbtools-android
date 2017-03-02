@@ -264,8 +264,7 @@ Setup
         
         ... or ...
         
-        cd app
-        gradle dbtools-genclasses
+        ./gradle app:dbtools-genclasses
 
         ... or ...
 

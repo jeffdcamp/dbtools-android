@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+  Version 8.1.1 *(2017-03)*
+---------------------------
+* Fixed generated statement binding for REAL and DECIMAL
+* Change Kotlin AndroidBaseRecord.tableName to AndroidBaseRecord.getTableName()
+* Fixed issues with dbtools-gen with sub projects (ex: ./gradlew app:dbtools-gen)
+
   Version 8.1.0 *(2017-02)*
 ---------------------------
 * Added databaseManager.swapDatabase(...)
