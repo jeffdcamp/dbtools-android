@@ -3,12 +3,12 @@ package org.dbtools.android.domain
 import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 
 @Suppress("unused")
 abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDatabaseManager: AndroidDatabaseManager) : KotlinAndroidBaseManager<T>(androidDatabaseManager), NotifiableManager {
-    var lastTableModifiedTs = -1L
-        private set
+    private val lastTableModifiedTsMap = ConcurrentHashMap<String, Long>()
 
     private val listenerLock = ReentrantLock()
     private val tableChangeListenersMap = mutableMapOf<String, MutableSet<DBToolsTableChangeListener>>()
@@ -233,6 +233,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
 
     // ===== Listeners =====
 
+    @JvmOverloads
     open fun addTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
         listenerLock.lock()
         try {
@@ -248,6 +249,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
         }
     }
 
+    @JvmOverloads
     open fun removeTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
         listenerLock.lock()
         try {
@@ -258,6 +260,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
         }
     }
 
+    @JvmOverloads
     open fun clearTableChangeListeners(databaseName: String = getDatabaseName()) {
         listenerLock.lock()
         try {
@@ -290,7 +293,20 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
     }
 
     // ===== Table Change =====
-    private fun updateLastTableModifiedTs() {
-        this.lastTableModifiedTs = System.currentTimeMillis()
+    /**
+     * Returns the last modification long ts
+
+     * @return long ts value of the last modification to this table using this manager, or -1 if no modifications have occurred since app launch
+     */
+    @JvmOverloads
+    fun getLastTableModifiedTs(databaseName: String = getDatabaseName()): Long {
+        val lastTableModifiedTs = lastTableModifiedTsMap[databaseName] ?: return -1L
+
+        return lastTableModifiedTs
+    }
+
+    @JvmOverloads
+    private fun updateLastTableModifiedTs(databaseName: String = getDatabaseName()) {
+        lastTableModifiedTsMap.put(databaseName, System.currentTimeMillis())
     }
 }

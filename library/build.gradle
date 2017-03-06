@@ -44,7 +44,7 @@ dependencies {
     compile 'com.google.code.findbugs:jsr305:3.0.1'
 
     // optional
-    provided 'io.reactivex:rxjava:1.2.6'
+    provided 'io.reactivex:rxjava:1.2.7'
     provided "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     provided 'joda-time:joda-time:2.9.7'
@@ -55,7 +55,7 @@ dependencies {
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.10'
+    testCompile 'org.mockito:mockito-core:2.7.13'
 }
 
 tasks.withType(Test) {

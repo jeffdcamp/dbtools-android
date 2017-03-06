@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,7 +23,7 @@ import rx.subjects.PublishSubject;
 @SuppressWarnings("UnusedDeclaration")
 public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> implements NotifiableManager {
 
-    private long lastTableModifiedTs = -1L;
+    private final Map<String, Long> lastTableModifiedTsMap = new ConcurrentHashMap<>();
 
     private final Lock listenerLock = new ReentrantLock();
     private final Map<String, Set<DBToolsTableChangeListener>> tableChangeListenersMap = new HashMap<>();
@@ -384,10 +385,23 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
      * @return long ts value of the last modification to this table using this manager, or -1 if no modifications have occurred since app launch
      */
     public long getLastTableModifiedTs() {
+        return getLastTableModifiedTs(getDatabaseName());
+    }
+
+    public long getLastTableModifiedTs(String databaseName) {
+        Long lastTableModifiedTs = lastTableModifiedTsMap.get(databaseName);
+        if (lastTableModifiedTs == null) {
+            return -1L;
+        }
+
         return lastTableModifiedTs;
     }
 
     private void updateLastTableModifiedTs() {
-        this.lastTableModifiedTs = System.currentTimeMillis();
+        updateLastTableModifiedTs(getDatabaseName());
+    }
+
+    private void updateLastTableModifiedTs(String databaseName) {
+        lastTableModifiedTsMap.put(databaseName, System.currentTimeMillis());
     }
 }
