@@ -19,6 +19,10 @@ import rx.functions.Func0;
 @SuppressWarnings("UnusedDeclaration")
 public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends AndroidBaseManager<T> {
 
+    public RxAndroidBaseManager(AndroidDatabaseManager androidDatabaseManager) {
+        super(androidDatabaseManager);
+    }
+
     public Observable<Cursor> findCursorAllRx() {
         return DBToolsRxUtil.just(new Func0<Cursor>() {
             @Nullable

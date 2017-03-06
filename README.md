@@ -228,8 +228,7 @@ Setup
 
         ... or ...
         
-        cd app
-        gradle dbtools-init
+        ./gradle app:dbtools-init
         
         ... or ...
 

@@ -8,6 +8,7 @@ import org.dbtools.sample.model.database.main.MainDatabaseManagers;
 import org.dbtools.sample.model.database.main.individual.Individual;
 import org.dbtools.sample.model.database.main.individual.IndividualConst;
 import org.dbtools.sample.model.database.main.individual.IndividualManager;
+import org.dbtools.sample.model.database.main.individualdata.IndividualDataManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +26,10 @@ public class TableChangeSubscribeTest {
     private final AtomicInteger insertEventCount = new AtomicInteger(0);
     private final AtomicInteger updateEventCount = new AtomicInteger(0);
     private final AtomicInteger deleteEventCount = new AtomicInteger(0);
+    private final AtomicInteger bulkOperationCount = new AtomicInteger(0);
 
     private IndividualManager individualManager;
+    private IndividualDataManager individualDataManager;
     private Subscription tableChangeSubscription;
 
     @Before
@@ -38,6 +41,8 @@ public class TableChangeSubscribeTest {
         JdbcSqliteDatabaseWrapper.setEnableLogging(true); // show all statements
 
         individualManager = MainDatabaseManagers.getIndividualManager();
+        individualDataManager = MainDatabaseManagers.getIndividualDataManager();
+
 
         tableChangeSubscription = individualManager.tableChanges()
                 .subscribeOn(Schedulers.immediate())
@@ -62,6 +67,11 @@ public class TableChangeSubscribeTest {
             updateEventCount.incrementAndGet();
         } else if (tableChange.isDelete()) {
             deleteEventCount.incrementAndGet();
+        }
+
+
+        if (tableChange.isBulkOperation()) {
+            bulkOperationCount.incrementAndGet();
         }
     }
 
@@ -105,7 +115,9 @@ public class TableChangeSubscribeTest {
 
         // test
         assertEquals(4, individualManager.findCount());
-        assertCountValues(1, 0, 0);
+        assertCountValues(0, 0, 0);
+        assertBulkOperation(1);
+
 
         // === UPDATE ===
         individualManager.beginTransaction();
@@ -119,7 +131,8 @@ public class TableChangeSubscribeTest {
 
         // test
         assertEquals(4, individualManager.findCount());
-        assertCountValues(1, 1, 0);
+        assertCountValues(0, 0, 0);
+        assertBulkOperation(2);
 
 
         // === DELETE ===
@@ -134,7 +147,66 @@ public class TableChangeSubscribeTest {
 
         // test
         assertEquals(0, individualManager.findCount());
-        assertCountValues(1, 1, 1);
+        assertCountValues(0, 0, 0);
+        assertBulkOperation(3);
+    }
+
+    @Test
+    public void testTransactionRollback() throws Exception {
+        Individual individual1 = createIndividual("Jeff");
+        Individual individual2 = createIndividual("Ty");
+        Individual individual3 = createIndividual("Bob");
+        Individual individual4 = createIndividual("Sam");
+
+        // === INSERT ===
+        individualManager.beginTransaction();
+
+        individualManager.save(individual1);
+        individualManager.save(individual2);
+
+        individualManager.endTransaction(true);
+
+        // test
+        assertEquals(2, individualManager.findCount());
+        assertCountValues(0, 0, 0);
+        assertBulkOperation(1);
+
+        // === INSERT with rollback ===
+        individualManager.beginTransaction();
+
+        individualManager.save(individual3);
+        individualManager.save(individual4);
+
+        individualManager.endTransaction(false);
+
+        // test
+        assertEquals(2, individualManager.findCount());
+        assertCountValues(0, 0, 0);
+        assertBulkOperation(1);
+    }
+
+    @Test
+    public void testTransactionNotificationCrossManagers() throws Exception {
+        // transaction started with a DIFFERENT manager
+        individualDataManager.beginTransaction();
+
+        Individual individual1 = createIndividual("Jeff");
+        Individual individual2 = createIndividual("Ty");
+        Individual individual3 = createIndividual("Bob");
+        Individual individual4 = createIndividual("Sam");
+
+        individualManager.save(individual1);
+        individualManager.save(individual2);
+        individualManager.save(individual3);
+        individualManager.save(individual4);
+
+        // transaction started with a DIFFERENT manager
+        individualDataManager.endTransaction(true);
+
+        // test (make sure that individualManager table change listeners get notified)
+        assertEquals(4, individualManager.findCount());
+        assertCountValues(0, 0, 0);
+        assertBulkOperation(1);
     }
 
     @Test
@@ -198,6 +270,10 @@ public class TableChangeSubscribeTest {
         Individual individual = new Individual();
         individual.setFirstName(name);
         return individual;
+    }
+
+    private void assertBulkOperation(int expectedCount) {
+        assertEquals("Bulk Operation", expectedCount, bulkOperationCount.get());
     }
 
     private void assertCountValues(int expectedInsertEventCount, int expectedUpdateEventCount, int expectedDeleteEventCount) {

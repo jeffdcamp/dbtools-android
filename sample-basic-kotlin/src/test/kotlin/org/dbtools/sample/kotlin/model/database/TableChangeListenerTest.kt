@@ -6,6 +6,7 @@ import org.dbtools.sample.kotlin.model.database.main.MainDatabaseManagers
 import org.dbtools.sample.kotlin.model.database.main.individual.Individual
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualConst
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualManager
+import org.dbtools.sample.kotlin.model.database.main.individualdata.IndividualDataManager
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -16,8 +17,10 @@ class TableChangeListenerTest {
     private val insertEventCount = AtomicInteger(0)
     private val updateEventCount = AtomicInteger(0)
     private val deleteEventCount = AtomicInteger(0)
+    private val bulkOperationCount = AtomicInteger(0)
 
-    private var individualManager: IndividualManager? = null
+    private lateinit var individualManager: IndividualManager
+    private lateinit var individualDataManager: IndividualDataManager
 
     @Before
     @Throws(Exception::class)
@@ -29,15 +32,20 @@ class TableChangeListenerTest {
         JdbcSqliteDatabaseWrapper.setEnableLogging(true) // show all statements
 
         individualManager = MainDatabaseManagers.individualManager
+        individualDataManager = MainDatabaseManagers.individualDataManager
 
         // setup table change listener
-        individualManager!!.addTableChangeListener(DBToolsTableChangeListener { tableChange ->
+        individualManager.addTableChangeListener(DBToolsTableChangeListener { tableChange ->
             if (tableChange.isInsert) {
                 insertEventCount.incrementAndGet()
             } else if (tableChange.isUpdate) {
                 updateEventCount.incrementAndGet()
             } else if (tableChange.isDelete) {
                 deleteEventCount.incrementAndGet()
+            }
+
+            if (tableChange.isBulkOperation) {
+                bulkOperationCount.incrementAndGet()
             }
         })
     }
@@ -47,20 +55,20 @@ class TableChangeListenerTest {
     fun testRecordCrud() {
         // === INSERT ===
         val individual = createIndividual("Jeff")
-        individualManager!!.save(individual)
+        individualManager.save(individual)
 
         // test save
-        assertEquals(1, individualManager!!.findCount())
+        assertEquals(1, individualManager.findCount())
         assertCountValues(1, 0, 0)
 
         // === UPDATE ===
         individual.firstName = "Jeffery"
-        individualManager!!.save(individual)
+        individualManager.save(individual)
         assertCountValues(1, 1, 0)
 
         // === DELETE ===
-        individualManager!!.delete(individual)
-        assertEquals(0, individualManager!!.findCount())
+        individualManager.delete(individual)
+        assertEquals(0, individualManager.findCount())
         assertCountValues(1, 1, 1)
     }
 
@@ -73,47 +81,109 @@ class TableChangeListenerTest {
         val individual4 = createIndividual("Sam")
 
         // === INSERT ===
-        individualManager!!.beginTransaction()
+        individualManager.beginTransaction()
 
-        individualManager!!.save(individual1)
-        individualManager!!.save(individual2)
-        individualManager!!.save(individual3)
-        individualManager!!.save(individual4)
+        individualManager.save(individual1)
+        individualManager.save(individual2)
+        individualManager.save(individual3)
+        individualManager.save(individual4)
 
-        individualManager!!.endTransaction(true)
+        individualManager.endTransaction(true)
 
         // test
-        assertEquals(4, individualManager!!.findCount())
-        assertCountValues(1, 0, 0)
+        assertEquals(4, individualManager.findCount())
+        assertCountValues(0, 0, 0)
+        assertBulkOperation(1)
 
         // === UPDATE ===
-        individualManager!!.beginTransaction()
+        individualManager.beginTransaction()
 
-        individualManager!!.update(individual1)
-        individualManager!!.update(individual2)
-        individualManager!!.update(individual3)
-        individualManager!!.update(individual4)
+        individualManager.update(individual1)
+        individualManager.update(individual2)
+        individualManager.update(individual3)
+        individualManager.update(individual4)
 
-        individualManager!!.endTransaction(true)
+        individualManager.endTransaction(true)
 
         // test
-        assertEquals(4, individualManager!!.findCount())
-        assertCountValues(1, 1, 0)
-
+        assertEquals(4, individualManager.findCount())
+        assertCountValues(0, 0, 0)
+        assertBulkOperation(2)
 
         // === DELETE ===
-        individualManager!!.beginTransaction()
+        individualManager.beginTransaction()
 
-        individualManager!!.delete(individual1)
-        individualManager!!.delete(individual2)
-        individualManager!!.delete(individual3)
-        individualManager!!.delete(individual4)
+        individualManager.delete(individual1)
+        individualManager.delete(individual2)
+        individualManager.delete(individual3)
+        individualManager.delete(individual4)
 
-        individualManager!!.endTransaction(true)
+        individualManager.endTransaction(true)
 
         // test
-        assertEquals(0, individualManager!!.findCount())
-        assertCountValues(1, 1, 1)
+        assertEquals(0, individualManager.findCount())
+        assertCountValues(0, 0, 0)
+        assertBulkOperation(3)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testTransactionRollback() {
+        val individual1 = createIndividual("Jeff")
+        val individual2 = createIndividual("Ty")
+        val individual3 = createIndividual("Bob")
+        val individual4 = createIndividual("Sam")
+
+        // === INSERT ===
+        individualManager.beginTransaction()
+
+        individualManager.save(individual1)
+        individualManager.save(individual2)
+
+        individualManager.endTransaction(true)
+
+        // test
+        assertEquals(2, individualManager.findCount())
+        assertCountValues(0, 0, 0)
+        assertBulkOperation(1)
+
+        // === INSERT with rollback ===
+        individualManager.beginTransaction()
+
+        individualManager.save(individual3)
+        individualManager.save(individual4)
+
+        individualManager.endTransaction(false)
+
+        // test
+        assertEquals(2, individualManager.findCount())
+        assertCountValues(0, 0, 0)
+        assertBulkOperation(1)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testTransactionNotificationCrossManagers() {
+        // transaction started with a DIFFERENT manager
+        individualDataManager.beginTransaction()
+
+        val individual1 = createIndividual("Jeff")
+        val individual2 = createIndividual("Ty")
+        val individual3 = createIndividual("Bob")
+        val individual4 = createIndividual("Sam")
+
+        individualManager.save(individual1)
+        individualManager.save(individual2)
+        individualManager.save(individual3)
+        individualManager.save(individual4)
+
+        // transaction started with a DIFFERENT manager
+        individualDataManager.endTransaction(true)
+
+        // test (make sure that individualManager table change listeners get notified)
+        assertEquals(4, individualManager.findCount())
+        assertCountValues(0, 0, 0)
+        assertBulkOperation(1)
     }
 
     @Test
@@ -121,28 +191,28 @@ class TableChangeListenerTest {
     fun testUpdate() {
         // === INSERT ===
         val individual = createIndividual("Jeff")
-        individualManager!!.save(individual)
+        individualManager.save(individual)
 
         // test save
-        assertEquals(1, individualManager!!.findCount())
+        assertEquals(1, individualManager.findCount())
         assertCountValues(1, 0, 0)
 
         // === Record UPDATE ===
         individual.firstName = "Jeff1"
-        individualManager!!.save(individual)
+        individualManager.save(individual)
 
         assertCountValues(1, 1, 0)
 
         // == Update single column
-        val contentValues = individualManager!!.createNewDBToolsContentValues()
+        val contentValues = individualManager.createNewDBToolsContentValues()
         contentValues.put(IndividualConst.C_FIRST_NAME, "Jeff2")
-        individualManager!!.update(contentValues, individual.id)
+        individualManager.update(contentValues, individual.id)
 
         assertCountValues(1, 2, 0)
 
         // Update a record that does not exist (no event should trigger)
         contentValues.put(IndividualConst.C_FIRST_NAME, "Jeff2")
-        individualManager!!.update(contentValues, 1000) // 1000 is a primary key that should NEVER exist in this test
+        individualManager.update(contentValues, 1000) // 1000 is a primary key that should NEVER exist in this test
 
         assertCountValues(1, 2, 0)
 
@@ -153,24 +223,24 @@ class TableChangeListenerTest {
     fun testDelete() {
         // === INSERT ===
         val individual1 = createIndividual("Jeff")
-        individualManager!!.save(individual1)
+        individualManager.save(individual1)
         val individual2 = createIndividual("Ty")
-        individualManager!!.save(individual2)
+        individualManager.save(individual2)
 
         // test save
-        assertEquals(2, individualManager!!.findCount())
+        assertEquals(2, individualManager.findCount())
         assertCountValues(2, 0, 0)
 
         // Basic delete
-        individualManager!!.delete(individual1.id)
+        individualManager.delete(individual1.id)
         assertCountValues(2, 0, 1)
 
         // Delete all
-        individualManager!!.deleteAll()
+        individualManager.deleteAll()
         assertCountValues(2, 0, 2)
 
         // Delete all (with NO records... no new event should trigger)
-        individualManager!!.deleteAll()
+        individualManager.deleteAll()
         assertCountValues(2, 0, 2)
     }
 
@@ -179,6 +249,10 @@ class TableChangeListenerTest {
         val individual = Individual()
         individual.firstName = name
         return individual
+    }
+
+    private fun assertBulkOperation(expectedCount: Int) {
+        assertEquals("Bulk Operation", expectedCount.toLong(), bulkOperationCount.get().toLong())
     }
 
     private fun assertCountValues(expectedInsertEventCount: Int, expectedUpdateEventCount: Int, expectedDeleteEventCount: Int) {

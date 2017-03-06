@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+  Version 8.2.0 *(2017-03)*
+---------------------------
+* Improved table notifications and subscriptions across managers and multiple databases
+* Fixed issues with dbtools-init with sub projects (ex: ./gradlew app:dbtools-init)
+
   Version 8.1.1 *(2017-03)*
 ---------------------------
 * Fixed generated statement binding for REAL and DECIMAL

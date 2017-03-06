@@ -6,11 +6,11 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-rc1'
+        classpath 'com.android.tools.build:gradle:2.3.0'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0' // version plugin support
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-        classpath 'org.dbtools:gradle-dbtools-plugin:8.1.1'
+        classpath 'org.dbtools:gradle-dbtools-plugin:8.2.0'
     }
 }
 

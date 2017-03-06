@@ -5,14 +5,11 @@ import org.dbtools.android.domain.AndroidDatabase
 import org.dbtools.android.domain.config.DatabaseConfig
 
 
-class DatabaseManager  : DatabaseBaseManager {
+open class DatabaseManager(databaseConfig: DatabaseConfig) : DatabaseBaseManager(databaseConfig) {
 
     companion object {
-        const val mainTablesVersion = 1
-        const val mainViewsVersion = 1
-    }
-
-    constructor(databaseConfig: DatabaseConfig) : super(databaseConfig) {
+        const val MAIN_TABLES_VERSION = 1
+        const val MAIN_VIEWS_VERSION = 1
     }
 
     override fun onUpgrade(androidDatabase: AndroidDatabase, oldVersion: Int, newVersion: Int) {

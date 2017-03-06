@@ -1,12 +1,15 @@
 package org.dbtools.android.domain;
 
+import android.support.annotation.NonNull;
+
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,16 +20,17 @@ import rx.Observable;
 import rx.subjects.PublishSubject;
 
 @SuppressWarnings("UnusedDeclaration")
-public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> {
+public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> implements NotifiableManager {
 
-    private final AtomicBoolean transactionInsertOccurred = new AtomicBoolean(false);
-    private final AtomicBoolean transactionUpdateOccurred = new AtomicBoolean(false);
-    private final AtomicBoolean transactionDeleteOccurred = new AtomicBoolean(false);
     private long lastTableModifiedTs = -1L;
 
     private final Lock listenerLock = new ReentrantLock();
-    private final Set<DBToolsTableChangeListener> tableChangeListeners = new HashSet<>();
-    private final PublishSubject<DatabaseTableChange> tableChanges = PublishSubject.create();
+    private final Map<String, Set<DBToolsTableChangeListener>> tableChangeListenersMap = new HashMap<>();
+    private final Map<String, PublishSubject<DatabaseTableChange>> tableChangeSubjectMap = new HashMap<>();
+
+    public RxAndroidBaseManagerWritable(AndroidDatabaseManager androidDatabaseManager) {
+        super(androidDatabaseManager);
+    }
 
     public boolean inTransaction() {
         return inTransaction(getDatabaseName());
@@ -41,7 +45,15 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     }
 
     public void beginTransaction(@Nonnull String databaseName) {
-        getWritableDatabase(databaseName).beginTransaction();
+        // log warning
+        DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> writableDatabase = getWritableDatabase(databaseName);
+        if (writableDatabase.inTransaction()) {
+            getAndroidDatabaseManager().getLogger().w(AndroidDatabaseBaseManager.TAG, "WARNING: Already in transaction.");
+        }
+
+        // clear table changes and start transaction
+        getAndroidDatabaseManager().clearTransactionTableChange(databaseName);
+        writableDatabase.beginTransaction();
     }
 
     public void endTransaction(boolean success) {
@@ -54,18 +66,12 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
             db.setTransactionSuccessful();
         }
 
-        // determine if there are changes
-        DatabaseTableChange tableChange = new DatabaseTableChange(getTableName(), transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get());
-        transactionInsertOccurred.set(false);
-        transactionUpdateOccurred.set(false);
-        transactionDeleteOccurred.set(false);
-
         // end transaction
         db.endTransaction();
 
         // post end transaction event
-        if (tableChange.hasChange()) {
-            notifyTableListeners(true, db, tableChange);
+        if (success) {
+            getAndroidDatabaseManager().notifyTransactionEnded(databaseName);
         }
     }
 
@@ -138,7 +144,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
 
                 record.setPrimaryKeyId(rowId);
 
-                notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), rowId, true, false, false));
+                notifyTableListeners(databaseName, false, db, new DatabaseTableChange(getTableName(), rowId, true, false, false));
 
                 success = true;
             } catch (Exception ex) {
@@ -172,7 +178,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         int rowsAffectedCount = statement.executeUpdateDelete();
 
         if (rowsAffectedCount > 0) {
-            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), rowId, false, true, false));
+            notifyTableListeners(databaseName, false, db, new DatabaseTableChange(getTableName(), rowId, false, true, false));
         }
 
         return rowsAffectedCount;
@@ -204,7 +210,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         if (success && rowsAffectedCount > 0) {
-            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), false, true, false));
+            notifyTableListeners(databaseName, false, db, new DatabaseTableChange(getTableName(), false, true, false));
         }
 
         return rowsAffectedCount;
@@ -253,7 +259,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
         }
 
         if (success && rowCountAffected > 0) {
-            notifyTableListeners(false, db, new DatabaseTableChange(getTableName(), false, false, true));
+            notifyTableListeners(databaseName, false, db, new DatabaseTableChange(getTableName(), false, false, true));
         }
 
         return rowCountAffected;
@@ -270,8 +276,18 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     // ===== Listeners =====
 
     public void addTableChangeListener(DBToolsTableChangeListener listener) {
+        addTableChangeListener(getDatabaseName(), listener);
+    }
+
+    public void addTableChangeListener(String databaseName, DBToolsTableChangeListener listener) {
         listenerLock.lock();
         try {
+            Set<DBToolsTableChangeListener> tableChangeListeners = tableChangeListenersMap.get(databaseName);
+            if (tableChangeListeners == null) {
+                tableChangeListeners = new HashSet<>();
+                tableChangeListenersMap.put(databaseName, tableChangeListeners);
+            }
+
             tableChangeListeners.add(listener);
         } finally {
             listenerLock.unlock();
@@ -279,52 +295,85 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
     }
 
     public void removeTableChangeListener(DBToolsTableChangeListener listener) {
+        removeTableChangeListener(getDatabaseName(), listener);
+    }
+
+    public void removeTableChangeListener(String databaseName, DBToolsTableChangeListener listener) {
         listenerLock.lock();
         try {
+            Set<DBToolsTableChangeListener> tableChangeListeners = tableChangeListenersMap.get(databaseName);
+            if (tableChangeListeners != null) {
             tableChangeListeners.remove(listener);
+            }
         } finally {
             listenerLock.unlock();
         }
     }
 
     public void clearTableChangeListeners() {
+        clearTableChangeListeners(getDatabaseName());
+    }
+
+    public void clearTableChangeListeners(String databaseName) {
         listenerLock.lock();
         try {
+            Set<DBToolsTableChangeListener> tableChangeListeners = tableChangeListenersMap.get(databaseName);
+            if (tableChangeListeners != null) {
             tableChangeListeners.clear();
+            }
         } finally {
             listenerLock.unlock();
         }
     }
 
-    private void notifyTableListeners(boolean forceNotify, @Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull DatabaseTableChange changeType) {
+    @Override
+    public void notifyTableListeners(@NonNull String databaseName, boolean forceNotify, @Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> databaseWrapper, @Nonnull DatabaseTableChange changeType) {
         updateLastTableModifiedTs();
 
-        if (forceNotify || !(db != null && db.inTransaction())) {
-            tableChanges.onNext(changeType);
-
+        if (forceNotify || !(databaseWrapper != null && databaseWrapper.inTransaction())) {
             listenerLock.lock();
             try {
-                for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
-                    tableChangeListener.onTableChange(changeType);
+                PublishSubject<DatabaseTableChange> subject = tableChangeSubjectMap.get(databaseName);
+                if (subject != null) {
+                    subject.onNext(changeType);
+                }
+
+                Set<DBToolsTableChangeListener> tableChangeListeners = tableChangeListenersMap.get(databaseName);
+
+                if (tableChangeListeners != null) {
+                    for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
+                        tableChangeListener.onTableChange(changeType);
+                    }
                 }
             } finally {
                 listenerLock.unlock();
             }
         } else {
-            if (changeType.isInsert()) {
-                transactionInsertOccurred.set(true);
-            } else if (changeType.isUpdate()) {
-                transactionUpdateOccurred.set(true);
-            } else if (changeType.isDelete()) {
-                transactionDeleteOccurred.set(true);
-            }
+            getAndroidDatabaseManager().addTransactionTableChange(databaseName, this);
         }
     }
 
     // ===== Observables =====
 
+    @NonNull
     public Observable<DatabaseTableChange> tableChanges() {
-        return tableChanges.asObservable();
+        return tableChanges(getDatabaseName());
+    }
+
+    @NonNull
+    public Observable<DatabaseTableChange> tableChanges(@NonNull String databaseName) {
+        listenerLock.lock();
+
+        try {
+            PublishSubject<DatabaseTableChange> subject = tableChangeSubjectMap.get(databaseName);
+            if (subject == null) {
+                subject = PublishSubject.create();
+                tableChangeSubjectMap.put(databaseName, subject);
+            }
+            return subject.asObservable();
+        } finally {
+            listenerLock.unlock();
+        }
     }
 
     // ===== Table Change =====

@@ -11,6 +11,15 @@ public class DatabaseTableChange {
     private final boolean delete;
     private final boolean bulkOperation;
 
+    public DatabaseTableChange(String table) {
+        this.table = table;
+        this.rowId = UNKNOWN_ROW_ID;
+        this.insert = false;
+        this.update = false;
+        this.delete = false;
+        this.bulkOperation = true;
+    }
+
     public DatabaseTableChange(String table, long rowId, boolean insert, boolean update, boolean delete) {
         this.table = table;
         this.bulkOperation = false;

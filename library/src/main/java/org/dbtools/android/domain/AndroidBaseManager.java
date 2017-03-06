@@ -4,8 +4,8 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import org.dbtools.android.domain.config.DatabaseConfig;
 import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
@@ -16,23 +16,54 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 @SuppressWarnings("UnusedDeclaration")
 public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     public static final int MAX_TRY_COUNT = 3;
     public static final String DEFAULT_COLLATE_LOCALIZED = " COLLATE LOCALIZED";
 
-    public abstract DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getReadableDatabase(String databaseName);
+    private final AndroidDatabaseManager androidDatabaseManager;
 
-    public abstract DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getWritableDatabase(String databaseName);
+    protected AndroidBaseManager(AndroidDatabaseManager androidDatabaseManager) {
+        this.androidDatabaseManager = androidDatabaseManager;
+    }
 
-    public abstract AndroidDatabase getAndroidDatabase(String databaseName);
+    public AndroidDatabaseManager getAndroidDatabaseManager() {
+        return androidDatabaseManager;
+    }
+    
+    @NonNull
+    public DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getReadableDatabase(@NonNull String databaseName) {
+        return androidDatabaseManager.getReadableDatabase(databaseName);
+    }
+
+    @NonNull
+    public DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getReadableDatabase() {
+        return androidDatabaseManager.getReadableDatabase(getDatabaseName());
+    }
+
+    @NonNull
+    public DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getWritableDatabase(@NonNull String databaseName) {
+        return androidDatabaseManager.getWritableDatabase(databaseName);
+    }
+
+    @NonNull
+    public DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> getWritableDatabase() {
+        return androidDatabaseManager.getWritableDatabase(getDatabaseName());
+    }
+
+    @Nullable
+    public org.dbtools.android.domain.AndroidDatabase getAndroidDatabase(@NonNull String databaseName) {
+        return androidDatabaseManager.getDatabase(databaseName);
+    }
+
+    public org.dbtools.android.domain.config.DatabaseConfig getDatabaseConfig() {
+        return androidDatabaseManager.getDatabaseConfig();
+    }
 
     public abstract String getDatabaseName();
 
+    @NonNull
     public abstract String getTableName();
 
     public abstract String getPrimaryKey();
@@ -48,8 +79,6 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     public abstract String getUpdateSql();
 
     public abstract T newRecord();
-
-    public abstract DatabaseConfig getDatabaseConfig();
 
     /**
      * Return a database/platform specific version of DBToolsContentValues
@@ -67,15 +96,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(getDatabaseName(), getCreateSql());
     }
 
-    public void createTable(@Nonnull String databaseName) {
-//        executeSql(getWritableDatabase(databaseName), getCreateSql());
-//    }
-//
-//    public void createTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+    public void createTable(@NonNull String databaseName) {
         executeSql(databaseName, getCreateSql());
     }
 
-    public static  void createTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, String sql) {
+    public static  void createTable(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, String sql) {
         executeSql(db, sql);
     }
 
@@ -83,16 +108,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(getDatabaseName(), getDropSql());
     }
 
-    public void dropTable(@Nonnull String databaseName) {
-//        executeSql(getWritableDatabase(databaseName), getDropSql());
-//    }
-//
-//    public void dropTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+    public void dropTable(@NonNull String databaseName) {
         executeSql(databaseName, getDropSql());
     }
 
     // for use with enum records
-    public static void dropTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String sql) {
+    public static void dropTable(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @NonNull String sql) {
         executeSql(db, sql);
     }
 
@@ -100,63 +121,55 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         cleanTable(getDatabaseName());
     }
 
-    public void cleanTable(@Nonnull String databaseName) {
-//        cleanTable(getWritableDatabase(databaseName), getDropSql(), getCreateSql());
-//    }
-//
-//    public void cleanTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+    public void cleanTable(@NonNull String databaseName) {
         cleanTable(databaseName, getDropSql(), getCreateSql());
     }
 
-    public void cleanTable(@Nonnull String dropSql, @Nonnull String createSql) {
+    public void cleanTable(@NonNull String dropSql, @NonNull String createSql) {
         cleanTable(getDatabaseName(), dropSql, createSql);
     }
 
-    public void cleanTable(@Nonnull String databaseName, @Nonnull String dropSql, @Nonnull String createSql) {
+    public void cleanTable(@NonNull String databaseName, @NonNull String dropSql, @NonNull String createSql) {
         DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
 
-//        cleanTable(getWritableDatabase(databaseName), dropSql, createSql);
-//    }
-//
-//    public void cleanTable(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String dropSql, @Nonnull String createSql) {
         checkDB(db);
         executeSql(db, dropSql);
         executeSql(db, createSql);
     }
 
-    public StatementWrapper getInsertStatement(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+    public StatementWrapper getInsertStatement(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
         return db.getInsertStatement(getTableName(), getInsertSql());
     }
 
-    public StatementWrapper getUpdateStatement(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
+    public StatementWrapper getUpdateStatement(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db) {
         return db.getUpdateStatement(getTableName(), getUpdateSql());
     }
 
-    public void executeSql(@Nonnull String sql) {
+    public void executeSql(@NonNull String sql) {
         executeSql(getDatabaseName(), sql);
     }
 
-    public void executeSql(@Nonnull String sql, @Nullable Object[] bindArgs) {
+    public void executeSql(@NonNull String sql, @Nullable Object[] bindArgs) {
         executeSql(getDatabaseName(), sql, bindArgs);
     }
 
-    public void executeSql(@Nonnull String databaseName, @Nonnull String sql, @Nullable Object[] bindArgs) {
+    public void executeSql(@NonNull String databaseName, @NonNull String sql, @Nullable Object[] bindArgs) {
         executeSql(getWritableDatabase(databaseName), sql, bindArgs);
     }
 
-    public void executeSql(@Nonnull String databaseName, @Nonnull String sql) {
+    public void executeSql(@NonNull String databaseName, @NonNull String sql) {
         executeSql(getWritableDatabase(databaseName), sql);
     }
 
-    public static void executeSql(@Nonnull AndroidDatabase androidDatabase, @Nonnull String sql) {
+    public static void executeSql(@NonNull AndroidDatabase androidDatabase, @NonNull String sql) {
         executeSql(androidDatabase.getDatabaseWrapper(), sql);
     }
 
-    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String sql) {
+    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @NonNull String sql) {
         executeSql(db, sql, null);
     }
 
-    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nonnull String sql, @Nullable Object[] bindArgs) {
+    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @NonNull String sql, @Nullable Object[] bindArgs) {
         checkDB(db);
 
         String[] sqlStatements = sql.split(";");
@@ -184,12 +197,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public Cursor findCursorByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public Cursor findCursorByRawQuery(@NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
     @Nullable
-    public Cursor findCursorByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public Cursor findCursorByRawQuery(@NonNull String databaseName, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
     }
 
@@ -199,7 +212,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public Cursor findCursorBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String orderBy) {
+    public Cursor findCursorBySelection(@NonNull String databaseName, @Nullable String selection, @Nullable String orderBy) {
         return findCursorBySelection(databaseName, selection, null, orderBy);
     }
 
@@ -209,7 +222,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public Cursor findCursorBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    public Cursor findCursorBySelection(@NonNull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findCursorBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
     }
 
@@ -219,7 +232,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public Cursor findCursorBySelection(@Nonnull String databaseName, boolean distinct, @Nonnull String table, @Nonnull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    public Cursor findCursorBySelection(@NonNull String databaseName, boolean distinct, @NonNull String table, @NonNull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         Cursor cursor = getReadableDatabase(databaseName).query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
 
         if (cursor != null) {
@@ -240,52 +253,52 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public Cursor findCursorByRowId(@Nonnull String databaseName, long rowId) {
+    public Cursor findCursorByRowId(@NonNull String databaseName, long rowId) {
         return findCursorBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
     }
 
-    @Nonnull
+    @NonNull
     public List<T> findAll() {
         return findAllBySelection(null, null, null);
     }
 
-    @Nonnull
-    public List<T> findAll(@Nonnull String databaseName) {
+    @NonNull
+    public List<T> findAll(@NonNull String databaseName) {
         return findAllBySelection(databaseName, null, null, null);
     }
 
-    @Nonnull
+    @NonNull
     public List<T> findAllOrderBy(@Nullable String orderBy) {
         return findAllBySelection(null, null, orderBy);
     }
 
-    @Nonnull
-    public List<T> findAllOrderBy(@Nonnull String databaseName, @Nullable String orderBy) {
+    @NonNull
+    public List<T> findAllOrderBy(@NonNull String databaseName, @Nullable String orderBy) {
         return findAllBySelection(databaseName, null, null, orderBy);
     }
 
-    @Nonnull
-    public List<T> findAllBySelection(@Nullable String selection, @Nonnull String[] selectionArgs) {
+    @NonNull
+    public List<T> findAllBySelection(@Nullable String selection, @NonNull String[] selectionArgs) {
         return findAllBySelection(selection, selectionArgs, null);
     }
 
-    @Nonnull
+    @NonNull
     public List<T> findAllBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findAllBySelection(selection, selectionArgs, null, null, orderBy, null);
     }
 
-    @Nonnull
+    @NonNull
     public List<T> findAllBySelection(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         return findAllBySelection(getDatabaseName(), true, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
-    @Nonnull
-    public List<T> findAllBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    @NonNull
+    public List<T> findAllBySelection(@NonNull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findAllBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
     }
 
-    @Nonnull
-    public List<T> findAllBySelection(@Nonnull String databaseName, boolean distinct, @Nonnull String table, @Nonnull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    @NonNull
+    public List<T> findAllBySelection(@NonNull String databaseName, boolean distinct, @NonNull String table, @NonNull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         Cursor cursor = findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
         return getAllItemsFromCursor(cursor);
     }
@@ -296,8 +309,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery Custom query
      * @return List of object T
      */
-    @Nonnull
-    public List<T> findAllByRawQuery(@Nonnull String rawQuery) {
+    @NonNull
+    public List<T> findAllByRawQuery(@NonNull String rawQuery) {
         return getAllItemsFromCursor(findCursorByRawQuery(getDatabaseName(), rawQuery, null));
     }
 
@@ -308,8 +321,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs query arguments
      * @return List of object T
      */
-    @Nonnull
-    public List<T> findAllByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    @NonNull
+    public List<T> findAllByRawQuery(@NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return getAllItemsFromCursor(findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs));
     }
 
@@ -321,12 +334,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs query arguments
      * @return List of object T
      */
-    @Nonnull
-    public List<T> findAllByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    @NonNull
+    public List<T> findAllByRawQuery(@NonNull String databaseName, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return getAllItemsFromCursor(findCursorByRawQuery(databaseName, rawQuery, selectionArgs));
     }
 
-    @Nonnull
+    @NonNull
     public List<T> getAllItemsFromCursor(@Nullable Cursor cursor) {
         List<T> foundItems;
         if (cursor != null) {
@@ -352,7 +365,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public T findByRowId(@Nonnull String databaseName, long rowId) {
+    public T findByRowId(@NonNull String databaseName, long rowId) {
         return findBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
     }
 
@@ -362,7 +375,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public T findBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    public T findBySelection(@NonNull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy);
     }
 
@@ -372,18 +385,18 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public T findBySelection(@Nonnull String databaseName, boolean distinct, @Nonnull String table, @Nonnull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy) {
+    public T findBySelection(@NonNull String databaseName, boolean distinct, @NonNull String table, @NonNull String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy) {
         Cursor cursor = findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, "1");
         return createRecordFromCursor(cursor);
     }
 
     @Nullable
-    public T findByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public T findByRawQuery(@NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return findByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
     @Nullable
-    public T findByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public T findByRawQuery(@NonNull String databaseName, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         Cursor cursor = findCursorByRawQuery(databaseName, rawQuery, selectionArgs);
 
         if (cursor != null) {
@@ -410,18 +423,18 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         }
     }
 
-    @Nonnull
+    @NonNull
     public List<T> findAllByRowIds(long[] rowIds) {
         return findAllByRowIds(rowIds, null);
     }
 
-    @Nonnull
+    @NonNull
     public List<T> findAllByRowIds(long[] rowIds, @Nullable String orderBy) {
         return findAllByRowIds(getDatabaseName(), rowIds, orderBy);
     }
 
-    @Nonnull
-    public List<T> findAllByRowIds(@Nonnull String databaseName, long[] rowIds, @Nullable String orderBy) {
+    @NonNull
+    public List<T> findAllByRowIds(@NonNull String databaseName, long[] rowIds, @Nullable String orderBy) {
         if (rowIds.length == 0) {
             return new ArrayList<T>();
         }
@@ -441,7 +454,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return findCountBySelection(null, null);
     }
 
-    public long findCount(@Nonnull String databaseName) {
+    public long findCount(@NonNull String databaseName) {
         return findCountBySelection(databaseName, null, null);
     }
 
@@ -449,11 +462,11 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         return findCountBySelection(getDatabaseName(), selection, selectionArgs);
     }
 
-    public long findCountBySelection(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs) {
+    public long findCountBySelection(@NonNull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs) {
         return findCountBySelection(getReadableDatabase(databaseName), getTableName(), selection, selectionArgs);
     }
 
-    public static long findCountBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nullable String selection, @Nullable String[] selectionArgs) {
+    public static long findCountBySelection(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @Nullable String selection, @Nullable String[] selectionArgs) {
         long count = -1;
 
         Cursor c = database.query(tableName, new String[]{"count(1)"}, selection, selectionArgs, null, null, null);
@@ -472,7 +485,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery Query
      * @return total count
      */
-    public long findCountByRawQuery(@Nonnull String rawQuery) {
+    public long findCountByRawQuery(@NonNull String rawQuery) {
         return findCountByRawQuery(getDatabaseName(), rawQuery, null);
     }
 
@@ -483,7 +496,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param rawQuery     Query
      * @return total count
      */
-    public long findCountByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery) {
+    public long findCountByRawQuery(@NonNull String databaseName, @NonNull String rawQuery) {
         return findCountByRawQuery(databaseName, rawQuery, null);
     }
 
@@ -494,15 +507,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param selectionArgs Selection args
      * @return total count
      */
-    public long findCountByRawQuery(@Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public long findCountByRawQuery(@NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return findCountByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
     }
 
-    public long findCountByRawQuery(@Nonnull String databaseName, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public long findCountByRawQuery(@NonNull String databaseName, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return findCountByRawQuery(getReadableDatabase(databaseName), rawQuery, selectionArgs);
     }
 
-    public static long findCountByRawQuery(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public static long findCountByRawQuery(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         long count = 0;
         Cursor c = database.rawQuery(rawQuery, selectionArgs);
         if (c != null) {
@@ -525,7 +538,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueByRawQuery(@Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
+    public <I> I findValueByRawQuery(@NonNull Class<I> valueType, @NonNull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         return findValueByRawQuery(getDatabaseName(), valueType, rawQuery, selectionArgs, defaultValue);
     }
 
@@ -540,7 +553,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueByRawQuery(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
+    public <I> I findValueByRawQuery(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         return findValueByRawQuery(getReadableDatabase(databaseName), valueType, rawQuery, selectionArgs, defaultValue);
     }
 
@@ -555,7 +568,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueByRawQuery(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
+    public static <I> I findValueByRawQuery(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull Class<I> valueType, @NonNull String rawQuery, @Nullable String[] selectionArgs, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
@@ -580,7 +593,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, long rowId, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull Class<I> valueType, @NonNull String column, long rowId, I defaultValue) {
         return findValueBySelection(getDatabaseName(), valueType, column, getPrimaryKey() + " = " + rowId, null, defaultValue);
     }
 
@@ -595,7 +608,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
         return findValueBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, defaultValue);
     }
 
@@ -611,7 +624,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
         return findValueBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, orderBy, defaultValue);
     }
 
@@ -627,7 +640,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
         return findValueBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
     }
 
@@ -642,7 +655,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, long rowId, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String column, long rowId, I defaultValue) {
         return findValueBySelection(databaseName, valueType, column, getPrimaryKey() + " = " + rowId, null, null, defaultValue);
     }
 
@@ -658,7 +671,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, I defaultValue) {
         return findValueBySelection(databaseName, valueType, column, selection, selectionArgs, null, defaultValue);
     }
 
@@ -675,7 +688,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
         return findValueBySelection(databaseName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
     }
 
@@ -693,7 +706,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 //     * @param <I>           Type of value
 //     * @return query results value or defaultValue if no data was returned
 //     */
-//    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
+//    public static <I> I findValueBySelection(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy, I defaultValue) {
 //        return findValueBySelection(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
 //    }
 //
@@ -711,7 +724,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 //     * @param <I>           Type of value
 //     * @return query results value or defaultValue if no data was returned
 //     */
-//    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+//    public static <I> I findValueBySelection(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
 
     /**
      * Return the value for the specified column and first row value as given type for given selection and selectionArgs.
@@ -726,7 +739,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+    public <I> I findValueBySelection(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
         DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db = getWritableDatabase(databaseName);
         String tableName = getTableName();
         return findValueBySelection(db, tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
@@ -746,7 +759,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public static <I> I findValueBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
+    public static <I> I findValueBySelection(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, I defaultValue) {
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
         I value = defaultValue;
 
@@ -769,8 +782,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesByRawQuery(@Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    @NonNull
+    public <I> List<I> findAllValuesByRawQuery(@NonNull Class<I> valueType, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return findAllValuesByRawQuery(getDatabaseName(), valueType, rawQuery, selectionArgs);
     }
 
@@ -784,8 +797,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesByRawQuery(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    @NonNull
+    public <I> List<I> findAllValuesByRawQuery(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return findAllValuesByRawQuery(databaseName, valueType, 0, rawQuery, selectionArgs);
     }
 
@@ -800,8 +813,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesByRawQuery(@Nonnull String databaseName, @Nonnull Class<I> valueType, int columnIndex, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    @NonNull
+    public <I> List<I> findAllValuesByRawQuery(@NonNull String databaseName, @NonNull Class<I> valueType, int columnIndex, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         return findAllValuesByRawQuery(getReadableDatabase(databaseName), valueType, columnIndex, rawQuery, selectionArgs);
     }
 
@@ -816,7 +829,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    public static <I> List<I> findAllValuesByRawQuery(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull Class<I> valueType, int columnIndex, @Nonnull String rawQuery, @Nullable String[] selectionArgs) {
+    public static <I> List<I> findAllValuesByRawQuery(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull Class<I> valueType, int columnIndex, @NonNull String rawQuery, @Nullable String[] selectionArgs) {
         List<I> foundItems;
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
 
@@ -846,8 +859,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
+    @NonNull
+    public <I> List<I> findAllValuesBySelection(@NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs) {
         return findAllValuesBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, null);
     }
 
@@ -862,8 +875,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    @NonNull
+    public <I> List<I> findAllValuesBySelection(@NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findAllValuesBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, orderBy);
     }
 
@@ -878,8 +891,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesBySelection(@Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    @NonNull
+    public <I> List<I> findAllValuesBySelection(@NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         return findAllValuesBySelection(getDatabaseName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
@@ -895,8 +908,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    @NonNull
+    public <I> List<I> findAllValuesBySelection(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findAllValuesBySelection(databaseName, valueType, column, selection, selectionArgs, null, null, orderBy, null);
     }
 
@@ -912,8 +925,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public <I> List<I> findAllValuesBySelection(@Nonnull String databaseName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    @NonNull
+    public <I> List<I> findAllValuesBySelection(@NonNull String databaseName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         return findAllValuesBySelection(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
@@ -930,8 +943,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    @NonNull
+    public static <I> List<I> findAllValuesBySelection(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findAllValuesBySelection(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, null);
     }
 
@@ -948,8 +961,8 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results List or empty List returned
      */
-    @Nonnull
-    public static <I> List<I> findAllValuesBySelection(@Nonnull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull String tableName, @Nonnull Class<I> valueType, @Nonnull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    @NonNull
+    public static <I> List<I> findAllValuesBySelection(@NonNull DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @NonNull String tableName, @NonNull Class<I> valueType, @NonNull String column, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         List<I> foundItems;
         DatabaseValue<I> databaseValue = getDatabaseValue(valueType);
 
@@ -975,15 +988,15 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     private static final String TABLE_EXISTS = "SELECT COUNT(1) FROM sqlite_master WHERE type = 'table' AND name = ?";
 
-    public boolean tableExists(@Nonnull String tableName) {
+    public boolean tableExists(@NonNull String tableName) {
         return tableExists(getDatabaseName(), tableName);
     }
 
-    public boolean tableExists(@Nonnull String databaseName, @Nonnull String tableName) {
+    public boolean tableExists(@NonNull String databaseName, @NonNull String tableName) {
         return tableExists(getReadableDatabase(databaseName), tableName);
     }
 
-    public static boolean tableExists(@Nonnull AndroidDatabase androidDatabase, @Nonnull String tableName) {
+    public static boolean tableExists(@NonNull AndroidDatabase androidDatabase, @NonNull String tableName) {
         return tableExists(androidDatabase.getDatabaseWrapper(), tableName);
     }
 
@@ -1001,19 +1014,19 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
     }
 
     @Nullable
-    public MatrixCursor toMatrixCursor(@Nonnull T record) {
+    public MatrixCursor toMatrixCursor(@NonNull T record) {
         List<T> list = new ArrayList<T>(1);
         list.add(record);
         return toMatrixCursor(record.getAllColumns(), list);
     }
 
     @Nullable
-    public MatrixCursor toMatrixCursor(@Nonnull T... records) {
+    public MatrixCursor toMatrixCursor(@NonNull T... records) {
         return toMatrixCursor(Arrays.asList(records));
     }
 
     @Nullable
-    public MatrixCursor toMatrixCursor(@Nonnull List<T> records) {
+    public MatrixCursor toMatrixCursor(@NonNull List<T> records) {
         if (records.isEmpty()) {
             return null;
         }

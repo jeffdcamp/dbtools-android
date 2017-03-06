@@ -10,13 +10,7 @@ import org.dbtools.android.domain.database.statement.StatementWrapper
 import java.util.*
 
 @Suppress("unused")
-abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
-
-    abstract fun getReadableDatabase(databaseName: String = getDatabaseName()): DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>>
-
-    abstract fun getWritableDatabase(databaseName: String = getDatabaseName()): DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>>
-
-    abstract fun getAndroidDatabase(databaseName: String = getDatabaseName()): AndroidDatabase?
+abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDatabaseManager: AndroidDatabaseManager) {
 
     abstract val primaryKey: String
 
@@ -36,7 +30,21 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord> {
 
     abstract fun newRecord(): T
 
-    abstract fun getDatabaseConfig(): DatabaseConfig
+    open fun getReadableDatabase(databaseName: String = getDatabaseName()): DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>> {
+        return androidDatabaseManager.getReadableDatabase(databaseName)
+    }
+
+    open fun getWritableDatabase(databaseName: String = getDatabaseName()): DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>> {
+        return androidDatabaseManager.getWritableDatabase(databaseName)
+    }
+
+    open fun getAndroidDatabase(databaseName: String = getDatabaseName()): AndroidDatabase? {
+        return androidDatabaseManager.getDatabase(databaseName)
+    }
+
+    open fun getDatabaseConfig(): DatabaseConfig {
+        return androidDatabaseManager.databaseConfig
+    }
 
     /**
      * Return a database/platform specific version of DBToolsContentValues

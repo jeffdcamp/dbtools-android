@@ -5,20 +5,16 @@ import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import rx.Observable
 import rx.subjects.PublishSubject
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 
 @Suppress("unused")
-abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKotlinAndroidBaseManager<T>() {
-    private val transactionInsertOccurred = AtomicBoolean(false)
-    private val transactionUpdateOccurred = AtomicBoolean(false)
-    private val transactionDeleteOccurred = AtomicBoolean(false)
+abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDatabaseManager: AndroidDatabaseManager) : RxKotlinAndroidBaseManager<T>(androidDatabaseManager), NotifiableManager {
     var lastTableModifiedTs = -1L
         private set
 
     private val listenerLock = ReentrantLock()
-    private val tableChangeListeners = HashSet<DBToolsTableChangeListener>()
-    private val tableChanges = PublishSubject.create<DatabaseTableChange>()
+    private val tableChangeListenersMap = mutableMapOf<String, MutableSet<DBToolsTableChangeListener>>()
+    private val tableChangeSubjectMap = HashMap<String, PublishSubject<DatabaseTableChange>>()
 
     inline fun inTransaction(func: () -> Boolean) {
         var success = false
@@ -37,7 +33,15 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
 
     @JvmOverloads
     open fun beginTransaction(databaseName: String = getDatabaseName()) {
-        getWritableDatabase(databaseName).beginTransaction()
+        // log warning
+        val writableDatabase = getWritableDatabase(databaseName)
+        if (writableDatabase.inTransaction()) {
+            androidDatabaseManager.getLogger().w(AndroidDatabaseBaseManager.TAG, "WARNING: Already in transaction.")
+        }
+
+        // clear table changes and start transaction
+        androidDatabaseManager.clearTransactionTableChange(databaseName)
+        writableDatabase.beginTransaction()
     }
 
     @JvmOverloads
@@ -47,18 +51,12 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
             db.setTransactionSuccessful()
         }
 
-        // determine if there are changes
-        val tableChange = DatabaseTableChange(getTableName(), transactionInsertOccurred.get(), transactionUpdateOccurred.get(), transactionDeleteOccurred.get())
-        transactionInsertOccurred.set(false)
-        transactionUpdateOccurred.set(false)
-        transactionDeleteOccurred.set(false)
-
         // end transaction
         db.endTransaction()
 
         // post end transaction event
-        if (tableChange.hasChange()) {
-            notifyTableListeners(true, db, tableChange)
+        if (success) {
+            androidDatabaseManager.notifyTransactionEnded(databaseName)
         }
     }
 
@@ -109,13 +107,13 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
             try {
                 // statement
                 val statement = getInsertStatement(db)
-                statement.clearBindings();
+                statement.clearBindings()
                 record.bindInsertStatement(statement)
                 rowId = statement.executeInsert()
 
                 record.primaryKeyId = rowId
 
-                notifyTableListeners(false, db, DatabaseTableChange(getTableName(), rowId, true, false, false))
+                notifyTableListeners(databaseName, false, db, DatabaseTableChange(getTableName(), rowId, true, false, false))
 
                 success = true
             } catch (ex: Exception) {
@@ -147,7 +145,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         val rowsAffectedCount = statement.executeUpdateDelete()
 
         if (rowsAffectedCount > 0) {
-            notifyTableListeners(false, db, DatabaseTableChange(getTableName(), rowId, false, true, false))
+            notifyTableListeners(databaseName, false, db, DatabaseTableChange(getTableName(), rowId, false, true, false))
         }
 
         return rowsAffectedCount
@@ -179,7 +177,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         }
 
         if (success && rowsAffectedCount > 0) {
-            notifyTableListeners(false, db, DatabaseTableChange(getTableName(), false, true, false))
+            notifyTableListeners(databaseName, false, db, DatabaseTableChange(getTableName(), false, true, false))
         }
 
         return rowsAffectedCount
@@ -225,7 +223,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
         }
 
         if (success && rowCountAffected > 0) {
-            notifyTableListeners(false, db, DatabaseTableChange(getTableName(), false, false, true))
+            notifyTableListeners(databaseName, false, db, DatabaseTableChange(getTableName(), false, false, true))
         }
 
         return rowCountAffected
@@ -238,62 +236,81 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord> : RxKot
 
     // ===== Listeners =====
 
-    open fun addTableChangeListener(listener: DBToolsTableChangeListener) {
+    open fun addTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
         listenerLock.lock()
         try {
+            var tableChangeListeners: MutableSet<DBToolsTableChangeListener>? = tableChangeListenersMap[databaseName]
+            if (tableChangeListeners == null) {
+                tableChangeListeners = HashSet<DBToolsTableChangeListener>()
+                tableChangeListenersMap[databaseName] = tableChangeListeners
+            }
+
             tableChangeListeners.add(listener)
         } finally {
             listenerLock.unlock()
         }
     }
 
-    open fun removeTableChangeListener(listener: DBToolsTableChangeListener) {
+    open fun removeTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
         listenerLock.lock()
         try {
-            tableChangeListeners.remove(listener)
+            val tableChangeListeners = tableChangeListenersMap[databaseName]
+            tableChangeListeners?.remove(listener)
         } finally {
             listenerLock.unlock()
         }
     }
 
-    open fun clearTableChangeListeners() {
+    open fun clearTableChangeListeners(databaseName: String = getDatabaseName()) {
         listenerLock.lock()
         try {
-            tableChangeListeners.clear()
+            val tableChangeListeners = tableChangeListenersMap[databaseName]
+            tableChangeListeners?.clear()
         } finally {
             listenerLock.unlock()
         }
     }
 
-    private fun notifyTableListeners(forceNotify: Boolean, db: DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>>?, changeType: DatabaseTableChange) {
+    override fun notifyTableListeners(databaseName: String, forceNotify: Boolean, databaseWrapper: DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>>?, changeType: DatabaseTableChange) {
         updateLastTableModifiedTs()
 
-        if (forceNotify || !(db != null && db.inTransaction())) {
-            tableChanges.onNext(changeType)
-
+        if (forceNotify || !(databaseWrapper != null && databaseWrapper.inTransaction())) {
             listenerLock.lock()
             try {
-                for (tableChangeListener in tableChangeListeners) {
-                    tableChangeListener.onTableChange(changeType)
+                val subject = tableChangeSubjectMap[databaseName]
+                subject?.onNext(changeType)
+
+
+                val tableChangeListeners = tableChangeListenersMap[databaseName]
+
+                if (tableChangeListeners != null) {
+                    for (tableChangeListener in tableChangeListeners) {
+                        tableChangeListener.onTableChange(changeType)
+                    }
                 }
             } finally {
                 listenerLock.unlock()
             }
         } else {
-            if (changeType.isInsert) {
-                transactionInsertOccurred.set(true)
-            } else if (changeType.isUpdate) {
-                transactionUpdateOccurred.set(true)
-            } else if (changeType.isDelete) {
-                transactionDeleteOccurred.set(true)
-            }
+            androidDatabaseManager.addTransactionTableChange(databaseName, this)
         }
     }
 
     // ===== Observables =====
 
-    open fun tableChanges(): Observable<DatabaseTableChange> {
-        return tableChanges.asObservable()
+    fun tableChanges(databaseName: String): Observable<DatabaseTableChange> {
+        listenerLock.lock()
+
+        try {
+            var subject: PublishSubject<DatabaseTableChange>? = tableChangeSubjectMap.get(databaseName)
+            if (subject == null) {
+                subject = PublishSubject.create<DatabaseTableChange>()
+                tableChangeSubjectMap.put(databaseName, subject)
+            }
+            return subject!!.asObservable()
+        } finally {
+            listenerLock.unlock()
+        }
     }
 
     // ===== Table Change =====

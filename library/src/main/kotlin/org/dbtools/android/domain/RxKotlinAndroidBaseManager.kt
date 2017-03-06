@@ -7,7 +7,7 @@ import rx.Observable
 import java.util.*
 
 @Suppress("unused")
-abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord> : KotlinAndroidBaseManager<T>() {
+abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord>(androidDatabaseManager: AndroidDatabaseManager) : KotlinAndroidBaseManager<T>(androidDatabaseManager) {
 
     @JvmOverloads
     open fun findCursorAllRx(databaseName: String = getDatabaseName()): Observable<Cursor> {

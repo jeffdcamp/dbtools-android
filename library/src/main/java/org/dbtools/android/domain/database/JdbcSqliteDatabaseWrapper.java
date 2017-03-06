@@ -27,6 +27,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     private Map<String, StatementWrapper> insertStatementMap = new HashMap<>();
     private Map<String, StatementWrapper> updateStatementMap = new HashMap<>();
     private static boolean enableLogging = false;
+    private boolean commitTransaction = false;
 
     public JdbcSqliteDatabaseWrapper() {
         this("jdbc:sqlite::memory:");
@@ -331,6 +332,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     @Override
     public void beginTransaction() {
         try {
+            commitTransaction = false;
             conn.setAutoCommit(false);
         } catch(SQLException e) {
             e.printStackTrace();
@@ -341,12 +343,17 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
     public void endTransaction() {
         try {
             try {
-                conn.commit();
+                if (commitTransaction) {
+                    conn.commit();
+                } else {
+                    conn.rollback();
+                }
             } catch (SQLException e1) {
                 conn.rollback();
                 e1.printStackTrace();
             } finally {
                 conn.setAutoCommit(true);
+                commitTransaction = false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -355,7 +362,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
 
     @Override
     public void setTransactionSuccessful() {
-        // do nothing
+        commitTransaction = true;
     }
 
     @Override
