@@ -156,7 +156,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(android
     }
 
     @JvmOverloads
-    open fun update(contentValues: DBToolsContentValues<*>, where: String?, whereArgs: Array<String>?, databaseName: String = getDatabaseName()): Int {
+    open fun update(contentValues: DBToolsContentValues<*>, where: String? = null, whereArgs: Array<String>? = null, databaseName: String = getDatabaseName()): Int {
         val db = getWritableDatabase(databaseName)
 
         var rowsAffectedCount = 0
@@ -202,7 +202,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(android
     }
 
     @JvmOverloads
-    open fun delete(where: String?, whereArgs: Array<String>?, databaseName: String = getDatabaseName()): Int {
+    open fun delete(where: String?, whereArgs: Array<String>? = null, databaseName: String = getDatabaseName()): Int {
         val db = getWritableDatabase(databaseName)
 
         var rowCountAffected = 0

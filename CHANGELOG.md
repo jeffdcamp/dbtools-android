@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+  Version 8.2.1 *(2017-03)*
+---------------------------
+* Added support for multi field indexes (Added <index/> section to schema.xsd to support multiple column indexes)
+* Imp
+
+
   Version 8.2.0 *(2017-03)*
 ---------------------------
 * Improved table notifications and subscriptions across managers and multiple databases

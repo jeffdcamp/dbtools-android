@@ -2,7 +2,7 @@ package org.dbtools.android.domain
 
 import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
-import java.util.*
+import java.util.HashSet
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 
@@ -154,7 +154,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
     }
 
     @JvmOverloads
-    open fun update(contentValues: DBToolsContentValues<*>, where: String?, whereArgs: Array<String>?, databaseName: String = getDatabaseName()): Int {
+    open fun update(contentValues: DBToolsContentValues<*>, where: String? = null, whereArgs: Array<String>? = null, databaseName: String = getDatabaseName()): Int {
         val db = getWritableDatabase(databaseName)
 
         var rowsAffectedCount = 0
@@ -200,7 +200,7 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
     }
 
     @JvmOverloads
-    open fun delete(where: String?, whereArgs: Array<String>?, databaseName: String = getDatabaseName()): Int {
+    open fun delete(where: String?, whereArgs: Array<String>? = null, databaseName: String = getDatabaseName()): Int {
         val db = getWritableDatabase(databaseName)
 
         var rowCountAffected = 0
