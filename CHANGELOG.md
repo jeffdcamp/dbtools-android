@@ -1,6 +1,18 @@
 Change Log
 ==========
 
+Version 9.0.0 *(2017-04)*
+---------------------------
+* Changed from RxJava 1 to RxJava 2
+* Added findAllxxxRxStream(...) functions that keep the cursor open and emits results to an Observable<T>
+* Added support text enums (use VARCHAR as field jdbcDataType)
+
+**Migration**
+
+* xxxRx() functions now all Return Single<T> and Single<List<T>> OR Maybe<T> and Maybe<List<T>>
+* findValueBySelection(..., rowId, ...) has been replaced with findValueByRowId(..., rowId, ...)
+
+
 Version 8.2.1 *(2017-03)*
 ---------------------------
 * Added support for multi field indexes (Added <index/> section to schema.xsd to support multiple column indexes)

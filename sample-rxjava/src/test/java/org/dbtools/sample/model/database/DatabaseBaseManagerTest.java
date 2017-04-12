@@ -12,8 +12,8 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -132,11 +132,11 @@ public class DatabaseBaseManagerTest {
         });
 
         individualManager.tableChanges()
-                .subscribeOn(Schedulers.immediate())
-                .observeOn(Schedulers.immediate())
-                .subscribe(new Action1<DatabaseTableChange>() {
+                .subscribeOn(Schedulers.trampoline())
+                .observeOn(Schedulers.trampoline())
+                .subscribe(new Consumer<DatabaseTableChange>() {
                     @Override
-                    public void call(DatabaseTableChange tableChange) {
+                    public void accept(DatabaseTableChange tableChange) {
                         System.out.println("Table Changed: " + tableChange.getTable() + " ID: " + tableChange.getRowId());
                         subscribeMessageCount++;
                     }

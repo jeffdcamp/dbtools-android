@@ -13,8 +13,16 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import rx.Observable;
-import rx.functions.Func0;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeEmitter;
+import io.reactivex.MaybeOnSubscribe;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.annotations.NonNull;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends AndroidBaseManager<T> {
@@ -23,252 +31,341 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         super(androidDatabaseManager);
     }
 
-    public Observable<Cursor> findCursorAllRx() {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorAllRx() {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorAll();
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorAll());
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorByRawQuery(getDatabaseName(), rawQuery, selectionArgs));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
+    public Single<Cursor> findCursorByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.getReadableDatabase(databaseName).rawQuery(rawQuery, selectionArgs));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String orderBy) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String orderBy) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(selection, new String[]{}, orderBy);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(selection, new String[]{}, orderBy));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String orderBy) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String orderBy) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(databaseName, selection, null, orderBy);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(databaseName, selection, null, orderBy));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(getDatabaseName(), selection, selectionArgs, orderBy);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(getDatabaseName(), selection, selectionArgs, orderBy));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorBySelectionRx(final boolean distinct, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorBySelectionRx(final boolean distinct, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(getDatabaseName(), distinct, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorByRowIdRx(final long rowId) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorByRowIdRx(final long rowId) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> findCursorByRowIdRx(@Nonnull final String databaseName, final long rowId) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
-            @Nullable
+    public Single<Cursor> findCursorByRowIdRx(@Nonnull final String databaseName, final long rowId) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return findCursorBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCursorBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null));
             }
         });
     }
 
+    // ==========
+
     @Nonnull
-    public Observable<List<T>> findAllRx() {
+    public Single<List<T>> findAllRx() {
         return findAllBySelectionRx(null, null, null);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllRx(@Nonnull final String databaseName) {
+    public Single<List<T>> findAllRx(@Nonnull final String databaseName) {
         return findAllBySelectionRx(databaseName, null, null, null);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllOrderByRx(@Nullable final String orderBy) {
+    public Single<List<T>> findAllOrderByRx(@Nullable final String orderBy) {
         return findAllBySelectionRx(null, null, orderBy);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllOrderByRx(@Nonnull final String databaseName, @Nullable final String orderBy) {
+    public Single<List<T>> findAllOrderByRx(@Nonnull final String databaseName, @Nullable final String orderBy) {
         return findAllBySelectionRx(databaseName, null, null, orderBy);
     }
 
+    // **********
+
     @Nonnull
-    public Observable<T> findByRowIdRx(final long rowId) {
+    public Observable<T> findAllRxStream() {
+        return findAllBySelectionRxStream(null, null, null);
+    }
+
+    @Nonnull
+    public Observable<T> findAllRxStream(@Nonnull final String databaseName) {
+        return findAllBySelectionRxStream(databaseName, null, null, null);
+    }
+
+    @Nonnull
+    public Observable<T> findAllOrderByRxStream(@Nullable final String orderBy) {
+        return findAllBySelectionRxStream(null, null, orderBy);
+    }
+    @Nonnull
+    public Observable<T> findAllOrderByRxStream(@Nonnull final String databaseName, @Nullable final String orderBy) {
+        return Observable.create(new ObservableOnSubscribe<T>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
+                RxAndroidBaseManager.this.emitAllItemsFromCursor(e, findCursorBySelection(databaseName, null, null, orderBy));
+            }
+        });
+    }
+
+
+    // ==========
+
+    @Nonnull
+    public Maybe<T> findByRowIdRx(final long rowId) {
         return findBySelectionRx(getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
     }
 
     @Nonnull
-    public Observable<T> findByRowIdRx(@Nonnull final String databaseName, final long rowId) {
+    public Maybe<T> findByRowIdRx(@Nonnull final String databaseName, final long rowId) {
         return findBySelectionRx(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
     }
 
     @Nonnull
-    public Observable<T> findBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+    public Maybe<T> findBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return findBySelectionRx(selection, selectionArgs, null, null, orderBy, null);
     }
 
     @Nonnull
-    public Observable<T> findBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+    public Maybe<T> findBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return findBySelectionRx(getDatabaseName(), true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
     }
 
     @Nonnull
-    public Observable<T> findBySelectionRx(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    public Maybe<T> findBySelectionRx(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         return findBySelectionRx(getDatabaseName(), true, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
     @Nonnull
-    public Observable<T> findBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
-        return DBToolsRxUtil.just(new Func0<T>() {
+    public Maybe<T> findBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+        return Maybe.create(new MaybeOnSubscribe<T>() {
             @Override
-            public T call() {
-                return findBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy);
+            public void subscribe(@NonNull MaybeEmitter<T> e) throws Exception {
+                T result = RxAndroidBaseManager.this.findBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy);
+                if (result != null) {
+                    e.onSuccess(result);
+                } else {
+                    e.onComplete();
+                }
             }
         });
     }
 
+    // ==========
+
     @Nonnull
-    public Observable<List<T>> findAllBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs) {
+    public Single<List<T>> findAllBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs) {
         return findAllBySelectionRx(selection, selectionArgs, null, null, null, null);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+    public Single<List<T>> findAllBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return findAllBySelectionRx(selection, selectionArgs, null, null, orderBy, null);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllBySelectionRx(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+    public Single<List<T>> findAllBySelectionRx(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         return findAllBySelectionRx(getDatabaseName(), true, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllBySelectionRx(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+    public Single<List<T>> findAllBySelectionRx(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         return findAllBySelectionRx(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
-        return DBToolsRxUtil.just(new Func0<List<T>>() {
+    public Single<List<T>> findAllBySelectionRx(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+        return Single.create(new SingleOnSubscribe<List<T>>() {
             @Override
-            public List<T> call() {
-                return findAllBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
+            public void subscribe(@NonNull SingleEmitter<List<T>> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findAllBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit));
             }
         });
     }
 
+    // **********
+
     @Nonnull
-    public Observable<T> findByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+    public Observable<T> findAllBySelectionRxStream(@Nullable final String selection, @Nullable final String[] selectionArgs) {
+        return findAllBySelectionRxStream(selection, selectionArgs, null, null, null, null);
+    }
+
+    @Nonnull
+    public Observable<T> findAllBySelectionRxStream(@Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+        return findAllBySelectionRxStream(selection, selectionArgs, null, null, orderBy, null);
+    }
+
+    @Nonnull
+    public Observable<T> findAllBySelectionRxStream(@Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
+        return findAllBySelectionRxStream(getDatabaseName(), true, getTableName(), getAllColumns(), selection, selectionArgs, groupBy, having, orderBy, limit);
+    }
+
+    @Nonnull
+    public Observable<T> findAllBySelectionRxStream(@Nonnull String databaseName, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
+        return findAllBySelectionRxStream(databaseName, true, getTableName(), getAllColumns(), selection, selectionArgs, null, null, orderBy, null);
+    }
+
+    @Nonnull
+    public Observable<T> findAllBySelectionRxStream(@Nonnull final String databaseName, final boolean distinct, @Nonnull final String table, @Nonnull final String[] columns, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+        return Observable.create(new ObservableOnSubscribe<T>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
+                RxAndroidBaseManager.this.emitAllItemsFromCursor(e, findCursorBySelection(databaseName, distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit));
+            }
+        });
+    }
+
+    // ==========
+
+    @Nonnull
+    public Maybe<T> findByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return findByRawQueryRx(getDatabaseName(), rawQuery, selectionArgs);
     }
 
     @Nonnull
-    public Observable<T> findByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<T>() {
-            @Override
-            public T call() {
-                return findByRawQuery(databaseName, rawQuery, selectionArgs);
-            }
-        });
+    public Maybe<T> findByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return Maybe.create(new MaybeOnSubscribe<T>() {
+                                @Override
+                                public void subscribe(@NonNull MaybeEmitter<T> e) throws Exception {
+                                    T result = RxAndroidBaseManager.this.findByRawQuery(databaseName, rawQuery, selectionArgs);
+                                    if (result != null) {
+                                        e.onSuccess(result);
+                                    } else {
+                                        e.onComplete();
+                                    }
+                                }
+                            }
+        );
     }
 
+    // ==========
+
     @Nonnull
-    public Observable<List<T>> findAllByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+    public Single<List<T>> findAllByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
         return findAllByRawQueryRx(getDatabaseName(), rawQuery, selectionArgs);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<List<T>>() {
+    public Single<List<T>> findAllByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return Single.create(new SingleOnSubscribe<List<T>>() {
             @Override
-            public List<T> call() {
-                return findAllByRawQuery(databaseName, rawQuery, selectionArgs);
+            public void subscribe(@NonNull SingleEmitter<List<T>> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findAllByRawQuery(databaseName, rawQuery, selectionArgs));
             }
         });
     }
 
+    // **********
+
     @Nonnull
-    public Observable<List<T>> findAllByRowIdsRx(final long[] rowIds) {
+    public Observable<T> findAllByRawQueryRxStream(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return findAllByRawQueryRxStream(getDatabaseName(), rawQuery, selectionArgs);
+    }
+
+    @Nonnull
+    public Observable<T> findAllByRawQueryRxStream(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return Observable.create(new ObservableOnSubscribe<T>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
+                RxAndroidBaseManager.this.emitAllItemsFromCursor(e, findCursorByRawQuery(databaseName, rawQuery, selectionArgs));
+            }
+        });
+    }
+
+    // ==========
+
+    @Nonnull
+    public Single<List<T>> findAllByRowIdsRx(final long[] rowIds) {
         return findAllByRowIdsRx(rowIds, null);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllByRowIdsRx(final long[] rowIds, @Nullable final String orderBy) {
+    public Single<List<T>> findAllByRowIdsRx(final long[] rowIds, @Nullable final String orderBy) {
         return findAllByRowIdsRx(getDatabaseName(), rowIds, orderBy);
     }
 
     @Nonnull
-    public Observable<List<T>> findAllByRowIdsRx(@Nonnull final String databaseName, final long[] rowIds, @Nullable final String orderBy) {
+    public Single<List<T>> findAllByRowIdsRx(@Nonnull final String databaseName, final long[] rowIds, @Nullable final String orderBy) {
         StringBuilder sb = new StringBuilder();
         for (long rowId : rowIds) {
             if (sb.length() > 0) {
@@ -280,42 +377,74 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
         return findAllBySelectionRx(databaseName, sb.toString(), null, orderBy);
     }
 
+    // **********
+
     @Nonnull
-    public Observable<Long> findCountRx() {
-        return DBToolsRxUtil.just(new Func0<Long>() {
+    public Observable<T> findAllByRowIdsRxStream(final long[] rowIds) {
+        return findAllByRowIdsRxStream(rowIds, null);
+    }
+
+    @Nonnull
+    public Observable<T> findAllByRowIdsRxStream(final long[] rowIds, @Nullable final String orderBy) {
+        return findAllByRowIdsRxStream(getDatabaseName(), rowIds, orderBy);
+    }
+
+    @Nonnull
+    public Observable<T> findAllByRowIdsRxStream(@Nonnull final String databaseName, final long[] rowIds, @Nullable final String orderBy) {
+        final StringBuilder sb = new StringBuilder();
+        for (long rowId : rowIds) {
+            if (sb.length() > 0) {
+                sb.append(" OR ");
+            }
+            sb.append(getPrimaryKey()).append(" = ").append(rowId);
+        }
+
+        return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
-            public Long call() {
-                return findCountBySelection(null, null);
+            public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
+                RxAndroidBaseManager.this.emitAllItemsFromCursor(e, findCursorBySelection(databaseName, sb.toString(), null, orderBy));
+            }
+        });
+    }
+
+    // ==========
+
+    @Nonnull
+    public Single<Long> findCountRx() {
+        return Single.create(new SingleOnSubscribe<Long>() {
+            @Override
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountBySelection(null, null));
             }
         });
     }
 
     @Nonnull
-    public Observable<Long> findCountRx(@Nonnull final String databaseName) {
-        return DBToolsRxUtil.just(new Func0<Long>() {
+    public Single<Long> findCountRx(@Nonnull final String databaseName) {
+        return Single.create(new SingleOnSubscribe<Long>() {
             @Override
-            public Long call() {
-                return findCountBySelection(databaseName, null, null);
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountBySelection(databaseName, null, null));
             }
         });
     }
 
     @Nonnull
-    public Observable<Long> findCountBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<Long>() {
+    public Single<Long> findCountBySelectionRx(@Nullable final String selection, @Nullable final String[] selectionArgs) {
+        return Single.create(new SingleOnSubscribe<Long>() {
             @Override
-            public Long call() {
-                return findCountBySelection(getDatabaseName(), selection, selectionArgs);
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountBySelection(getDatabaseName(), selection, selectionArgs));
             }
         });
     }
 
     @Nonnull
-    public Observable<Long> findCountBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<Long>() {
+    public Single<Long> findCountBySelectionRx(@Nonnull final String databaseName, @Nullable final String selection, @Nullable final String[] selectionArgs) {
+        return Single.create(new SingleOnSubscribe<Long>() {
             @Override
-            public Long call() {
-                return findCountBySelection(databaseName, selection, selectionArgs);
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountBySelection(databaseName, selection, selectionArgs));
             }
         });
 
@@ -328,11 +457,11 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return total count
      */
     @Nonnull
-    public Observable<Long> findCountByRawQueryRx(@Nonnull final String rawQuery) {
-        return DBToolsRxUtil.just(new Func0<Long>() {
+    public Single<Long> findCountByRawQueryRx(@Nonnull final String rawQuery) {
+        return Single.create(new SingleOnSubscribe<Long>() {
             @Override
-            public Long call() {
-                return findCountByRawQuery(getDatabaseName(), rawQuery, null);
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountByRawQuery(getDatabaseName(), rawQuery, null));
             }
         });
     }
@@ -345,11 +474,11 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return total count
      */
     @Nonnull
-    public Observable<Long> findCountByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery) {
-        return DBToolsRxUtil.just(new Func0<Long>() {
+    public Single<Long> findCountByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery) {
+        return Single.create(new SingleOnSubscribe<Long>() {
             @Override
-            public Long call() {
-                return findCountByRawQuery(databaseName, rawQuery, null);
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountByRawQuery(databaseName, rawQuery, null));
             }
         });
     }
@@ -362,22 +491,22 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return total count
      */
     @Nonnull
-    public Observable<Long> findCountByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
-        return DBToolsRxUtil.just(new Func0<Long>() {
+    public Single<Long> findCountByRawQueryRx(@Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+        return Single.create(new SingleOnSubscribe<Long>() {
             @Override
-            public Long call() {
-                return findCountByRawQuery(getDatabaseName(), rawQuery, selectionArgs);
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountByRawQuery(getDatabaseName(), rawQuery, selectionArgs));
             }
         });
     }
 
     @Nonnull
-    public Observable<Long> findCountByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
+    public Single<Long> findCountByRawQueryRx(@Nonnull final String databaseName, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs) {
 
-        return DBToolsRxUtil.just(new Func0<Long>() {
+        return Single.create(new SingleOnSubscribe<Long>() {
             @Override
-            public Long call() {
-                return findCountByRawQuery(databaseName, rawQuery, selectionArgs);
+            public void subscribe(@NonNull SingleEmitter<Long> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.findCountByRawQuery(databaseName, rawQuery, selectionArgs));
             }
         });
     }
@@ -392,7 +521,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueByRawQueryRx(@Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, I defaultValue) {
+    public <I> Single<I> findValueByRawQueryRx(@Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, I defaultValue) {
         return findValueByRawQueryRx(getDatabaseName(), valueType, rawQuery, selectionArgs, defaultValue);
     }
 
@@ -407,7 +536,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
+    public <I> Single<I> findValueByRawQueryRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
         return findValueByRawQueryRx(getReadableDatabase(databaseName), valueType, rawQuery, selectionArgs, defaultValue);
     }
 
@@ -422,11 +551,11 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public static <I> Observable<I> findValueByRawQueryRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
-        return DBToolsRxUtil.just(new Func0<I>() {
+    public static <I> Single<I> findValueByRawQueryRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final Class<I> valueType, @Nonnull final String rawQuery, @Nullable final String[] selectionArgs, final I defaultValue) {
+        return Single.create(new SingleOnSubscribe<I>() {
             @Override
-            public I call() {
-                return findValueByRawQuery(database, valueType, rawQuery, selectionArgs, defaultValue);
+            public void subscribe(@NonNull SingleEmitter<I> e) throws Exception {
+                e.onSuccess(findValueByRawQuery(database, valueType, rawQuery, selectionArgs, defaultValue));
             }
         });
     }
@@ -441,7 +570,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, long rowId, final I defaultValue) {
+    public <I> Single<I> findValueByRowIdRx(@Nonnull final Class<I> valueType, @Nonnull final String column, long rowId, final I defaultValue) {
         return findValueBySelectionRx(getDatabaseName(), valueType, column, getPrimaryKey() + " = " + rowId, null, defaultValue);
     }
 
@@ -457,7 +586,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
+    public <I> Single<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
         return findValueBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, defaultValue);
     }
 
@@ -474,7 +603,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
+    public <I> Single<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final String orderBy, final I defaultValue) {
         return findValueBySelectionRx(valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
     }
 
@@ -491,7 +620,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, final String orderBy, final I defaultValue) {
+    public <I> Single<I> findValueBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, final String orderBy, final I defaultValue) {
         return findValueBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
     }
 
@@ -508,7 +637,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
+    public <I> Single<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, final I defaultValue) {
         return findValueBySelectionRx(databaseName, valueType, column, selection, selectionArgs, null, defaultValue);
     }
 
@@ -526,7 +655,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy, @Nullable final I defaultValue) {
+    public <I> Single<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy, @Nullable final I defaultValue) {
         return findValueBySelectionRx(databaseName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
     }
 
@@ -544,7 +673,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public <I> Observable<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final I defaultValue) {
+    public <I> Single<I> findValueBySelectionRx(@Nonnull final String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final I defaultValue) {
         return findValueBySelectionRx(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
     }
 
@@ -563,7 +692,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public static <I> Observable<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy, @Nullable final I defaultValue) {
+    public static <I> Single<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy, @Nullable final I defaultValue) {
         return findValueBySelectionRx(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, defaultValue);
     }
 
@@ -582,11 +711,11 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results value or defaultValue if no data was returned
      */
     @Nonnull
-    public static <I> Observable<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, final I defaultValue) {
-        return DBToolsRxUtil.just(new Func0<I>() {
+    public static <I> Single<I> findValueBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, final I defaultValue) {
+        return Single.create(new SingleOnSubscribe<I>() {
             @Override
-            public I call() {
-                return findValueBySelection(database, tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue);
+            public void subscribe(@NonNull SingleEmitter<I> e) throws Exception {
+                e.onSuccess(findValueBySelection(database, tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, defaultValue));
             }
         });
     }
@@ -597,7 +726,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results List or empty List returned
      */
     @Nonnull
-    public <I> Observable<List<I>> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs) {
+    public <I> Single<List<I>> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs) {
         return findAllValuesBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, null, null, null, null);
     }
 
@@ -607,7 +736,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results List or empty List returned
      */
     @Nonnull
-    public <I> Observable<List<I>> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs,  @Nullable final String orderBy) {
+    public <I> Single<List<I>> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs,  @Nullable final String orderBy) {
         return findAllValuesBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, null, null, orderBy, null);
     }
 
@@ -617,7 +746,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results List or empty List returned
      */
     @Nonnull
-    public <I> Observable<List<I>> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+    public <I> Single<List<I>> findAllValuesBySelectionRx(@Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
         return findAllValuesBySelectionRx(getDatabaseName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
@@ -627,7 +756,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results List or empty List returned
      */
     @Nonnull
-    public <I> Observable<List<I>> findAllValuesBySelectionRx(@Nonnull String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+    public <I> Single<List<I>> findAllValuesBySelectionRx(@Nonnull String databaseName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
         return findAllValuesBySelectionRx(getReadableDatabase(databaseName), getTableName(), valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit);
     }
 
@@ -637,7 +766,7 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results List or empty List returned
      */
     @Nonnull
-    public static <I> Observable<List<I>> findAllValuesBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
+    public static <I> Single<List<I>> findAllValuesBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String orderBy) {
         return findAllValuesBySelectionRx(database, tableName, valueType, column, selection, selectionArgs, null, null, orderBy, null);
     }
 
@@ -647,145 +776,157 @@ public abstract class RxAndroidBaseManager<T extends AndroidBaseRecord> extends 
      * @return query results List or empty List returned
      */
     @Nonnull
-    public static <I> Observable<List<I>> findAllValuesBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
-        return DBToolsRxUtil.just(new Func0<List<I>>() {
+    public static <I> Single<List<I>> findAllValuesBySelectionRx(@Nonnull final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> database, @Nonnull final String tableName, @Nonnull final Class<I> valueType, @Nonnull final String column, @Nullable final String selection, @Nullable final String[] selectionArgs, @Nullable final String groupBy, @Nullable final String having, @Nullable final String orderBy, @Nullable final String limit) {
+        return Single.create(new SingleOnSubscribe<List<I>>() {
             @Override
-            public List<I> call() {
-                return findAllValuesBySelection(database, tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit);
+            public void subscribe(@NonNull SingleEmitter<List<I>> e) throws Exception {
+                e.onSuccess(findAllValuesBySelection(database, tableName, valueType, column, selection, selectionArgs, groupBy, having, orderBy, limit));
             }
         });
     }
 
     @Nonnull
-    public Observable<Boolean> tableExistsRx(@Nonnull final String tableName) {
-        return DBToolsRxUtil.just(new Func0<Boolean>() {
+    public Single<Boolean> tableExistsRx(@Nonnull final String tableName) {
+        return Single.create(new SingleOnSubscribe<Boolean>() {
             @Override
-            public Boolean call() {
-                return tableExists(getDatabaseName(), tableName);
+            public void subscribe(@NonNull SingleEmitter<Boolean> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.tableExists(getDatabaseName(), tableName));
             }
         });
     }
 
     @Nonnull
-    public Observable<Boolean> tableExistsRx(@Nonnull final String databaseName, @Nonnull final String tableName) {
-        return DBToolsRxUtil.just(new Func0<Boolean>() {
+    public Single<Boolean> tableExistsRx(@Nonnull final String databaseName, @Nonnull final String tableName) {
+        return Single.create(new SingleOnSubscribe<Boolean>() {
             @Override
-            public Boolean call() {
-                return tableExists(getReadableDatabase(databaseName), tableName);
+            public void subscribe(@NonNull SingleEmitter<Boolean> e) throws Exception {
+                e.onSuccess(tableExists(RxAndroidBaseManager.this.getReadableDatabase(databaseName), tableName));
             }
         });
     }
 
     @Nonnull
-    public static Observable<Boolean> tableExistsRx(@Nonnull final AndroidDatabase androidDatabase, @Nonnull final String tableName) {
-        return DBToolsRxUtil.just(new Func0<Boolean>() {
+    public static Single<Boolean> tableExistsRx(@Nonnull final AndroidDatabase androidDatabase, @Nonnull final String tableName) {
+        return Single.create(new SingleOnSubscribe<Boolean>() {
             @Override
-            public Boolean call() {
-                return tableExists(androidDatabase.getDatabaseWrapper(), tableName);
+            public void subscribe(@NonNull SingleEmitter<Boolean> e) throws Exception {
+                e.onSuccess(tableExists(androidDatabase.getDatabaseWrapper(), tableName));
             }
         });
     }
 
     @Nonnull
-    public static Observable<Boolean> tableExistsRx(@Nullable final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable final String tableName) {
-        return DBToolsRxUtil.just(new Func0<Boolean>() {
+    public static Single<Boolean> tableExistsRx(@Nullable final DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @Nullable final String tableName) {
+        return Single.create(new SingleOnSubscribe<Boolean>() {
             @Override
-            public Boolean call() {
-                return tableExists(db, tableName);
+            public void subscribe(@NonNull SingleEmitter<Boolean> e) throws Exception {
+                e.onSuccess(tableExists(db, tableName));
             }
         });
     }
 
     @Nonnull
-    public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final T record) {
-        return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
-            @Nullable
+    public Single<MatrixCursor> toMatrixCursorRx(@Nonnull final T record) {
+        return Single.create(new SingleOnSubscribe<MatrixCursor>() {
             @Override
-            public MatrixCursor call() {
-                return toMatrixCursor(record);
+            public void subscribe(@NonNull SingleEmitter<MatrixCursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.toMatrixCursor(record));
             }
         });
     }
 
     @Nonnull
-    public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final T... records) {
-        return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
-            @Nullable
+    public Single<MatrixCursor> toMatrixCursorRx(@Nonnull final T... records) {
+        return Single.create(new SingleOnSubscribe<MatrixCursor>() {
             @Override
-            public MatrixCursor call() {
-                return toMatrixCursor(Arrays.asList(records));
+            public void subscribe(@NonNull SingleEmitter<MatrixCursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.toMatrixCursor(Arrays.asList(records)));
             }
         });
     }
 
     @Nonnull
-    public Observable<MatrixCursor> toMatrixCursorRx(@Nonnull final List<T> records) {
-        return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
-            @Nullable
+    public Single<MatrixCursor> toMatrixCursorRx(@Nonnull final List<T> records) {
+        return Single.create(new SingleOnSubscribe<MatrixCursor>() {
             @Override
-            public MatrixCursor call() {
-                return toMatrixCursor(records);
+            public void subscribe(@NonNull SingleEmitter<MatrixCursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.toMatrixCursor(records));
             }
         });
     }
 
     @Nonnull
-    public Observable<MatrixCursor> toMatrixCursorRx(final String[] columns, final List<T> records) {
-        return DBToolsRxUtil.just(new Func0<MatrixCursor>() {
+    public Single<MatrixCursor> toMatrixCursorRx(final String[] columns, final List<T> records) {
+        return Single.create(new SingleOnSubscribe<MatrixCursor>() {
             @Override
-            public MatrixCursor call() {
-                return toMatrixCursor(columns, records);
+            public void subscribe(@NonNull SingleEmitter<MatrixCursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.toMatrixCursor(columns, records));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> mergeCursorsRx(final Cursor... cursors) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
+    public Single<Cursor> mergeCursorsRx(final Cursor... cursors) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return new MergeCursor(cursors);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(new MergeCursor(cursors));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> addAllToCursorTopRx(final Cursor cursor, final List<T> records) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
+    public Single<Cursor> addAllToCursorTopRx(final Cursor cursor, final List<T> records) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return mergeCursors(toMatrixCursor(records), cursor);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.mergeCursors(toMatrixCursor(records), cursor));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> addAllToCursorTopRx(final Cursor cursor, final T... records) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
+    public Single<Cursor> addAllToCursorTopRx(final Cursor cursor, final T... records) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return mergeCursors(toMatrixCursor(records), cursor);
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.mergeCursors(toMatrixCursor(records), cursor));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> addAllToCursorBottomRx(final Cursor cursor, final List<T> records) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
+    public Single<Cursor> addAllToCursorBottomRx(final Cursor cursor, final List<T> records) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return mergeCursors(cursor, toMatrixCursor(records));
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.mergeCursors(cursor, toMatrixCursor(records)));
             }
         });
     }
 
     @Nonnull
-    public Observable<Cursor> addAllToCursorBottomRx(final Cursor cursor, final T... records) {
-        return DBToolsRxUtil.just(new Func0<Cursor>() {
+    public Single<Cursor> addAllToCursorBottomRx(final Cursor cursor, final T... records) {
+        return Single.create(new SingleOnSubscribe<Cursor>() {
             @Override
-            public Cursor call() {
-                return mergeCursors(cursor, toMatrixCursor(records));
+            public void subscribe(@NonNull SingleEmitter<Cursor> e) throws Exception {
+                e.onSuccess(RxAndroidBaseManager.this.mergeCursors(cursor, toMatrixCursor(records)));
             }
         });
+    }
+
+    private void emitAllItemsFromCursor(ObservableEmitter<T> e, Cursor cursor) {
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    T record = newRecord();
+                    record.setContent(cursor);
+                    e.onNext(record);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+
+        e.onComplete();
     }
 }

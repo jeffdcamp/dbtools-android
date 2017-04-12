@@ -1,8 +1,21 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+//        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
+//apply plugin: 'me.tatarka.retrolambda'
+
 
 android {
     compileSdkVersion 25
@@ -33,10 +46,10 @@ android {
     }
 
     // be sure to support straight Java 6
-//    compileOptions {
-//        sourceCompatibility JavaVersion.VERSION_1_7
-//        targetCompatibility JavaVersion.VERSION_1_7
-//    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 dependencies {
@@ -44,10 +57,10 @@ dependencies {
     compile 'com.google.code.findbugs:jsr305:3.0.1'
 
     // optional
-    provided 'io.reactivex:rxjava:1.2.7'
+    provided "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     provided "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    provided 'joda-time:joda-time:2.9.7'
+    provided 'joda-time:joda-time:2.9.9'
     provided 'org.threeten:threetenbp:1.3.3'
 
     provided 'org.sqlite.sqliteX:sqlite-android:3.15.2' // SQL Android Bindings
@@ -55,7 +68,7 @@ dependencies {
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.13'
+    testCompile 'org.mockito:mockito-core:2.7.22'
 }
 
 tasks.withType(Test) {

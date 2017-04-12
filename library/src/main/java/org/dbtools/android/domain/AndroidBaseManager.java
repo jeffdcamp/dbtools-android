@@ -361,12 +361,12 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
 
     @Nullable
     public T findByRowId(long rowId) {
-        return findBySelection(getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
+        return findBySelection(getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)}, null);
     }
 
     @Nullable
     public T findByRowId(@NonNull String databaseName, long rowId) {
-        return findBySelection(databaseName, getPrimaryKey() + "= ?", new String[]{String.valueOf(rowId)}, null);
+        return findBySelection(databaseName, getPrimaryKey() + " = ?", new String[]{String.valueOf(rowId)}, null);
     }
 
     @Nullable
@@ -593,7 +593,7 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
      * @param <I>           Type of value
      * @return query results value or defaultValue if no data was returned
      */
-    public <I> I findValueBySelection(@NonNull Class<I> valueType, @NonNull String column, long rowId, I defaultValue) {
+    public <I> I findValueByRowId(@NonNull Class<I> valueType, @NonNull String column, long rowId, I defaultValue) {
         return findValueBySelection(getDatabaseName(), valueType, column, getPrimaryKey() + " = " + rowId, null, defaultValue);
     }
 

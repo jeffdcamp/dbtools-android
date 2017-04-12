@@ -7,7 +7,8 @@ import org.dbtools.android.domain.config.DatabaseConfig
 import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import org.dbtools.android.domain.database.statement.StatementWrapper
-import java.util.*
+import java.util.ArrayList
+import java.util.Arrays
 
 @Suppress("unused")
 abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDatabaseManager: AndroidDatabaseManager) {
@@ -272,7 +273,7 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDataba
      * @return query results value or defaultValue if no data was returned
      */
     @JvmOverloads
-    fun <I> findValueByRawQuery(valueType: Class<out I>, rawQuery: String, selectionArgs: Array<String>? = null, defaultValue: I, databaseName: String = getDatabaseName()): I {
+    fun <I> findValueByRawQuery(valueType: Class<out I>, defaultValue: I, rawQuery: String, selectionArgs: Array<String>? = null, databaseName: String = getDatabaseName()): I {
         val databaseValue = AndroidBaseManager.getDatabaseValue<I>(valueType)
         var value = defaultValue
 
@@ -297,7 +298,7 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDataba
      * @return query results value or defaultValue if no data was returned
      */
     @JvmOverloads
-    open fun <I> findValueBySelection(valueType: Class<out I>, column: String, rowId: Long, defaultValue: I, databaseName: String = getDatabaseName()): I {
+    open fun <I> findValueByRowId(valueType: Class<out I>, column: String, rowId: Long, defaultValue: I, databaseName: String = getDatabaseName()): I {
         return findValueBySelection<I>(valueType = valueType,
                 column = column,
                 defaultValue = defaultValue,

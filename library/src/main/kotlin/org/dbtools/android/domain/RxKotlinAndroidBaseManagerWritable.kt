@@ -1,9 +1,9 @@
 package org.dbtools.android.domain
 
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
-import rx.Observable
-import rx.subjects.PublishSubject
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 
@@ -310,7 +310,7 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(android
                 subject = PublishSubject.create<DatabaseTableChange>()
                 tableChangeSubjectMap.put(databaseName, subject)
             }
-            return subject!!.asObservable()
+            return subject!!
         } finally {
             listenerLock.unlock()
         }
@@ -329,7 +329,6 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(android
         return lastTableModifiedTs
     }
 
-    @JvmOverloads
     private fun updateLastTableModifiedTs(databaseName: String = getDatabaseName()) {
         lastTableModifiedTsMap.put(databaseName, System.currentTimeMillis())
     }

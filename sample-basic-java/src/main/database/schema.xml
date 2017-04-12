@@ -5,7 +5,8 @@
     <database name="main"> <!-- use fieldsDefaultNotNull="true" to make all table field default notNull -->
         <table name="INDIVIDUAL">
             <field name="_id" jdbcDataType="BIGINT" increment="true" primaryKey="true" notNull="true"/>
-            <field name="INDIVIDUAL_TYPE" jdbcDataType="INTEGER" enumerationClass="org.dbtools.sample.model.type.IndividualType" enumerationDefault="HEAD"/>
+            <field name="INDIVIDUAL_TYPE" jdbcDataType="INTEGER" enumerationClass="org.dbtools.sample.model.type.IndividualType" enumerationDefault="HEAD" notNull="true"/>
+            <field name="INDIVIDUAL_TYPE_TEXT" jdbcDataType="VARCHAR" enumerationClass="org.dbtools.sample.model.type.IndividualType" enumerationDefault="HEAD" notNull="true"/>
             <field name="FIRST_NAME" jdbcDataType="VARCHAR" size="255" notNull="true"/>
             <field name="LAST_NAME" jdbcDataType="VARCHAR" size="255" notNull="true"/>
             <field name="SAMPLE_DATE_TIME" jdbcDataType="DATETIME"/> <!-- text -->

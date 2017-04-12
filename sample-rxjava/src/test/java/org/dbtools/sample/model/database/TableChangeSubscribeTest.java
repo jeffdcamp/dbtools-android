@@ -15,9 +15,10 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import rx.Subscription;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,7 +31,7 @@ public class TableChangeSubscribeTest {
 
     private IndividualManager individualManager;
     private IndividualDataManager individualDataManager;
-    private Subscription tableChangeSubscription;
+    private Disposable tableChangeSubscription;
 
     @Before
     public void setUp() throws Exception {
@@ -45,11 +46,11 @@ public class TableChangeSubscribeTest {
 
 
         tableChangeSubscription = individualManager.tableChanges()
-                .subscribeOn(Schedulers.immediate())
-                .observeOn(Schedulers.immediate())
-                .subscribe(new Action1<DatabaseTableChange>() {
+                .subscribeOn(Schedulers.trampoline())
+                .observeOn(Schedulers.trampoline())
+                .subscribe(new Consumer<DatabaseTableChange>() {
                     @Override
-                    public void call(DatabaseTableChange tableChange) {
+                    public void accept(@NonNull DatabaseTableChange tableChange) throws Exception {
                         TableChangeSubscribeTest.this.handleSubscribeEvent(tableChange);
                     }
                 });
@@ -57,7 +58,7 @@ public class TableChangeSubscribeTest {
 
     @After
     public void tearDown() throws Exception {
-        tableChangeSubscription.unsubscribe();
+        tableChangeSubscription.dispose();
     }
 
     private void handleSubscribeEvent(DatabaseTableChange tableChange) {

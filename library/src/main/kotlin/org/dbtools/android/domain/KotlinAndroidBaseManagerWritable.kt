@@ -305,7 +305,6 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
         return lastTableModifiedTs
     }
 
-    @JvmOverloads
     private fun updateLastTableModifiedTs(databaseName: String = getDatabaseName()) {
         lastTableModifiedTsMap.put(databaseName, System.currentTimeMillis())
     }

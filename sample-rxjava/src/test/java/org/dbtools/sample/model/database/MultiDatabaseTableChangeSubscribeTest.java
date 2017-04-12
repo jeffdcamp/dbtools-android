@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import rx.Subscription;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,7 +33,7 @@ public class MultiDatabaseTableChangeSubscribeTest {
 
     private String databaseName1 = DatabaseManagerConst.MAIN_DATABASE_NAME + "1";
     private String databaseName2 = DatabaseManagerConst.MAIN_DATABASE_NAME + "2";
-    private Subscription tableChangeSubscription;
+    private Disposable tableChangeSubscription;
 
     @Before
     public void setUp() throws Exception {
@@ -50,11 +50,11 @@ public class MultiDatabaseTableChangeSubscribeTest {
         individualManager = MainDatabaseManagers.getIndividualManager();
 
         tableChangeSubscription = individualManager.tableChanges(databaseName1)
-                .subscribeOn(Schedulers.immediate())
-                .observeOn(Schedulers.immediate())
-                .subscribe(new Action1<DatabaseTableChange>() {
+                .subscribeOn(Schedulers.trampoline())
+                .observeOn(Schedulers.trampoline())
+                .subscribe(new Consumer<DatabaseTableChange>() {
                     @Override
-                    public void call(DatabaseTableChange tableChange) {
+                    public void accept(DatabaseTableChange tableChange) {
                         MultiDatabaseTableChangeSubscribeTest.this.handleSubscribeEvent(tableChange);
                     }
                 });
@@ -62,7 +62,7 @@ public class MultiDatabaseTableChangeSubscribeTest {
 
     @After
     public void tearDown() throws Exception {
-        tableChangeSubscription.unsubscribe();
+        tableChangeSubscription.dispose();
     }
 
     private void handleSubscribeEvent(DatabaseTableChange tableChange) {

@@ -7,15 +7,12 @@ import android.widget.Toast
 import org.dbtools.sample.kotlin.model.database.main.MainDatabaseManagers
 import org.dbtools.sample.kotlin.model.database.main.individual.Individual
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualManager
-import java.util.*
+import java.util.Date
+import java.util.GregorianCalendar
 
 class MainActivity : AppCompatActivity() {
 
-    private var individualManager: IndividualManager
-
-    init {
-        individualManager = MainDatabaseManagers.individualManager!!
-    }
+    private var individualManager: IndividualManager = MainDatabaseManagers.individualManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

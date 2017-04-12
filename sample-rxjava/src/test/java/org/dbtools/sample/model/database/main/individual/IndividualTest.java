@@ -1,13 +1,13 @@
 package org.dbtools.sample.model.database.main.individual;
 
 import org.dbtools.android.domain.config.TestDatabaseConfig;
-import org.dbtools.android.domain.database.JdbcSqliteDatabaseWrapper;
 import org.dbtools.query.sql.SQLQueryBuilder;
 import org.dbtools.sample.model.database.DatabaseManager;
 import org.dbtools.sample.model.database.TestMainDatabaseConfig;
 import org.dbtools.sample.model.database.main.MainDatabaseManagers;
 import org.dbtools.sample.model.database.main.individualdata.IndividualData;
 import org.dbtools.sample.model.database.main.individualdata.IndividualDataManager;
+import org.dbtools.sample.model.type.IndividualType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,8 +15,8 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import rx.Observable;
-import rx.observers.TestSubscriber;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -29,6 +29,8 @@ public class IndividualTest {
         databaseConfig.deleteAllDatabaseFiles();
         DatabaseManager databaseManager = new DatabaseManager(databaseConfig);
         MainDatabaseManagers.init(databaseManager);
+
+//        JdbcSqliteDatabaseWrapper.setEnableLogging(true);
     }
 
     @Test
@@ -109,31 +111,28 @@ public class IndividualTest {
         assertEqualsIndividualListRx("findAllByRowIdsRx", Arrays.asList(ind1, ind2), individualManager.findAllByRowIdsRx(new long[]{ind1.getId(), ind2.getId(), 99999}));
         assertEqualsIndividualListRx("findAllBySelectionRx", Arrays.asList(ind1, ind3, ind4), individualManager.findAllBySelectionRx(IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1)));
         assertEqualsRx("findAllValuesBySelectionRx", Arrays.asList(1, 3, 4), individualManager.findAllValuesBySelectionRx(Integer.class, IndividualConst.C_NUMBER, IndividualConst.C_ENABLED + " = ?", SQLQueryBuilder.toSelectionArgs(1)));
-        assertEqualsRx("findValueBySelectionRx", ind4.getNumber(), individualManager.findValueBySelectionRx(Integer.class, IndividualConst.C_NUMBER, ind4.getId(), 99));
+        assertEqualsRx("findValueBySelectionRx", ind4.getNumber(), individualManager.findValueByRowIdRx(Integer.class, IndividualConst.C_NUMBER, ind4.getId(), 99));
         assertEqualsIndividualListRx("findAllOrderByRx", Arrays.asList(ind2, ind4, ind3, ind5, ind1), individualManager.findAllOrderByRx(IndividualConst.C_LAST_NAME));
         assertEqualsRx("tableExistsRx", true, individualManager.tableExistsRx(IndividualConst.TABLE));
         assertEqualsRx("tableExistsRx false", false, individualManager.tableExistsRx("BadTableName"));
     }
 
-    private <I> void assertEqualsRx(final String message, final I expected, Observable<I> observable) {
-        TestSubscriber<I> testSubscriber = new TestSubscriber<>();
-        observable.subscribe(testSubscriber);
-        testSubscriber.assertReceivedOnNext(Arrays.asList(expected));
+    private <I> void assertEqualsRx(final String message, final I expected, Single<I> singleObservable) {
+        assertEquals(message, expected, singleObservable.blockingGet());
     }
 
-    private void assertEqualsIndividualRx(final String message, final Individual expected, Observable<Individual> observable) {
-        TestSubscriber<Individual> testSubscriber = new TestSubscriber<>();
-        observable.subscribe(testSubscriber);
-        List<Individual> onNextEvents = testSubscriber.getOnNextEvents();
-        Individual individual = onNextEvents.get(0);
+    private void assertEqualsIndividualRx(final String message, final Individual expected, Maybe<Individual> singleObservable) {
+        Individual individual = singleObservable.blockingGet();
         assertEquals(message, expected.getId(), individual.getId());
     }
 
-    private void assertEqualsIndividualListRx(final String message, final List<Individual> expected, Observable<List<Individual>> observable) {
-        TestSubscriber<List<Individual>> testSubscriber = new TestSubscriber<>();
-        observable.subscribe(testSubscriber);
-        List<List<Individual>> onNextEvents = testSubscriber.getOnNextEvents();
-        List<Individual> individuals = onNextEvents.get(0);
+    private void assertEqualsIndividualRx(final String message, final Individual expected, Single<Individual> singleObservable) {
+        Individual individual = singleObservable.blockingGet();
+        assertEquals(message, expected.getId(), individual.getId());
+    }
+
+    private void assertEqualsIndividualListRx(final String message, final List<Individual> expected, Single<List<Individual>> observable) {
+        List<Individual> individuals = observable.blockingGet();
 
         assertEquals(message, expected.size(), individuals.size());
 
@@ -183,8 +182,6 @@ public class IndividualTest {
 
     @Test
     public void testNullColumns() {
-        JdbcSqliteDatabaseWrapper.setEnableLogging(true);
-
         IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
 
         Individual individual1 = new Individual();
@@ -214,5 +211,29 @@ public class IndividualTest {
         assertEquals(individual2a.getLastName(), ""); // not null column
         assertNull(individual2a.getPhone()); // null column.. Make sure statement does NOT carry over individual1 data
         assertNull(individual2a.getNumber());
+    }
+
+
+    @Test
+    public void testEnumColumns() {
+        // === CREATE / INSERT ===
+        IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
+
+        Individual i1 = new Individual();
+        i1.setFirstName("Jeff");
+        i1.setIndividualTypeText(IndividualType.HEAD);
+        i1.setIndividualType(IndividualType.HEAD);
+        individualManager.save(i1);
+
+        Individual i2 = new Individual();
+        i2.setFirstName("Tanner");
+        i2.setIndividualTypeText(IndividualType.CHILD);
+        i2.setIndividualType(IndividualType.CHILD);
+        individualManager.save(i2);
+
+        assertEquals(IndividualType.HEAD, individualManager.findByRowId(i1.getId()).getIndividualType());
+        assertEquals(IndividualType.HEAD, individualManager.findByRowId(i1.getId()).getIndividualTypeText());
+        assertEquals(IndividualType.CHILD, individualManager.findByRowId(i2.getId()).getIndividualType());
+        assertEquals(IndividualType.CHILD, individualManager.findByRowId(i2.getId()).getIndividualTypeText());
     }
 }

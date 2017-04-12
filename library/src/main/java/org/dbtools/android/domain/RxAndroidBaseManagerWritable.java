@@ -17,8 +17,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import rx.Observable;
-import rx.subjects.PublishSubject;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 
 @SuppressWarnings("UnusedDeclaration")
 public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> extends RxAndroidBaseManager<T> implements NotifiableManager {
@@ -371,7 +371,7 @@ public abstract class RxAndroidBaseManagerWritable<T extends AndroidBaseRecord> 
                 subject = PublishSubject.create();
                 tableChangeSubjectMap.put(databaseName, subject);
             }
-            return subject.asObservable();
+            return subject;
         } finally {
             listenerLock.unlock();
         }

@@ -24,6 +24,8 @@ public class IndividualConst {
     public static final String FULL_C_ID = "INDIVIDUAL._id";
     public static final String C_INDIVIDUAL_TYPE = "INDIVIDUAL_TYPE";
     public static final String FULL_C_INDIVIDUAL_TYPE = "INDIVIDUAL.INDIVIDUAL_TYPE";
+    public static final String C_INDIVIDUAL_TYPE_TEXT = "INDIVIDUAL_TYPE_TEXT";
+    public static final String FULL_C_INDIVIDUAL_TYPE_TEXT = "INDIVIDUAL.INDIVIDUAL_TYPE_TEXT";
     public static final String C_FIRST_NAME = "FIRST_NAME";
     public static final String FULL_C_FIRST_NAME = "INDIVIDUAL.FIRST_NAME";
     public static final String C_LAST_NAME = "LAST_NAME";
@@ -52,7 +54,8 @@ public class IndividualConst {
     public static final String FULL_C_SPOUSE_INDIVIDUAL_ID = "INDIVIDUAL.SPOUSE_INDIVIDUAL_ID";
     public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS INDIVIDUAL (" + 
         "_id INTEGER PRIMARY KEY  AUTOINCREMENT," + 
-        "INDIVIDUAL_TYPE INTEGER," + 
+        "INDIVIDUAL_TYPE INTEGER NOT NULL," + 
+        "INDIVIDUAL_TYPE_TEXT TEXT NOT NULL," + 
         "FIRST_NAME TEXT NOT NULL," + 
         "LAST_NAME TEXT NOT NULL," + 
         "SAMPLE_DATE_TIME TEXT," + 
@@ -70,11 +73,12 @@ public class IndividualConst {
         "" + 
         "";
     public static final String DROP_TABLE = "DROP TABLE IF EXISTS INDIVIDUAL;";
-    public static final String INSERT_STATEMENT = "INSERT INTO INDIVIDUAL (INDIVIDUAL_TYPE,FIRST_NAME,LAST_NAME,SAMPLE_DATE_TIME,BIRTH_DATE,LAST_MODIFIED,NUMBER,PHONE,EMAIL,DATA,AMOUNT1,AMOUNT2,ENABLED,SPOUSE_INDIVIDUAL_ID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    public static final String UPDATE_STATEMENT = "UPDATE INDIVIDUAL SET INDIVIDUAL_TYPE=?, FIRST_NAME=?, LAST_NAME=?, SAMPLE_DATE_TIME=?, BIRTH_DATE=?, LAST_MODIFIED=?, NUMBER=?, PHONE=?, EMAIL=?, DATA=?, AMOUNT1=?, AMOUNT2=?, ENABLED=?, SPOUSE_INDIVIDUAL_ID=? WHERE _id = ?";
+    public static final String INSERT_STATEMENT = "INSERT INTO INDIVIDUAL (INDIVIDUAL_TYPE,INDIVIDUAL_TYPE_TEXT,FIRST_NAME,LAST_NAME,SAMPLE_DATE_TIME,BIRTH_DATE,LAST_MODIFIED,NUMBER,PHONE,EMAIL,DATA,AMOUNT1,AMOUNT2,ENABLED,SPOUSE_INDIVIDUAL_ID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    public static final String UPDATE_STATEMENT = "UPDATE INDIVIDUAL SET INDIVIDUAL_TYPE=?, INDIVIDUAL_TYPE_TEXT=?, FIRST_NAME=?, LAST_NAME=?, SAMPLE_DATE_TIME=?, BIRTH_DATE=?, LAST_MODIFIED=?, NUMBER=?, PHONE=?, EMAIL=?, DATA=?, AMOUNT1=?, AMOUNT2=?, ENABLED=?, SPOUSE_INDIVIDUAL_ID=? WHERE _id = ?";
     public static final String[] ALL_COLUMNS = new String[] {
         C_ID,
         C_INDIVIDUAL_TYPE,
+        C_INDIVIDUAL_TYPE_TEXT,
         C_FIRST_NAME,
         C_LAST_NAME,
         C_SAMPLE_DATE_TIME,
@@ -91,6 +95,7 @@ public class IndividualConst {
     public static final String[] ALL_COLUMNS_FULL = new String[] {
         FULL_C_ID,
         FULL_C_INDIVIDUAL_TYPE,
+        FULL_C_INDIVIDUAL_TYPE_TEXT,
         FULL_C_FIRST_NAME,
         FULL_C_LAST_NAME,
         FULL_C_SAMPLE_DATE_TIME,
@@ -114,6 +119,10 @@ public class IndividualConst {
 
     public static org.dbtools.sample.model.type.IndividualType getIndividualType(Cursor cursor) {
         return org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(org.dbtools.sample.model.type.IndividualType.class, cursor.getInt(cursor.getColumnIndexOrThrow(C_INDIVIDUAL_TYPE)), org.dbtools.sample.model.type.IndividualType.HEAD);
+    }
+
+    public static org.dbtools.sample.model.type.IndividualType getIndividualTypeText(Cursor cursor) {
+        return org.dbtools.android.domain.util.EnumUtil.stringToEnum(org.dbtools.sample.model.type.IndividualType.class, cursor.getString(cursor.getColumnIndexOrThrow(C_INDIVIDUAL_TYPE_TEXT)), org.dbtools.sample.model.type.IndividualType.HEAD);
     }
 
     public static String getFirstName(Cursor cursor) {

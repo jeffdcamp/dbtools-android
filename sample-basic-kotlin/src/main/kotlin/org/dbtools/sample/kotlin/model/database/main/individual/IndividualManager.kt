@@ -16,7 +16,9 @@ import org.dbtools.sample.kotlin.model.database.DatabaseManager
 class IndividualManager(databaseManager: DatabaseManager) : IndividualBaseManager(databaseManager) {
 
     fun findLastIndividualId(): Long {
-        return findValueByRawQuery(Long::class.java, "SELECT MAX(" + IndividualConst.C_ID + ") FROM " + IndividualConst.TABLE, null, 0L)
+        return findValueByRawQuery(valueType = Long::class.java,
+                rawQuery = "SELECT MAX(${IndividualConst.C_ID}) FROM ${IndividualConst.TABLE}",
+                defaultValue = 0L)
     }
 
     fun findLastIndividual(): Individual? {

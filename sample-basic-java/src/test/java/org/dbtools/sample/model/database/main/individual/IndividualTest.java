@@ -1,13 +1,13 @@
 package org.dbtools.sample.model.database.main.individual;
 
 import org.dbtools.android.domain.config.TestDatabaseConfig;
-import org.dbtools.android.domain.database.JdbcSqliteDatabaseWrapper;
 import org.dbtools.query.sql.SQLQueryBuilder;
 import org.dbtools.sample.model.database.DatabaseManager;
 import org.dbtools.sample.model.database.TestMainDatabaseConfig;
 import org.dbtools.sample.model.database.main.MainDatabaseManagers;
 import org.dbtools.sample.model.database.main.individualdata.IndividualData;
 import org.dbtools.sample.model.database.main.individualdata.IndividualDataManager;
+import org.dbtools.sample.model.type.IndividualType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +25,8 @@ public class IndividualTest {
         databaseConfig.deleteAllDatabaseFiles();
         DatabaseManager databaseManager = new DatabaseManager(databaseConfig);
         MainDatabaseManagers.init(databaseManager);
+
+//        JdbcSqliteDatabaseWrapper.setEnableLogging(true);
     }
 
     @Test
@@ -109,7 +111,7 @@ public class IndividualTest {
         assertEquals("findAllValuesBySelection1", 3, integerList.size());
         assertEquals("findAllValuesBySelection1 value check", ind3.getNumber(), integerList.get(1));
 
-        Integer value = individualManager.findValueBySelection(Integer.class, IndividualConst.C_NUMBER, ind4.getId(), 99);
+        Integer value = individualManager.findValueByRowId(Integer.class, IndividualConst.C_NUMBER, ind4.getId(), 99);
         assertEquals("findAllValuesBySelection2 value check", ind4.getNumber(), value);
 
         List<Individual> orderedList = individualManager.findAllOrderBy(IndividualConst.C_LAST_NAME);
@@ -161,8 +163,6 @@ public class IndividualTest {
 
     @Test
     public void testNullColumns() {
-        JdbcSqliteDatabaseWrapper.setEnableLogging(true);
-
         IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
 
         Individual individual1 = new Individual();
@@ -192,5 +192,28 @@ public class IndividualTest {
         assertEquals(individual2a.getLastName(), ""); // not null column
         assertNull(individual2a.getPhone()); // null column.. Make sure statement does NOT carry over individual1 data
         assertNull(individual2a.getNumber());
+    }
+
+    @Test
+    public void testEnumColumns() {
+        // === CREATE / INSERT ===
+        IndividualManager individualManager = MainDatabaseManagers.getIndividualManager();
+
+        Individual i1 = new Individual();
+        i1.setFirstName("Jeff");
+        i1.setIndividualTypeText(IndividualType.HEAD);
+        i1.setIndividualType(IndividualType.HEAD);
+        individualManager.save(i1);
+
+        Individual i2 = new Individual();
+        i2.setFirstName("Tanner");
+        i2.setIndividualTypeText(IndividualType.CHILD);
+        i2.setIndividualType(IndividualType.CHILD);
+        individualManager.save(i2);
+
+        assertEquals(IndividualType.HEAD, individualManager.findByRowId(i1.getId()).getIndividualType());
+        assertEquals(IndividualType.HEAD, individualManager.findByRowId(i1.getId()).getIndividualTypeText());
+        assertEquals(IndividualType.CHILD, individualManager.findByRowId(i2.getId()).getIndividualType());
+        assertEquals(IndividualType.CHILD, individualManager.findByRowId(i2.getId()).getIndividualTypeText());
     }
 }

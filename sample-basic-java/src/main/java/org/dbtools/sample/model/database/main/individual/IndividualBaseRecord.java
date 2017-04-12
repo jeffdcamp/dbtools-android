@@ -21,6 +21,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
 
     private long id = 0;
     private org.dbtools.sample.model.type.IndividualType individualType = org.dbtools.sample.model.type.IndividualType.HEAD;
+    private org.dbtools.sample.model.type.IndividualType individualTypeText = org.dbtools.sample.model.type.IndividualType.HEAD;
     private String firstName = "";
     private String lastName = "";
     private java.util.Date sampleDateTime = null;
@@ -65,6 +66,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     @Override
     public void getContentValues(DBToolsContentValues values) {
         values.put(IndividualConst.C_INDIVIDUAL_TYPE, individualType.ordinal());
+        values.put(IndividualConst.C_INDIVIDUAL_TYPE_TEXT, individualTypeText.toString());
         values.put(IndividualConst.C_FIRST_NAME, firstName);
         values.put(IndividualConst.C_LAST_NAME, lastName);
         values.put(IndividualConst.C_SAMPLE_DATE_TIME, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime));
@@ -85,6 +87,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         Object[] values = new Object[]{
             id,
             individualType.ordinal(),
+            individualTypeText.toString(),
             firstName,
             lastName,
             org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime),
@@ -106,6 +109,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         Individual copy = new Individual();
         copy.setId(id);
         copy.setIndividualType(individualType);
+        copy.setIndividualTypeText(individualTypeText);
         copy.setFirstName(firstName);
         copy.setLastName(lastName);
         copy.setSampleDateTime(sampleDateTime != null ? new java.util.Date(sampleDateTime.getTime()) : null );
@@ -125,130 +129,133 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     @Override
     public void bindInsertStatement(StatementWrapper statement) {
         statement.bindLong(1, individualType.ordinal());
-        statement.bindString(2, firstName);
-        statement.bindString(3, lastName);
+        statement.bindString(2, individualTypeText.toString());
+        statement.bindString(3, firstName);
+        statement.bindString(4, lastName);
         if (sampleDateTime != null) {
-            statement.bindString(4, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime));
-        } else {
-            statement.bindNull(4);
-        }
-        if (birthDate != null) {
-            statement.bindString(5, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate));
+            statement.bindString(5, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime));
         } else {
             statement.bindNull(5);
         }
-        if (lastModified != null) {
-            statement.bindLong(6, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified));
+        if (birthDate != null) {
+            statement.bindString(6, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate));
         } else {
             statement.bindNull(6);
         }
-        if (number != null) {
-            statement.bindLong(7, number);
+        if (lastModified != null) {
+            statement.bindLong(7, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified));
         } else {
             statement.bindNull(7);
         }
-        if (phone != null) {
-            statement.bindString(8, phone);
+        if (number != null) {
+            statement.bindLong(8, number);
         } else {
             statement.bindNull(8);
         }
-        if (email != null) {
-            statement.bindString(9, email);
+        if (phone != null) {
+            statement.bindString(9, phone);
         } else {
             statement.bindNull(9);
         }
-        if (data != null) {
-            statement.bindBlob(10, data);
+        if (email != null) {
+            statement.bindString(10, email);
         } else {
             statement.bindNull(10);
         }
-        if (amount1 != null) {
-            statement.bindDouble(11, amount1);
+        if (data != null) {
+            statement.bindBlob(11, data);
         } else {
             statement.bindNull(11);
         }
-        if (amount2 != null) {
-            statement.bindDouble(12, amount2);
+        if (amount1 != null) {
+            statement.bindDouble(12, amount1);
         } else {
             statement.bindNull(12);
         }
-        if (enabled != null) {
-            statement.bindLong(13, enabled != null ? (enabled ? 1 : 0) : 0);
+        if (amount2 != null) {
+            statement.bindDouble(13, amount2);
         } else {
             statement.bindNull(13);
         }
-        if (spouseIndividualId != null) {
-            statement.bindLong(14, spouseIndividualId);
+        if (enabled != null) {
+            statement.bindLong(14, enabled != null ? (enabled ? 1 : 0) : 0);
         } else {
             statement.bindNull(14);
+        }
+        if (spouseIndividualId != null) {
+            statement.bindLong(15, spouseIndividualId);
+        } else {
+            statement.bindNull(15);
         }
     }
 
     @Override
     public void bindUpdateStatement(StatementWrapper statement) {
         statement.bindLong(1, individualType.ordinal());
-        statement.bindString(2, firstName);
-        statement.bindString(3, lastName);
+        statement.bindString(2, individualTypeText.toString());
+        statement.bindString(3, firstName);
+        statement.bindString(4, lastName);
         if (sampleDateTime != null) {
-            statement.bindString(4, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime));
-        } else {
-            statement.bindNull(4);
-        }
-        if (birthDate != null) {
-            statement.bindString(5, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate));
+            statement.bindString(5, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(sampleDateTime));
         } else {
             statement.bindNull(5);
         }
-        if (lastModified != null) {
-            statement.bindLong(6, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified));
+        if (birthDate != null) {
+            statement.bindString(6, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToDBString(birthDate));
         } else {
             statement.bindNull(6);
         }
-        if (number != null) {
-            statement.bindLong(7, number);
+        if (lastModified != null) {
+            statement.bindLong(7, org.dbtools.android.domain.date.DBToolsDateFormatter.dateToLong(lastModified));
         } else {
             statement.bindNull(7);
         }
-        if (phone != null) {
-            statement.bindString(8, phone);
+        if (number != null) {
+            statement.bindLong(8, number);
         } else {
             statement.bindNull(8);
         }
-        if (email != null) {
-            statement.bindString(9, email);
+        if (phone != null) {
+            statement.bindString(9, phone);
         } else {
             statement.bindNull(9);
         }
-        if (data != null) {
-            statement.bindBlob(10, data);
+        if (email != null) {
+            statement.bindString(10, email);
         } else {
             statement.bindNull(10);
         }
-        if (amount1 != null) {
-            statement.bindDouble(11, amount1);
+        if (data != null) {
+            statement.bindBlob(11, data);
         } else {
             statement.bindNull(11);
         }
-        if (amount2 != null) {
-            statement.bindDouble(12, amount2);
+        if (amount1 != null) {
+            statement.bindDouble(12, amount1);
         } else {
             statement.bindNull(12);
         }
-        if (enabled != null) {
-            statement.bindLong(13, enabled != null ? (enabled ? 1 : 0) : 0);
+        if (amount2 != null) {
+            statement.bindDouble(13, amount2);
         } else {
             statement.bindNull(13);
         }
-        if (spouseIndividualId != null) {
-            statement.bindLong(14, spouseIndividualId);
+        if (enabled != null) {
+            statement.bindLong(14, enabled != null ? (enabled ? 1 : 0) : 0);
         } else {
             statement.bindNull(14);
         }
-        statement.bindLong(15, id);
+        if (spouseIndividualId != null) {
+            statement.bindLong(15, spouseIndividualId);
+        } else {
+            statement.bindNull(15);
+        }
+        statement.bindLong(16, id);
     }
 
     public void setContent(DBToolsContentValues values) {
         individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(org.dbtools.sample.model.type.IndividualType.class, values.getAsInteger(IndividualConst.C_INDIVIDUAL_TYPE), org.dbtools.sample.model.type.IndividualType.HEAD);
+        individualTypeText = org.dbtools.android.domain.util.EnumUtil.stringToEnum(org.dbtools.sample.model.type.IndividualType.class, values.getAsString(IndividualConst.C_INDIVIDUAL_TYPE_TEXT), org.dbtools.sample.model.type.IndividualType.HEAD);
         firstName = values.getAsString(IndividualConst.C_FIRST_NAME);
         lastName = values.getAsString(IndividualConst.C_LAST_NAME);
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(values.getAsString(IndividualConst.C_SAMPLE_DATE_TIME));
@@ -268,6 +275,7 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
     public void setContent(Cursor cursor) {
         id = cursor.getLong(cursor.getColumnIndexOrThrow(IndividualConst.C_ID));
         individualType = org.dbtools.android.domain.util.EnumUtil.ordinalToEnum(org.dbtools.sample.model.type.IndividualType.class, cursor.getInt(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE)), org.dbtools.sample.model.type.IndividualType.HEAD);
+        individualTypeText = org.dbtools.android.domain.util.EnumUtil.stringToEnum(org.dbtools.sample.model.type.IndividualType.class, cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_INDIVIDUAL_TYPE_TEXT)), org.dbtools.sample.model.type.IndividualType.HEAD);
         firstName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_FIRST_NAME));
         lastName = cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_LAST_NAME));
         sampleDateTime = org.dbtools.android.domain.date.DBToolsDateFormatter.dbStringToDate(cursor.getString(cursor.getColumnIndexOrThrow(IndividualConst.C_SAMPLE_DATE_TIME)));
@@ -295,13 +303,22 @@ public abstract class IndividualBaseRecord extends AndroidBaseRecord {
         this.id = id;
     }
 
-    @javax.annotation.Nullable
+    @javax.annotation.Nonnull
     public org.dbtools.sample.model.type.IndividualType getIndividualType() {
         return individualType;
     }
 
-    public void setIndividualType(@javax.annotation.Nullable org.dbtools.sample.model.type.IndividualType individualType) {
+    public void setIndividualType(@javax.annotation.Nonnull org.dbtools.sample.model.type.IndividualType individualType) {
         this.individualType = individualType;
+    }
+
+    @javax.annotation.Nonnull
+    public org.dbtools.sample.model.type.IndividualType getIndividualTypeText() {
+        return individualTypeText;
+    }
+
+    public void setIndividualTypeText(@javax.annotation.Nonnull org.dbtools.sample.model.type.IndividualType individualTypeText) {
+        this.individualTypeText = individualTypeText;
     }
 
     @javax.annotation.Nonnull
