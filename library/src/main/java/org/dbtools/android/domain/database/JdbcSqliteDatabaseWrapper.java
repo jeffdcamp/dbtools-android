@@ -259,7 +259,7 @@ public class JdbcSqliteDatabaseWrapper implements DatabaseWrapper<Connection, Jd
                 statement.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("SQL Error for sql: [" + sql + "]", e);
         }
     }
 
