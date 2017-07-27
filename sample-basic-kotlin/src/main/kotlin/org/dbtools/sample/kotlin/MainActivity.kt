@@ -2,8 +2,8 @@ package org.dbtools.sample.kotlin
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.View
 import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
 import org.dbtools.sample.kotlin.model.database.main.MainDatabaseManagers
 import org.dbtools.sample.kotlin.model.database.main.individual.Individual
 import org.dbtools.sample.kotlin.model.database.main.individual.IndividualManager
@@ -17,9 +17,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        createIndividualButton.setOnClickListener { createIndividual() }
+        updateLastIndividualButton.setOnClickListener { updateLastIndividual() }
+        deleteLastIndividualButton.setOnClickListener { deleteLastIndividual() }
+        showLastIndividualButton.setOnClickListener { showLastIndividualName() }
     }
 
-    fun createIndividual(view: View) {
+    fun createIndividual() {
         val individual = Individual()
         individual.firstName = "Jeff"
         individual.lastName = "Campbell"
@@ -38,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Individual Count: " + individualManager.findCount(), Toast.LENGTH_SHORT).show()
     }
 
-    fun deleteLastIndividual(view: View) {
+    fun deleteLastIndividual() {
         // check to make sure there is individuals
         if (!hasRecords()) {
             return
@@ -51,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun updateLastIndividual(view: View) {
+    fun updateLastIndividual() {
         // check to make sure there is individuals
         if (!hasRecords()) {
             return
@@ -67,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showLastIndividualName(view: View) {
+    fun showLastIndividualName() {
         // check to make sure there is individuals
         if (!hasRecords()) {
             return

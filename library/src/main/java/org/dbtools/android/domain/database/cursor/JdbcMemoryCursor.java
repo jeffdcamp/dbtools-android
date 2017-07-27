@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 
 public class JdbcMemoryCursor implements Cursor {
     private int currentPosition = -1;
-    private List<List<Object>> data = new ArrayList<List<Object>>();
+    private List<List<Object>> data = new ArrayList<>();
     private int columnCount;
     private String[] columnNames;
     private boolean closed = false; // state variable

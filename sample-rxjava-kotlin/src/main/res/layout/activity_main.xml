@@ -12,27 +12,27 @@
     tools:context="MainActivity">
 
     <Button
+        android:id="@+id/createIndividualButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Create Individual"
-        android:onClick="createIndividual"
         />
     <Button
+        android:id="@+id/updateLastIndividualButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Update Last Individual"
-        android:onClick="updateLastIndividual"
         />
     <Button
+        android:id="@+id/deleteLastIndividualButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Delete Last Individual"
-        android:onClick="deleteLastIndividual"
         />
     <Button
+        android:id="@+id/showLastIndividualButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Show Last Individual Name"
-        android:onClick="showLastIndividualName"
         />
 </LinearLayout>

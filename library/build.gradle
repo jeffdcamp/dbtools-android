@@ -4,9 +4,6 @@ buildscript {
         mavenCentral()
         jcenter()
     }
-    dependencies {
-//        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
-    }
 }
 
 apply plugin: 'com.android.library'
@@ -14,16 +11,15 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
-//apply plugin: 'me.tatarka.retrolambda'
 
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.1'
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 26
     }
     buildTypes {
         debug {
@@ -37,73 +33,34 @@ android {
 
     testOptions {
         unitTests.returnDefaultValues = true
-//        unitTests.all { Gradle 2.13
-//            jacoco {
-//                includeNoLocationClasses = true
-//            }
-//        }
 
     }
 
-    // be sure to support straight Java 6
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
     compile 'org.dbtools:dbtools-query:3.0.0'
-    compile 'com.google.code.findbugs:jsr305:3.0.1'
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
 
     // optional
     provided "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
     provided "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     provided 'joda-time:joda-time:2.9.9'
-    provided 'org.threeten:threetenbp:1.3.3'
+    provided 'org.threeten:threetenbp:1.3.6'
 
     provided 'org.sqlite.sqliteX:sqlite-android:3.15.2' // SQL Android Bindings
     provided 'net.zetetic:android-database-sqlcipher:3.5.4'
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.22'
-}
-
-tasks.withType(Test) {
-    testLogging {
-        exceptionFormat "full"
-    }
-}
-
-def coverageSourceDirs = [
-        'src/main/java',
-]
-
-jacoco {
-    toolVersion "0.7.2.201409121644"
-    //    toolVersion "0.7.6.201602180812" Gradle 2.13
-}
-
-task testDebugJacoco(type: JacocoReport, dependsOn: "testDebugUnitTest") {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports after running tests."
-    classDirectories = fileTree(
-            dir: "$buildDir/intermediates/classes/debug",
-            excludes: ['**/R.class',
-                       '**/R$*.class',
-                       '**/*$ViewInjector*.*',
-                       '**/BuildConfig.*',
-                       '**/Manifest*.*']
-    )
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-    additionalSourceDirs = files(coverageSourceDirs)
-    sourceDirectories = files(coverageSourceDirs)
-    executionData = files("$buildDir/jacoco/testDebugUnitTest.exec")
+    testCompile 'org.mockito:mockito-core:2.8.47'
+    testCompile 'joda-time:joda-time:2.9.9'
+    testCompile 'org.threeten:threetenbp:1.3.6'
 }
 
 // =============== Maven Deployment ===============

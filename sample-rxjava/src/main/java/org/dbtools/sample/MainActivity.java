@@ -2,7 +2,6 @@ package org.dbtools.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Toast;
 
 import org.dbtools.sample.model.database.main.MainDatabaseManagers;
@@ -21,9 +20,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         individualManager = MainDatabaseManagers.getIndividualManager();
+
+        findViewById(R.id.createIndividualButton).setOnClickListener(view -> createIndividual());
+        findViewById(R.id.deleteLastIndividualButton).setOnClickListener(view -> deleteLastIndividual());
+        findViewById(R.id.updateLastIndividualButton).setOnClickListener(view -> updateLastIndividual());
+        findViewById(R.id.showLastIndividualButton).setOnClickListener(view -> showLastIndividualName());
     }
 
-    public void createIndividual(View view) {
+    public void createIndividual() {
         Individual individual = new Individual();
         individual.setFirstName("Jeff");
         individual.setLastName("Campbell");
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Individual Count: " + individualManager.findCount(), Toast.LENGTH_SHORT).show();
     }
 
-    public void deleteLastIndividual(View view) {
+    public void deleteLastIndividual() {
         // check to make sure there is individuals
         if (!hasRecords()) {
             return;
@@ -55,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void updateLastIndividual(View view) {
+    public void updateLastIndividual() {
         // check to make sure there is individuals
         if (!hasRecords()) {
             return;
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void showLastIndividualName(View view) {
+    public void showLastIndividualName() {
         // check to make sure there is individuals
         if (!hasRecords()) {
             return;

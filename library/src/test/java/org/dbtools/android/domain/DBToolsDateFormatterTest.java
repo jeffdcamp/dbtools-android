@@ -5,6 +5,7 @@ import org.dbtools.android.domain.date.DBToolsThreeTenFormatter;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
+import org.junit.Test;
 import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.LocalDateTime;
@@ -45,14 +46,14 @@ public class DBToolsDateFormatterTest {
         jodaDateTimeUtc = new DateTime(1970, 5, 18, 13, 30, 0, 20, DateTimeZone.UTC);
     }
 
-    @org.junit.Test
+    @Test
     public void testNow() throws Exception {
         System.out.println("Date:   " + new Date().getTime());
         System.out.println("Joda:   " + DateTime.now().getMillis());
         System.out.println("JSR310: " + Instant.now().toEpochMilli());
     }
 
-    @org.junit.Test
+//    @Test
     public void testDateTimeLong() throws Exception {
         // Convert to long
         long jsr301Long = DBToolsThreeTenFormatter.localDateTimeToLong(jsr301DateTime);
@@ -69,7 +70,7 @@ public class DBToolsDateFormatterTest {
         assertTrue(jodaDateTime.isEqual(resultJodaDateTime));
     }
 
-    @org.junit.Test
+    @Test
     public void testDateTimeLongUtc() throws Exception {
         // Convert to long UTC
         long jsr301LongUtc = DBToolsThreeTenFormatter.localDateTimeToLongUtc(jsr301DateTime);
@@ -93,7 +94,7 @@ public class DBToolsDateFormatterTest {
 
     // ======================== TEXT =============================
 
-    @org.junit.Test
+    @Test
     public void testDateTimeString() throws Exception {
         // convert to text
         String jsr310ResultText = DBToolsThreeTenFormatter.localDateTimeToDBString(jsr301DateTime);
@@ -113,7 +114,7 @@ public class DBToolsDateFormatterTest {
         assertTrue(jodaDateTime.isEqual(resultJodaDateTime));
     }
 
-    @org.junit.Test
+    @Test
     public void testDateText() throws Exception {
         // convert to text
         String jsr310ResultText = DBToolsThreeTenFormatter.localDateToDBString(jsr301Date);
@@ -133,7 +134,7 @@ public class DBToolsDateFormatterTest {
 //        assertTrue(jodaDateTime.isEqual(resultJodaDateTime));
     }
 
-    @org.junit.Test
+    @Test
     public void testTimeText() throws Exception {
         // convert to text
         String jsr310ResultText = DBToolsThreeTenFormatter.localTimeToDBString(jsr301Time);

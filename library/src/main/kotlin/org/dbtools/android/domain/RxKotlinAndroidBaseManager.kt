@@ -14,7 +14,7 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord>(androidDatabase
 
     @JvmOverloads
     open fun findCursorAllRx(databaseName: String = getDatabaseName()): Single<Cursor> {
-        return Single.create { it.onSuccess(findCursorAll(databaseName)) }
+        return Single.create { it.onSuccess(findCursorAll(databaseName) ?: throw IllegalStateException("findCursorAllRx(...) cannot return null")) }
     }
 
     @JvmOverloads
@@ -24,12 +24,12 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord>(androidDatabase
 
     @JvmOverloads
     open fun findCursorBySelectionRx(selection: String? = null, selectionArgs: Array<String>? = null, distinct: Boolean = false, columns: Array<String>, groupBy: String? = null, having: String? = null, orderBy: String? = null, limit: String? = null, table: String = getTableName(), databaseName: String = getDatabaseName()): Single<Cursor> {
-        return Single.create { it.onSuccess(findCursorBySelection(selection, selectionArgs, columns = columns, databaseName = databaseName, table = table, groupBy = groupBy, having = having, orderBy = orderBy, distinct = distinct, limit = limit)) }
+        return Single.create { it.onSuccess(findCursorBySelection(selection, selectionArgs, columns = columns, databaseName = databaseName, table = table, groupBy = groupBy, having = having, orderBy = orderBy, distinct = distinct, limit = limit) ?: throw IllegalStateException("findCursorBySelectionRx(...) cannot return null")) }
     }
 
     @JvmOverloads
     open fun findCursorByRowIdRx(rowId: Long, databaseName: String = getDatabaseName()): Single<Cursor> {
-        return Single.create { it.onSuccess(findCursorBySelection(selection = primaryKey + "= ?", selectionArgs = arrayOf(rowId.toString()), databaseName = databaseName)) }
+        return Single.create { it.onSuccess(findCursorBySelection(selection = primaryKey + "= ?", selectionArgs = arrayOf(rowId.toString()), databaseName = databaseName) ?: throw IllegalStateException("findCursorByRowIdRx(...) cannot return null")) }
     }
 
     @JvmOverloads
