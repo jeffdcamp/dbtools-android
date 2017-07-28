@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 10.0.0 *(2017-07)*
+---------------------------
+* Target Android O / Android SDK 26
+* Fixed issue with JdbcSqliteDatabaseWrapper not throwing an exception on sql errors
+
 Version 9.0.0 *(2017-04)*
 ---------------------------
 * Changed from RxJava 1 to RxJava 2
