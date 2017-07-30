@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 10.0.1 *(2017-07)*
+---------------------------
+* Minor fixes to dbtools-gen
+
 Version 10.0.0 *(2017-07)*
 ---------------------------
 * Target Android O / Android SDK 26
