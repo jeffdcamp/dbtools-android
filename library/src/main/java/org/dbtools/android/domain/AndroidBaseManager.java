@@ -169,10 +169,23 @@ public abstract class AndroidBaseManager<T extends AndroidBaseRecord> {
         executeSql(db, sql, null);
     }
 
+    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @NonNull String sql, boolean splitStatements) {
+        executeSql(db, sql, null, splitStatements);
+    }
+
     public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @NonNull String sql, @Nullable Object[] bindArgs) {
+        executeSql(db, sql, bindArgs, true);
+    }
+
+    public static void executeSql(@Nullable DatabaseWrapper<? super AndroidBaseRecord, ? super DBToolsContentValues<?>> db, @NonNull String sql, @Nullable Object[] bindArgs, boolean splitStatements) {
         checkDB(db);
 
-        String[] sqlStatements = sql.split(";");
+        String[] sqlStatements;
+        if (splitStatements) {
+            sqlStatements = sql.split(";");
+        } else {
+            sqlStatements = new String[] {sql};
+        }
 
         for (String sqlStatement : sqlStatements) {
             if (sqlStatement.length() > 0) {

@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 10.0.2 *(2017-09)*
+--------------------------
+* Added AndroidBaseManager.executeSql(.., .., splitStatements) to allow ignoring splitting sql statements
+
 Version 10.0.1 *(2017-07)*
 ---------------------------
 * Minor fixes to dbtools-gen
