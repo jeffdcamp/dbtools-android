@@ -12,6 +12,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
 
+// todo JetBrains has indicated that coroutines are stable, but the kotlinx-coroutines designs may change ... remove this when kotlinx-coroutines are no longer experimental
+kotlin {
+    experimental {
+        coroutines 'enable' // temp disable warnings
+    }
+}
 
 android {
     compileSdkVersion 26
@@ -54,11 +60,20 @@ dependencies {
     provided 'org.threeten:threetenbp:1.3.6'
 
     provided 'org.sqlite.sqliteX:sqlite-android:3.15.2' // SQL Android Bindings
+    provided "com.android.support:appcompat-v7:$supportLibVersion"
+    provided "com.android.support:support-vector-drawable:$supportLibVersion"
+
     provided 'net.zetetic:android-database-sqlcipher:3.5.4'
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 
+    // livedata support for Kotlin
+    provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.18"
+    provided "android.arch.lifecycle:runtime:$archVersion"
+    provided "android.arch.lifecycle:extensions:$archVersion"
+
+
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.8.47'
+    testCompile 'org.mockito:mockito-core:2.10.0'
     testCompile 'joda-time:joda-time:2.9.9'
     testCompile 'org.threeten:threetenbp:1.3.6'
 }

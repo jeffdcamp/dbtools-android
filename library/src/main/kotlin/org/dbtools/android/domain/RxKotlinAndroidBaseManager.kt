@@ -7,10 +7,13 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
+import io.reactivex.subjects.PublishSubject
 import java.util.Arrays
 
 @Suppress("unused")
 abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord>(androidDatabaseManager: AndroidDatabaseManager) : KotlinAndroidBaseManager<T>(androidDatabaseManager) {
+
+    protected val tableChangeSubjectMap = HashMap<String, PublishSubject<DatabaseTableChange>>()
 
     @JvmOverloads
     open fun findCursorAllRx(databaseName: String = getDatabaseName()): Single<Cursor> {
@@ -263,6 +266,24 @@ abstract class RxKotlinAndroidBaseManager<T : AndroidBaseRecord>(androidDatabase
 
     open fun addAllToCursorBottomRx(cursor: Cursor, vararg records: T): Single<Cursor> {
         return Single.create { it.onSuccess(mergeCursors(cursor, toMatrixCursor(*records))) }
+    }
+
+    // ===== Observables =====
+
+    @JvmOverloads
+    fun tableChanges(databaseName: String = getDatabaseName()): Observable<DatabaseTableChange> {
+        listenerLock.lock()
+
+        try {
+            var subject: PublishSubject<DatabaseTableChange>? = tableChangeSubjectMap.get(databaseName)
+            if (subject == null) {
+                subject = PublishSubject.create<DatabaseTableChange>()
+                tableChangeSubjectMap.put(databaseName, subject)
+            }
+            return subject!!
+        } finally {
+            listenerLock.unlock()
+        }
     }
 
     private fun emitAllItemsFromCursor(e: ObservableEmitter<T>, cursorFunc: () -> Cursor?) {

@@ -1,19 +1,12 @@
 package org.dbtools.android.domain
 
-import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
 import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.locks.ReentrantLock
 
 @Suppress("unused")
 abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDatabaseManager: AndroidDatabaseManager) : RxKotlinAndroidBaseManager<T>(androidDatabaseManager), NotifiableManager {
     private val lastTableModifiedTsMap = ConcurrentHashMap<String, Long>()
-
-    private val listenerLock = ReentrantLock()
-    private val tableChangeListenersMap = mutableMapOf<String, MutableSet<DBToolsTableChangeListener>>()
-    private val tableChangeSubjectMap = HashMap<String, PublishSubject<DatabaseTableChange>>()
 
     inline fun inTransaction(func: () -> Boolean) {
         var success = false
@@ -235,44 +228,6 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(android
 
     // ===== Listeners =====
 
-    @JvmOverloads
-    open fun addTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
-        listenerLock.lock()
-        try {
-            var tableChangeListeners: MutableSet<DBToolsTableChangeListener>? = tableChangeListenersMap[databaseName]
-            if (tableChangeListeners == null) {
-                tableChangeListeners = HashSet<DBToolsTableChangeListener>()
-                tableChangeListenersMap[databaseName] = tableChangeListeners
-            }
-
-            tableChangeListeners.add(listener)
-        } finally {
-            listenerLock.unlock()
-        }
-    }
-
-    @JvmOverloads
-    open fun removeTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
-        listenerLock.lock()
-        try {
-            val tableChangeListeners = tableChangeListenersMap[databaseName]
-            tableChangeListeners?.remove(listener)
-        } finally {
-            listenerLock.unlock()
-        }
-    }
-
-    @JvmOverloads
-    open fun clearTableChangeListeners(databaseName: String = getDatabaseName()) {
-        listenerLock.lock()
-        try {
-            val tableChangeListeners = tableChangeListenersMap[databaseName]
-            tableChangeListeners?.clear()
-        } finally {
-            listenerLock.unlock()
-        }
-    }
-
     override fun notifyTableListeners(databaseName: String, forceNotify: Boolean, databaseWrapper: DatabaseWrapper<in AndroidBaseRecord, in DBToolsContentValues<*>>?, changeType: DatabaseTableChange) {
         updateLastTableModifiedTs()
 
@@ -295,24 +250,6 @@ abstract class RxKotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(android
             }
         } else {
             androidDatabaseManager.addTransactionTableChange(databaseName, this)
-        }
-    }
-
-    // ===== Observables =====
-
-    @JvmOverloads
-    fun tableChanges(databaseName: String = getDatabaseName()): Observable<DatabaseTableChange> {
-        listenerLock.lock()
-
-        try {
-            var subject: PublishSubject<DatabaseTableChange>? = tableChangeSubjectMap.get(databaseName)
-            if (subject == null) {
-                subject = PublishSubject.create<DatabaseTableChange>()
-                tableChangeSubjectMap.put(databaseName, subject)
-            }
-            return subject!!
-        } finally {
-            listenerLock.unlock()
         }
     }
 

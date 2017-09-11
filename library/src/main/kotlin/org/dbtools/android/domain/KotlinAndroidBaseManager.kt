@@ -9,9 +9,14 @@ import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import org.dbtools.android.domain.database.statement.StatementWrapper
 import java.util.ArrayList
 import java.util.Arrays
+import java.util.HashSet
+import java.util.concurrent.locks.ReentrantLock
 
 @Suppress("unused")
 abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDatabaseManager: AndroidDatabaseManager) {
+
+    protected val listenerLock = ReentrantLock()
+    protected val tableChangeListenersMap = mutableMapOf<String, MutableSet<DBToolsTableChangeListener>>()
 
     abstract val primaryKey: String
 
@@ -437,5 +442,45 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDataba
 
     open fun addAllToCursorBottom(cursor: Cursor, vararg records: T): Cursor {
         return toMatrixCursor(*records).let { mergeCursors(cursor, it) }
+    }
+
+    // ===== Listeners =====
+
+    @JvmOverloads
+    open fun addTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
+        listenerLock.lock()
+        try {
+            var tableChangeListeners: MutableSet<DBToolsTableChangeListener>? = tableChangeListenersMap[databaseName]
+            if (tableChangeListeners == null) {
+                tableChangeListeners = HashSet<DBToolsTableChangeListener>()
+                tableChangeListenersMap[databaseName] = tableChangeListeners
+            }
+
+            tableChangeListeners.add(listener)
+        } finally {
+            listenerLock.unlock()
+        }
+    }
+
+    @JvmOverloads
+    open fun removeTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
+        listenerLock.lock()
+        try {
+            val tableChangeListeners = tableChangeListenersMap[databaseName]
+            tableChangeListeners?.remove(listener)
+        } finally {
+            listenerLock.unlock()
+        }
+    }
+
+    @JvmOverloads
+    open fun clearTableChangeListeners(databaseName: String = getDatabaseName()) {
+        listenerLock.lock()
+        try {
+            val tableChangeListeners = tableChangeListenersMap[databaseName]
+            tableChangeListeners?.clear()
+        } finally {
+            listenerLock.unlock()
+        }
     }
 }

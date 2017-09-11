@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 10.1.0 *(2017-09)*
+--------------------------
+* Added LiveData support using DBToolsLiveData.toLiveData(...) (requires Kotlin and coroutines)
+
 Version 10.0.2 *(2017-09)*
 --------------------------
 * Added AndroidBaseManager.executeSql(.., .., splitStatements) to allow ignoring splitting sql statements
