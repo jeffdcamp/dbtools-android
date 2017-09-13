@@ -52,7 +52,7 @@ object DBToolsLiveData {
      *
      * @return LiveData<T>
      */
-    private fun <T, M: KotlinAndroidBaseManager<*>> toLiveData(coroutineContext: CoroutineContext, tableChangeManager: M?, func: suspend () -> T): LiveData<T> {
+    fun <T, M: KotlinAndroidBaseManager<*>> toLiveData(coroutineContext: CoroutineContext, tableChangeManager: M?, func: suspend () -> T): LiveData<T> {
         return toLiveDataInternal(coroutineContext, tableChangeManager, null, func)
     }
 

@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-Version 10.1.1 *(2017-09)*
+Version 10.1.2 *(2017-09)*
 --------------------------
 * Added LiveData support using DBToolsLiveData.toLiveData(...) (requires Kotlin and coroutines)
 
