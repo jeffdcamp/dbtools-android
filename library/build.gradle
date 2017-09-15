@@ -69,7 +69,7 @@ dependencies {
     // livedata support for Kotlin
     provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.18"
     provided "android.arch.lifecycle:runtime:$archVersion"
-    provided "android.arch.lifecycle:extensions:$archVersion"
+    provided "android.arch.lifecycle:extensions:$archVersionEA"
 
 
     testCompile 'junit:junit:4.12'
