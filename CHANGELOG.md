@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 10.1.4 *(2017-09)*
+--------------------------
+* Architecture Components LifeCycle runtime 1.0.0
+* Architecture Components LifeCycle extensions 1.0.0-beta1
+
 Version 10.1.3 *(2017-09)*
 --------------------------
 * Android Support Libraries 26.1.0
