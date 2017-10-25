@@ -6,8 +6,11 @@ import org.dbtools.android.domain.database.DatabaseWrapper;
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues;
 import org.dbtools.android.domain.database.statement.StatementWrapper;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -291,6 +294,30 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
         }
     }
 
+    /**
+     * Adds an listener but keeps a weak reference back to it.
+     * <p>
+     * Note that you cannot remove this listener once added. It will be automatically removed
+     * when the listener is GC'ed.
+     *
+     * @param listener The listener to which this Manager will keep a weak reference.
+     */
+    private void addWeakTableChangeListener(DBToolsTableChangeListener listener) {
+        addWeakTableChangeListener(listener, getDatabaseName());
+    }
+
+    /**
+     * Adds an listener but keeps a weak reference back to it.
+     * <p>
+     * Note that you cannot remove this listener once added. It will be automatically removed
+     * when the listener is GC'ed.
+     *
+     * @param listener The listener to which this Manager will keep a weak reference.
+     */
+    private void addWeakTableChangeListener(DBToolsTableChangeListener listener, String databaseName) {
+        addTableChangeListener(new DBToolsWeakTableChangeListener(this, listener, databaseName));
+    }
+
     public void removeTableChangeListener(DBToolsTableChangeListener listener) {
         removeTableChangeListener(getDatabaseName(), listener);
     }
@@ -333,7 +360,9 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
                 Set<DBToolsTableChangeListener> tableChangeListeners = tableChangeListenersMap.get(databaseName);
 
                 if (tableChangeListeners != null) {
-                    for (DBToolsTableChangeListener tableChangeListener : tableChangeListeners) {
+                    // perform .toList() to prevent concurrent modification when using weak table listeners
+                    List<DBToolsTableChangeListener> tableChangeListenersList = new ArrayList<>(tableChangeListeners);
+                    for (DBToolsTableChangeListener tableChangeListener : tableChangeListenersList) {
                         tableChangeListener.onTableChange(changeType);
                     }
                 }
@@ -371,5 +400,28 @@ public abstract class AndroidBaseManagerWritable<T extends AndroidBaseRecord> ex
 
     private void updateLastTableModifiedTs(String databaseName) {
         lastTableModifiedTsMap.put(databaseName, System.currentTimeMillis());
+    }
+
+    protected class DBToolsWeakTableChangeListener<M extends AndroidBaseManagerWritable<?>> implements DBToolsTableChangeListener {
+        private M manager;
+        private String databaseName;
+        private WeakReference<DBToolsTableChangeListener> weakReference;
+
+        public DBToolsWeakTableChangeListener(M manager, DBToolsTableChangeListener tableChangeListener, String databaseName) {
+            this.manager = manager;
+            this.databaseName = databaseName;
+            this.weakReference = new WeakReference<>(tableChangeListener);
+        }
+
+        @Override
+        public void onTableChange(DatabaseTableChange tableChange) {
+            DBToolsTableChangeListener tableChangeListener = weakReference.get();
+
+            if (tableChangeListener == null) {
+                manager.removeTableChangeListener(databaseName, this);
+            } else {
+                tableChangeListener.onTableChange(tableChange);
+            }
+        }
     }
 }

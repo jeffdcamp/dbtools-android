@@ -7,6 +7,7 @@ import org.dbtools.android.domain.config.DatabaseConfig
 import org.dbtools.android.domain.database.DatabaseWrapper
 import org.dbtools.android.domain.database.contentvalues.DBToolsContentValues
 import org.dbtools.android.domain.database.statement.StatementWrapper
+import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Arrays
 import java.util.HashSet
@@ -462,6 +463,19 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDataba
         }
     }
 
+    /**
+     * Adds an listener but keeps a weak reference back to it.
+     * <p>
+     * Note that you cannot remove this listener once added. It will be automatically removed
+     * when the listener is GC'ed.
+     *
+     * @param listener The listener to which this Manager will keep a weak reference.
+     */
+    @JvmOverloads
+    open fun addWeakTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
+        addTableChangeListener(DBToolsWeakTableChangeListener(this, listener, databaseName))
+    }
+
     @JvmOverloads
     open fun removeTableChangeListener(listener: DBToolsTableChangeListener, databaseName: String = getDatabaseName()) {
         listenerLock.lock()
@@ -481,6 +495,20 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDataba
             tableChangeListeners?.clear()
         } finally {
             listenerLock.unlock()
+        }
+    }
+
+    protected class DBToolsWeakTableChangeListener<M : KotlinAndroidBaseManager<*>>(private val manager: M, tableChangeListener: DBToolsTableChangeListener, private val databaseName: String) : DBToolsTableChangeListener {
+
+        private val weakReference: WeakReference<DBToolsTableChangeListener> = WeakReference(tableChangeListener)
+
+        override fun onTableChange(tableChange: DatabaseTableChange?) {
+            val tableChangeListener = weakReference.get()
+
+            when (tableChangeListener) {
+                null -> manager.removeTableChangeListener(this, databaseName)
+                else -> tableChangeListener.onTableChange(tableChange)
+            }
         }
     }
 }

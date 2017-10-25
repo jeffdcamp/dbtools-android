@@ -237,7 +237,8 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
                 val tableChangeListeners = tableChangeListenersMap[databaseName]
 
                 if (tableChangeListeners != null) {
-                    for (tableChangeListener in tableChangeListeners) {
+                    // perform .toList() to prevent concurrent modification when using weak table listeners
+                    for (tableChangeListener in tableChangeListeners.toList()) {
                         tableChangeListener.onTableChange(changeType)
                     }
                 }
