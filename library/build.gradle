@@ -62,6 +62,7 @@ dependencies {
     provided 'org.sqlite.sqliteX:sqlite-android:3.15.2' // SQL Android Bindings
     provided "com.android.support:appcompat-v7:$supportLibVersion"
     provided "com.android.support:support-vector-drawable:$supportLibVersion"
+    provided "com.android.support:recyclerview-v7:$supportLibVersion" // used by paging
 
     provided 'net.zetetic:android-database-sqlcipher:3.5.4'
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
