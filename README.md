@@ -11,9 +11,10 @@ DBTools for Android is an Android ORM library that makes it easy to work with SQ
 * Mature/Stable library: Used in many apps for years, and large apps with millions of users
 * Fast: Benchmark as one of the fastest ORMs for both reading and writing small, medium, and large sets of data
 * Code generator generates all of the boiler plate code.
-* Table change listeners (both Rx and non-Rx), to know when changes happen to specific tables
+* Table change listeners (Listeners, Rx, LiveData), to know when changes happen to specific tables
 * First class testing support:  All JUnit tests can run against JDBC Sqlite in the JVM
 * Rx support: Full support for Rx java Observables
+* Android Architecture Components LiveData and Paging support
 * Injection/Dagger support
 * Kotlin support: Generator can generate Kotlin and KotlinRx classes
 * Support Android Sqlite, sqlite.org sqlite, SQLCipher
