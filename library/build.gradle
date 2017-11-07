@@ -20,12 +20,12 @@ kotlin {
 }
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 26
+        targetSdkVersion 27
     }
     buildTypes {
         debug {
@@ -67,9 +67,9 @@ dependencies {
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 
     // livedata support for Kotlin
-    provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.19.2"
-    provided "android.arch.lifecycle:runtime:$archVersion"
-    provided "android.arch.lifecycle:extensions:$archVersionEA"
+    provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.19.3"
+    provided "android.arch.lifecycle:runtime:$archVersionLifecycleRT"
+    provided "android.arch.lifecycle:extensions:$archVersion"
     provided "android.arch.paging:runtime:1.0.0-alpha3"
 
     testCompile 'junit:junit:4.12'

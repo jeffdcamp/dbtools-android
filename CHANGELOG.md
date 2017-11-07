@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 10.3.0 *(2017-11)*
+--------------------------
+* Architecture Components LifeCycle runtime 1.0.3
+* Architecture Components LifeCycle extensions 1.0.0
+* Architecture Components Paging 1.0.0-alpha3
+
 Version 10.1.4 *(2017-10)*
 --------------------------
 * Added DBToolsTiledDataSource
