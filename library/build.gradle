@@ -54,7 +54,7 @@ dependencies {
 
     // optional
     provided "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
-    provided "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    provided "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     provided 'joda-time:joda-time:2.9.9'
     provided 'org.threeten:threetenbp:1.3.6'
@@ -68,7 +68,7 @@ dependencies {
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 
     // livedata support for Kotlin
-    provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.19.3"
+    provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.20"
     provided "android.arch.lifecycle:runtime:$archVersionLifecycleRT"
     provided "android.arch.lifecycle:extensions:$archVersion"
     provided "android.arch.paging:runtime:1.0.0-alpha3"

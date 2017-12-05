@@ -95,7 +95,7 @@ object DBToolsLiveData {
             }
 
             private fun getData() {
-                launch(coroutineContext + job) {
+                launch(coroutineContext, parent = job) {
                     val value = func()
                     postValue(value)
                 }

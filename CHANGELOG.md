@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 10.3.1 *(2017-12)*
+--------------------------
+* Kotlin 1.2.0
+* kotlinx-coroutines-android:0.20
+* kotlin-stdlib-jdk7
+* supportLibVersion 27.0.2
+
 Version 10.3.0 *(2017-11)*
 --------------------------
 * Architecture Components LifeCycle runtime 1.0.3
