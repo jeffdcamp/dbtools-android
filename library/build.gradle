@@ -21,7 +21,7 @@ kotlin {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.2'
 
     defaultConfig {
         minSdkVersion 15
@@ -71,10 +71,10 @@ dependencies {
     provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.20"
     provided "android.arch.lifecycle:runtime:$archVersionLifecycleRT"
     provided "android.arch.lifecycle:extensions:$archVersion"
-    provided "android.arch.paging:runtime:1.0.0-alpha3"
+    provided "android.arch.paging:runtime:1.0.0-alpha4"
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.11.0'
+    testCompile 'org.mockito:mockito-core:2.13.0'
     testCompile 'joda-time:joda-time:2.9.9'
     testCompile 'org.threeten:threetenbp:1.3.6'
 }

@@ -2,10 +2,9 @@
 
 package org.dbtools.android.domain
 
-import android.arch.paging.TiledDataSource
+import android.arch.paging.PositionalDataSource
 
-@Deprecated("Use DBToolsPositionalDataSource instead", ReplaceWith("DBToolsPositionalDataSource<T>", "org.dbtools.android.domain.DBToolsPositionalDataSource"))
-abstract class DBToolsTiledDataSource<T>() : TiledDataSource<T>() {
+abstract class DBToolsPositionalDataSource<T>() : PositionalDataSource<T>() {
 
     private val tableChangeListener = DBToolsTableChangeListener { invalidate() }
 

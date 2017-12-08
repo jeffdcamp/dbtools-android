@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 10.4.0 *(2017-12)*
+-------------------------
+* Architecture Components Paging 1.0.0-alpha4
+* Added DBToolsPositionalDataSource (Deprecated DBToolsTiledDataSource)
+
 Version 10.3.1 *(2017-12)*
 --------------------------
 * Kotlin 1.2.0
