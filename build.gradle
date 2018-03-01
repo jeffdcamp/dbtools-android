@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.2.30'
 
     repositories {
         mavenLocal()
@@ -29,10 +29,9 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion = '27.0.2'
-    archVersion = '1.0.0'
-    archVersionLifecycleRT = '1.0.3'
+    supportLibVersion = '27.1.0'
+    archLifecycleVersion = '1.1.0'
     xerialSqliteJdbcVersion = '3.21.0'
-    rxJavaVersion = '2.1.8'
-    rxAndroidVersion = '2.0.1'
+    rxJavaVersion = '2.1.10'
+    rxAndroidVersion = '2.0.2'
 }

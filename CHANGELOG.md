@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+Version 10.6.0 *(2018-03)*
+--------------------------
+* Support Libraries 27.1.0
+* Architecture Components Paging 1.0.0-alpha6
+* Architecture Components LifeCycle 1.1.0
+* Kotlin 1.2.30
+* kotlinx-coroutines-android:0.22.3
+
 Version 10.5.0 *(2018-01)*
 --------------------------
 * Fixed DBToolsLiveData to prevent repetitive calls when onActive() is called
