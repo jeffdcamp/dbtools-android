@@ -34,4 +34,5 @@ ext {
     xerialSqliteJdbcVersion = '3.21.0.1'
     rxJavaVersion = '2.1.10'
     rxAndroidVersion = '2.0.2'
+    coroutineVersion = '0.22.5'
 }
