@@ -64,16 +64,16 @@ dependencies {
     provided "com.android.support:support-vector-drawable:$supportLibVersion"
     provided "com.android.support:recyclerview-v7:$supportLibVersion" // used by paging
 
-    provided 'net.zetetic:android-database-sqlcipher:3.5.4'
+    provided 'net.zetetic:android-database-sqlcipher:3.5.7'
     provided "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
 
-    provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.22.3"
+    provided "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
     provided "android.arch.lifecycle:runtime:$archLifecycleVersion"
     provided "android.arch.lifecycle:extensions:$archLifecycleVersion"
     provided "android.arch.paging:runtime:1.0.0-alpha6"
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.15.0'
+    testCompile 'org.mockito:mockito-core:2.16.0'
     testCompile 'joda-time:joda-time:2.9.9'
     testCompile 'org.threeten:threetenbp:1.3.6'
 }

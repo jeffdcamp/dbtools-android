@@ -256,14 +256,11 @@ abstract class KotlinAndroidBaseManagerWritable<T : AndroidBaseRecord>(androidDa
 
      * @return long ts value of the last modification to this table using this manager, or -1 if no modifications have occurred since app launch
      */
-    @JvmOverloads
-    fun getLastTableModifiedTs(databaseName: String = getDatabaseName()): Long {
-        val lastTableModifiedTs = lastTableModifiedTsMap[databaseName] ?: return -1L
-
-        return lastTableModifiedTs
+    override fun getLastTableModifiedTs(databaseName: String): Long {
+        return lastTableModifiedTsMap[databaseName] ?: -1L
     }
 
     private fun updateLastTableModifiedTs(databaseName: String = getDatabaseName()) {
-        lastTableModifiedTsMap.put(databaseName, System.currentTimeMillis())
+        lastTableModifiedTsMap[databaseName] = System.currentTimeMillis()
     }
 }

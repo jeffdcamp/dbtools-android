@@ -511,4 +511,15 @@ abstract class KotlinAndroidBaseManager<T : AndroidBaseRecord>(val androidDataba
             }
         }
     }
+
+    // ===== Table Change =====
+    /**
+     * Returns the last modification long ts
+
+     * @return long ts value of the last modification to this table using this manager, or -1 if no modifications have occurred since app launch
+     */
+    @JvmOverloads
+    open fun getLastTableModifiedTs(databaseName: String = getDatabaseName()): Long {
+        return -1L
+    }
 }

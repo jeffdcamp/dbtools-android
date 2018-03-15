@@ -58,6 +58,18 @@ object DBToolsLiveData {
     }
 
     /**
+    *  Return data retrieved via func parameter as LiveData on the CommonPool thread
+    *
+    * @param tableChangeManagers Tables that will cause this LiveData to be triggered
+    * @param func Function that is executed to get data
+    *
+    * @return LiveData<T>
+    */
+    fun <T, M : KotlinAndroidBaseManager<*>> toLiveData(tableChangeManagers: List<M>?, func: suspend () -> T): LiveData<T> {
+        return toLiveDataInternal(CommonPool, null, tableChangeManagers, func)
+    }
+
+    /**
      * Return data retrieved via func parameter as LiveData
      *
      * @param coroutineContext Thread in which func is executed on
@@ -74,19 +86,22 @@ object DBToolsLiveData {
         return object : LiveData<T>(), DBToolsTableChangeListener {
             private val computing = AtomicBoolean(false)
             private val invalid = AtomicBoolean(true)
+            private val changeManager = tableChangeManager?.let { ChangeManager(tableChangeManager, -1L) }
+            private val changeManagers = tableChangeManagers?.let { managers -> managers.map { ChangeManager(it, -1L) } }
             private lateinit var job: Job
 
             override fun onActive() {
                 job = Job()
 
-                tableChangeManager?.addTableChangeListener(this)
-                tableChangeManagers?.forEach { it.addTableChangeListener(this) }
+                changeManager?.manager?.addTableChangeListener(this)
+                changeManagers?.forEach { (manager, _) -> manager.addTableChangeListener(this) }
                 getData()
+
             }
 
             override fun onInactive() {
-                tableChangeManager?.removeTableChangeListener(this)
-                tableChangeManagers?.forEach { it.removeTableChangeListener(this) }
+                changeManager?.manager?.removeTableChangeListener(this)
+                changeManagers?.forEach { (manager, _) -> manager.removeTableChangeListener(this) }
                 job.cancel()
             }
 
@@ -105,9 +120,11 @@ object DBToolsLiveData {
                         if (computing.compareAndSet(false, true)) {
                             try {
                                 var value: T? = null
+                                checkChangeTs()
                                 while (invalid.compareAndSet(true, false)) {
                                     computed = true
                                     value = func()
+                                    updateChangeTs()
                                 }
                                 if (computed) {
                                     postValue(value)
@@ -129,6 +146,18 @@ object DBToolsLiveData {
                     } while (computed && invalid.get())
                 }
             }
+
+            private fun checkChangeTs() {
+                var valid = changeManager?.lastChangeTs == changeManager?.manager?.getLastTableModifiedTs() ?: -1L
+                valid = changeManagers?.fold(valid) { result, (manager, ts) -> result && ts == manager.getLastTableModifiedTs() } ?: valid
+                invalid.compareAndSet(false, !valid)
+            }
+
+            private fun updateChangeTs() {
+                changeManager?.lastChangeTs = changeManager?.manager?.getLastTableModifiedTs() ?: -1L
+            }
         }
     }
+
+    private data class ChangeManager<out M : KotlinAndroidBaseManager<*>>(val manager: M, var lastChangeTs: Long)
 }

@@ -53,10 +53,12 @@ dependencies {
 
     // Kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
 
     // Test
     testCompile 'junit:junit:4.12'
     testCompile "org.xerial:sqlite-jdbc:$xerialSqliteJdbcVersion"
+    testImplementation "android.arch.core:core-testing:$archLifecycleVersion"
 }
 
 // cd <project folder>
