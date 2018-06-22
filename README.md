@@ -186,8 +186,6 @@ Setup
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.dbtools/dbtools-android)
 
-*For a working implementation of DBTools for Android see the Android-Template application (https://github.com/jeffdcamp/android-template)
-
   1. Add DBTools Gradle Plugin and dbtools-android dependency to build.gradle file
 
         buildscript {
@@ -297,8 +295,6 @@ Setup
 
         individualManager.save(individual1);
         
-    6. Refer to sample app using DBTools: https://github.com/jeffdcamp/android-template
-
 Documentation
 =============
 
