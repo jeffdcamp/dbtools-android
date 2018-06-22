@@ -332,8 +332,6 @@ Other Projects
 ==============
 DBTools Query - https://github.com/jeffdcamp/dbtools-query
 
-Android Template - https://github.com/jeffdcamp/android-template
-
 License
 =======
 
