@@ -1,3 +1,6 @@
+
+**NOTE**:  Because of the GREAT addition of Android Room (https://developer.android.com/topic/libraries/architecture/room), I'm deprecating this project.  I have also created a conversion from DBTools to Room by using the dbtools-gen type: ANDROID-KOTLIN-ROOM (this will generate Room Entities and Daos from the DBTools schema.xml file).  Also, there is a new dbtools-room project that is an library that makes it even easier to work with Google Room Library and SQLite Databases. (https://github.com/jeffdcamp/dbtools-room)
+
 DBTools for Android
 =================
 
